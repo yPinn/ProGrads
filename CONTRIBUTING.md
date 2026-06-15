@@ -20,13 +20,25 @@
 3. 開 PR，CI 綠後 squash merge 回 `main`。
 4. release-please 累積變更 → Release PR → 合併打 `vX.Y.Z`。
 
-## Commit 規範（Conventional Commits）
+## Commit 與 PR 訊息（統一格式，英文）
 
-格式：`<type>(<scope>): <subject>`
+**Commit**（Conventional Commits，標題 + 可選 body）：
+
+```text
+<type>(<scope>): <subject>
+
+<body — 簡述 what/why，可條列>
+
+<footer — 可選：BREAKING CHANGE: ... / Refs #123>
+```
 
 - type：`feat | fix | refactor | docs | test | chore | perf | ci | build | style | revert`
 - scope（建議）：`web | api | db | shared | content | ai | ci | docs | deps | repo`
-- 由 commitlint 在 `commit-msg` hook 驗證。
+- 標題由 commitlint 在 `commit-msg` hook 驗證；body 選填但鼓勵簡述變更。
+
+**PR**：title 同 Conventional Commits；body 用結構化模板（Summary / Changes / Verification / Related，見 `.github/PULL_REQUEST_TEMPLATE.md`）。
+
+> Squash 合併時，repo 設定為以 **PR 標題 + 內文**作為 `main` 上的 commit 訊息——故結構化 PR body 會成為該次 commit 的描述，commit 與 PR 自動一致。
 
 ## 程式碼風格
 
