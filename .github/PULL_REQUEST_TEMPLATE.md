@@ -1,10 +1,27 @@
-## 變更內容
+## Summary
 
-## 相關 issue
+<!-- What changed and why, in 1-2 sentences. -->
 
-## 檢查清單
+## Changes
 
-- [ ] 通過 `pnpm format:check`、`pnpm exec eslint .`、`pnpm lint:md`
-- [ ] commit 訊息符合 Conventional Commits
-- [ ] 已更新相關 `docs/`
-- [ ] 新增考題內容皆為官方公開且附 `source_url`、`license_status`
+<!-- Notable changes as bullets. -->
+
+-
+
+## Verification
+
+<!-- Commands run and results: lint / format / build / tests. -->
+
+-
+
+## Related
+
+<!-- Issues, decisions (docs/06 D##), docs updated. -->
+
+-
+
+## Checklist
+
+- [ ] Title follows Conventional Commits
+- [ ] Docs updated (`docs/`) if needed
+- [ ] New exam content is official and has `source_url` / `license_status`
