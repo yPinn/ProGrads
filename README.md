@@ -40,18 +40,19 @@ docs/           規格與決策文件
 
 ## 開發
 
-需求：Node 22+、pnpm 9+（`corepack enable pnpm`）、PostgreSQL、Redis。
+需求：Node ≥22（建議 24 LTS，見 `.nvmrc`）、pnpm 10（`corepack enable pnpm`，版本由 `packageManager` 鎖定）、PostgreSQL、Redis。
 
 ```bash
-pnpm install
-pnpm dev          # turbo: 啟動各 app
-pnpm lint         # ESLint
-pnpm format       # Prettier
-pnpm typecheck    # tsc
-pnpm test         # 測試
+pnpm install      # 需先 corepack enable pnpm
+pnpm dev          # 啟動各 app（apps/web）
+pnpm lint         # ESLint：root + 各 app
+pnpm lint:fix     # ESLint 自動修復
+pnpm format       # Prettier 寫入
+pnpm format:check # Prettier 檢查
+pnpm fix          # format + lint:fix 一次修復
 ```
 
-> 目前為骨架階段。`apps/web`、`apps/api`、Prisma schema 尚未 scaffold，見各目錄 README 與 docs。
+> 進度：`apps/web`（Nuxt 4，含前端套件）已 scaffold；`apps/api`（NestJS）與 Prisma schema 為下一步。
 
 ## 授權
 

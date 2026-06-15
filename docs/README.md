@@ -20,8 +20,13 @@
 棧：**Nuxt（CF Pages）+ NestJS（Fastify adapter，自有 server）+ Prisma + PostgreSQL**，
 monorepo（pnpm + Turborepo）、TypeScript strict、Zod 貫穿全棧、純非營利開源。
 
+## 進度與下一步
+
+- ✅ monorepo 骨架、tooling、CI、release、分支/環境策略。
+- ✅ `apps/web`（Nuxt 4 + 前端套件）已 scaffold。
+- 下一步：Prisma ER schema → scaffold `apps/api`（NestJS）。
+
 ## 待拍板
 
 - 提醒通路偏好（Email 先做 / 之後加 LINE）。
-- ORM 已定 Prisma；資管所逐校考科組合待補。
-- 下一步：Prisma ER schema → scaffold `apps/web` + `apps/api`。
+- 資管所逐校考科組合待補。

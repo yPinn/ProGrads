@@ -79,3 +79,23 @@
 - **基礎設施**：前端 CF Pages（production branch=prod、main=staging、PR=preview）；後端自有 server 跑 prod + staging 兩實例（獨立 DB `prograds_staging`、獨立 port、子網域 `api-staging`，Docker Compose 多檔/profile）。
 - **鐵則（12-factor）**：dev/prod parity、config 走環境變數、每環境獨立 DB 與密鑰；staging 絕不碰 prod DB。
 - **狀態**：拓樸已定；實際 CD 接線待 apps scaffold。
+
+## D13. Zod 固定 v3
+
+- **決策**：全棧 Zod 鎖 **v3**（非 v4）。
+- **理由**：整合套件（`@vee-validate/zod`、後端 `nestjs-zod`）peer 仍要求 Zod 3；v4 會破壞「Zod 共用契約」。
+- **取捨**：暫不上 Zod 4，待整合套件全面支援再評估升級。
+
+## D14. Nuxt Content 內容索引（SQLite）≠ 應用 DB
+
+- **決策**：保留 `@nuxt/content`；其內部以 SQLite（`better-sqlite3`）建內容索引供 build 時 prerender。
+- **釐清**：此 SQLite 僅為前端內容渲染索引（build 產物，CF runtime 不需要），**與應用資料庫 PostgreSQL 無關**——Postgres 仍是唯一應用 DB（後端，Prisma）。
+- **附帶**：`ogImage` 暫停用（需原生 renderer，日後啟用）。
+
+## D15. Toolchain：Node 24 LTS + pnpm 10
+
+- **決策**：Node 目標 **24（Active LTS）**（`.nvmrc`；`engines` 最低 `>=22`）；pnpm **10.34.3**（成熟穩定 major，由 `packageManager` 鎖定、corepack 取用）。捨棄 pnpm 11（剛發布、未夠成熟）。
+- **pnpm 10 兩個非直覺設定**：
+  - **build script 預設封鎖**（安全性）→ 以 `pnpm.onlyBuiltDependencies` 明確授權原生套件（better-sqlite3、sharp、esbuild、@parcel/watcher、unrs-resolver、vue-demi）。
+  - **嚴格 node_modules（不 hoist）**→ 程式直接 import 的套件須列為直接依賴，故 `tailwindcss` 加進 `apps/web`（`main.css` 的 `@import "tailwindcss"`）。
+- **維護**：Dependabot 每週升級依賴；major 版本（如 Node/pnpm）以穩定性為先，不盲目追最新。
