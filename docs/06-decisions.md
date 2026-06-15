@@ -60,3 +60,22 @@
 - **做法**：release-please（single 模式）自動 bump 根 `package.json` + 產 `CHANGELOG.md` + 打 `vX.Y.Z` tag；apps `package.json` 維持 `private` + `0.0.0`。
 - **相容性分離**：後端對外相容走 `/api/v1` 路徑版號（見 [05-api-conventions.md](05-api-conventions.md)），與產品版號脫鉤、極少變動；前端無外部 consumer，不需版號。
 - **取捨**：捨棄 per-app 獨立版號（過於細碎難維護），改以 scope（`web`/`api`）在 CHANGELOG 區分變更來源。
+
+## D11. 分支策略：GitHub Flow（trunk-based）
+
+- **決策**：`main` = 整合主幹（受保護、禁直接 push、只接 PR），自動部署到 staging；`production` 分支（由 release tag 晉升）= prod。開發走短命分支（`feat/`、`fix/`、`docs/`、`chore/`）→ PR → CI 綠 → squash merge。
+- **理由**：solo/小團隊用 Git Flow 過重；GitHub Flow + release-please + 環境晉升契合。
+- **不採**：長命 `develop`（main 即整合線）。
+- **晉升**：release-please 於 `main` 打 `vX.Y.Z` → 晉升 `production` 觸發 prod 部署。
+
+## D12. 部署環境：dev / preview / staging / prod（業界標準三層 + preview）
+
+- **決策**：採標準三層 + per-PR preview。
+  - local/dev：開發者機器。
+  - preview（ephemeral）：每個 PR；CF Pages 自動產生。
+  - staging/UAT：`main` 自動部署。
+  - prod：release tag 晉升 `production`。
+- **晉升管線**：`feature → PR(preview) → main(staging) → tag/production(prod)`。
+- **基礎設施**：前端 CF Pages（production branch=prod、main=staging、PR=preview）；後端自有 server 跑 prod + staging 兩實例（獨立 DB `prograds_staging`、獨立 port、子網域 `api-staging`，Docker Compose 多檔/profile）。
+- **鐵則（12-factor）**：dev/prod parity、config 走環境變數、每環境獨立 DB 與密鑰；staging 絕不碰 prod DB。
+- **狀態**：拓樸已定；實際 CD 接線待 apps scaffold。

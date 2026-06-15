@@ -1,6 +1,6 @@
 # 行為準則
 
-本專案採用 [Contributor Covenant](https://www.contributor-covenant.org/zh-tw/version/2/1/code_of_conduct/) v2.1 作為行為準則。
+本專案採用 [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct/) v2.1 作為行為準則（[各語言翻譯](https://www.contributor-covenant.org/translations)）。
 
 ## 簡述
 

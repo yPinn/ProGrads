@@ -7,11 +7,18 @@
 - Node 22+、pnpm 9+（`corepack enable pnpm`）、PostgreSQL、Redis。
 - `pnpm install` 後，Husky hooks 會自動安裝。
 
+## 分支策略（GitHub Flow，trunk-based）
+
+`main` = 整合主幹（受保護、禁直接 push、只接 PR），自動部署到 **staging**；`production` 分支（由 release tag 晉升）= **prod**。
+開短命分支、一支做一件事、merge 後刪除；不使用長命 `develop`。
+環境分層見 [docs/06-decisions.md](docs/06-decisions.md) D11/D12。
+
 ## 工作流程
 
-1. 從 `main` 開分支：`<type>/<short-desc>`。
+1. 從 `main` 開分支，命名對齊 commit type：`feat/...`、`fix/...`、`docs/...`、`chore/...`。
 2. 開發；提交前 `pnpm lint && pnpm typecheck && pnpm test`（pre-commit hook 會跑 lint-staged）。
-3. 開 PR，說明變更與測試方式。
+3. 開 PR，CI 綠後 squash merge 回 `main`。
+4. release-please 累積變更 → Release PR → 合併打 `vX.Y.Z`。
 
 ## Commit 規範（Conventional Commits）
 
