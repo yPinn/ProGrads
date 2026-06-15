@@ -1,0 +1,305 @@
+// ProGrads data model. See docs/02-data-model.md.
+// Dual axis: program_track (navigation) + subject (global shared question bank).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- Enums ----------
+
+enum LicenseStatus {
+  national_exam // government work, freely reusable
+  school_official // school-published, per-school terms
+  unknown // not collected
+}
+
+enum AdmissionType {
+  exam // 考試入學
+  recommended // 推甄
+  in_service // 在職專班
+}
+
+enum QuestionType {
+  mc
+  essay
+  calc
+  proof
+  cloze
+  listening
+}
+
+enum AnswerType {
+  single_choice
+  multi_choice
+  numeric
+  essay
+  proof
+}
+
+enum ReviewStatus {
+  ai_generated
+  human_verified
+  flagged
+}
+
+enum Confidence {
+  high
+  medium
+  low
+}
+
+enum AdmissionEvent {
+  registration_start
+  registration_end
+  written_exam
+  interview
+  result
+}
+
+// ---------- Taxonomy ----------
+
+model Category {
+  id        String         @id @default(cuid())
+  slug      String         @unique
+  name      String
+  tracks    ProgramTrack[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model ProgramTrack {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  name        String
+  categoryId  String
+  category    Category       @relation(fields: [categoryId], references: [id])
+  subjects    TrackSubject[]
+  departments Department[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([categoryId])
+}
+
+// Global shared subject library (reused across schools and tracks).
+model Subject {
+  id              String               @id @default(cuid())
+  slug            String               @unique
+  name            String
+  tracks          TrackSubject[]
+  knowledgePoints KnowledgePoint[]
+  examSubjects    ExamSubjectSubject[]
+  questions       QuestionSubject[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+}
+
+model TrackSubject {
+  trackId   String
+  subjectId String
+  track     ProgramTrack @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  subject   Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@id([trackId, subjectId])
+  @@index([subjectId])
+}
+
+model KnowledgePoint {
+  id        String                   @id @default(cuid())
+  slug      String
+  name      String
+  subjectId String
+  subject   Subject                  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    KnowledgePoint?          @relation("KnowledgePointTree", fields: [parentId], references: [id])
+  children  KnowledgePoint[]         @relation("KnowledgePointTree")
+  questions QuestionKnowledgePoint[]
+
+  @@unique([subjectId, slug])
+  @@index([parentId])
+}
+
+// ---------- Schools / exams ----------
+
+model School {
+  id          String              @id @default(cuid())
+  slug        String              @unique
+  name        String
+  departments Department[]
+  exams       Exam[]
+  schedules   AdmissionSchedule[]
+  stats       AdmissionStat[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model Department {
+  id        String              @id @default(cuid())
+  slug      String
+  name      String
+  schoolId  String
+  school    School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  trackId   String?
+  track     ProgramTrack?       @relation(fields: [trackId], references: [id])
+  exams     Exam[]
+  schedules AdmissionSchedule[]
+  stats     AdmissionStat[]
+  metadata  Json?
+
+  @@unique([schoolId, slug])
+  @@index([trackId])
+}
+
+// One admission paper set for a (school, dept, year, admissionType, group).
+model Exam {
+  id            String        @id @default(cuid())
+  schoolId      String
+  departmentId  String
+  year          Int
+  admissionType AdmissionType
+  group         String        @default("") // 組別; empty = no division
+  sourceUrl     String?
+  licenseStatus LicenseStatus @default(unknown)
+  school        School        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  department    Department    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  examSubjects  ExamSubject[]
+  metadata      Json?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@unique([schoolId, departmentId, year, admissionType, group])
+  @@index([year])
+}
+
+// A paper/section within an exam; may bundle multiple subjects (合科卷).
+model ExamSubject {
+  id        String               @id @default(cuid())
+  examId    String
+  exam      Exam                 @relation(fields: [examId], references: [id], onDelete: Cascade)
+  name      String // e.g. 資料結構與演算法
+  sourceUrl String?
+  subjects  ExamSubjectSubject[]
+  questions Question[]
+  metadata  Json?
+
+  @@index([examId])
+}
+
+model ExamSubjectSubject {
+  examSubjectId String
+  subjectId     String
+  examSubject   ExamSubject @relation(fields: [examSubjectId], references: [id], onDelete: Cascade)
+  subject       Subject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@id([examSubjectId, subjectId])
+  @@index([subjectId])
+}
+
+model Question {
+  id              String                   @id @default(cuid())
+  externalId      String                   @unique // frontmatter question_id
+  examSubjectId   String
+  examSubject     ExamSubject              @relation(fields: [examSubjectId], references: [id], onDelete: Cascade)
+  number          String // 題號, e.g. 3 / 3a
+  type            QuestionType
+  contentMd       String
+  points          Float?
+  metadata        Json?
+  choices         Choice[]
+  explanation     Explanation?
+  subjects        QuestionSubject[]
+  knowledgePoints QuestionKnowledgePoint[]
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  @@index([examSubjectId])
+}
+
+// Granular practice mapping: a question to one-or-more subjects.
+model QuestionSubject {
+  questionId String
+  subjectId  String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  subject    Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@id([questionId, subjectId])
+  @@index([subjectId])
+}
+
+model Choice {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  label      String // A / B / C
+  contentMd  String
+  isCorrect  Boolean  @default(false)
+
+  @@unique([questionId, label])
+}
+
+// Cached standard answer (Claude offline). Separate from the original question.
+model Explanation {
+  id             String       @id @default(cuid())
+  questionId     String       @unique
+  question       Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  standardAnswer String
+  answerType     AnswerType
+  confidence     Confidence?
+  modelUsed      String?
+  samplesCount   Int          @default(1)
+  reviewStatus   ReviewStatus @default(ai_generated)
+  metadata       Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model QuestionKnowledgePoint {
+  questionId       String
+  knowledgePointId String
+  question         Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  knowledgePoint   KnowledgePoint @relation(fields: [knowledgePointId], references: [id], onDelete: Cascade)
+
+  @@id([questionId, knowledgePointId])
+  @@index([knowledgePointId])
+}
+
+// ---------- Admissions (independent of exam papers) ----------
+
+model AdmissionSchedule {
+  id            String         @id @default(cuid())
+  schoolId      String
+  departmentId  String?
+  admissionType AdmissionType
+  year          Int
+  event         AdmissionEvent
+  date          DateTime
+  sourceUrl     String?
+  school        School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  department    Department?    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, year])
+  @@index([departmentId])
+}
+
+model AdmissionStat {
+  id            String        @id @default(cuid())
+  schoolId      String
+  departmentId  String
+  admissionType AdmissionType
+  year          Int
+  applicants    Int?
+  quota         Int?
+  admitted      Int?
+  school        School        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  department    Department    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, departmentId, admissionType, year])
+  @@index([departmentId])
+}
+
+// Phase 2 (deferred): User / Attempt / ReminderSubscription — see docs/00-product.md.
