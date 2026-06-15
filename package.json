@@ -5,17 +5,19 @@
   "description": "Taiwan graduate-exam prep hub: past papers, AI explanations, admissions info.",
   "license": "MIT",
   "type": "module",
-  "packageManager": "pnpm@9.15.4",
+  "packageManager": "pnpm@10.34.3",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
+    "lint": "eslint . && turbo run lint",
+    "lint:fix": "eslint . --fix && turbo run lint:fix",
+    "lint:md": "markdownlint-cli2 \"**/*.md\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "fix": "prettier --write . && pnpm run lint:fix",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "clean": "turbo run clean && rimraf node_modules",
@@ -37,5 +39,15 @@
     "turbo": "^2.3.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.18.1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "better-sqlite3",
+      "esbuild",
+      "sharp",
+      "unrs-resolver",
+      "vue-demi"
+    ]
   }
 }

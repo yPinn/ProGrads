@@ -14,6 +14,8 @@ export default tseslint.config(
       "**/node_modules/**",
       "**/*.gen.ts",
       "packages/db/generated/**",
+      // apps bring their own ESLint config (e.g. @nuxt/eslint); not linted at root.
+      "apps/web/**",
     ],
   },
   js.configs.recommended,
