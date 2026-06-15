@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "Vue.volar",
+    "Prisma.prisma",
+    "bradlc.vscode-tailwindcss",
+    "DavidAnson.vscode-markdownlint",
+    "editorconfig.editorconfig"
+  ]
+}

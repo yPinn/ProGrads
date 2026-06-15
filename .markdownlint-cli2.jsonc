@@ -1,0 +1,10 @@
+{
+  "config": {
+    "default": true,
+    "MD013": false, // long lines (tables, URLs)
+    "MD033": false, // inline HTML
+    "MD041": false, // first line need not be h1
+    "MD024": { "siblings_only": true }, // duplicate sibling headings
+  },
+  "ignores": ["node_modules", "**/CHANGELOG.md", "**/.output", "**/dist"],
+}

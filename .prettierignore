@@ -1,0 +1,11 @@
+node_modules
+dist
+.output
+.nuxt
+.nitro
+.turbo
+coverage
+pnpm-lock.yaml
+packages/db/generated
+**/*.gen.ts
+CHANGELOG.md
