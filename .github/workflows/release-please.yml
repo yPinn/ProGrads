@@ -14,4 +14,4 @@ jobs:
     steps:
       # Reads release-please-config.json + .release-please-manifest.json.
       # Opens/updates a Release PR; merging it tags vX.Y.Z and writes CHANGELOG.
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
