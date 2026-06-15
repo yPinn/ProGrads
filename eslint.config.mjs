@@ -30,5 +30,13 @@ export default tseslint.config(
       "no-console": ["warn", { allow: ["warn", "error"] }],
     },
   },
+  {
+    // NestJS DI needs runtime (value) imports for injected types.
+    files: ["apps/api/**/*.ts"],
+    rules: {
+      "@typescript-eslint/consistent-type-imports": "off",
+      "@typescript-eslint/no-extraneous-class": "off",
+    },
+  },
   prettier,
 );
