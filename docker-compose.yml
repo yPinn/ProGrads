@@ -1,0 +1,24 @@
+# Local dev infra. Only PostgreSQL for now (api runs via `pnpm dev` for hot-reload;
+# redis/Caddy/api containers come later — see docs/01-architecture.md).
+name: prograds # project namespace → networks/volumes prefixed, avoids clashing with other stacks
+services:
+  postgres:
+    image: postgres:17-alpine # pin major; for pgvector later switch to pgvector/pgvector:pg17
+    container_name: prograds-postgres # explicit, distinguishable name when running beside other services
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: prograds
+      POSTGRES_PASSWORD: prograds
+      POSTGRES_DB: prograds
+    ports:
+      - "127.0.0.1:5433:5432" # host 5433 (5432 is taken by a native Postgres); localhost only (docs/01)
+    volumes:
+      - prograds-pgdata:/var/lib/postgresql/data # named volume; `down` keeps it, `down -v` destroys it
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prograds -d prograds"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  prograds-pgdata:

@@ -3,7 +3,7 @@ import { z } from "zod";
 // Validated at startup (fail fast). See app.module.ts ConfigModule.
 export const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  PORT: z.coerce.number().int().positive().default(3001),
+  PORT: z.coerce.number().int().positive().default(8088),
   HOST: z.string().default("0.0.0.0"),
   DATABASE_URL: z.string().min(1),
 });
