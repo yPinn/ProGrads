@@ -45,10 +45,18 @@ export const ExplanationSchema = z.object({
 });
 export type Explanation = z.infer<typeof ExplanationSchema>;
 
+export const ChoiceSchema = z.object({
+  label: z.string(),
+  contentMd: z.string(),
+  isCorrect: z.boolean(),
+});
+export type Choice = z.infer<typeof ChoiceSchema>;
+
 export const QuestionDetailSchema = QuestionSummarySchema.extend({
   contentMd: z.string(),
   sourceUrl: z.string().nullable(),
   licenseStatus: LicenseStatus,
+  choices: z.array(ChoiceSchema),
   // examSubject detail includes its 合科卷 composition.
   examSubject: z.object({
     id: z.string(),

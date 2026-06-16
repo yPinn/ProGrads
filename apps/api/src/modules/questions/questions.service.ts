@@ -1,7 +1,12 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import type { Meta, QuestionDetail, QuestionSummary, Subject } from "@prograds/shared";
+import type { Choice, Meta, QuestionDetail, QuestionSummary, Subject } from "@prograds/shared";
 import { QuestionFilters, QuestionsRepository } from "./questions.repository.js";
 
+interface ChoiceRow {
+  label: string;
+  contentMd: string;
+  isCorrect: boolean;
+}
 interface SubjectRow {
   subject: { id: string; slug: string; name: string };
 }
@@ -20,6 +25,10 @@ interface DepartmentRow {
 
 function mapSubjects(rows: SubjectRow[]): Subject[] {
   return rows.map((r) => ({ id: r.subject.id, slug: r.subject.slug, name: r.subject.name }));
+}
+
+function mapChoices(rows: ChoiceRow[]): Choice[] {
+  return rows.map((c) => ({ label: c.label, contentMd: c.contentMd, isCorrect: c.isCorrect }));
 }
 
 function mapSchool(s: SchoolRow) {
@@ -74,6 +83,7 @@ export class QuestionsService {
       contentMd: q.contentMd,
       sourceUrl,
       licenseStatus: exam.licenseStatus,
+      choices: mapChoices(q.choices),
       subjects: mapSubjects(q.subjects),
       examSubject: {
         id: q.examSubject.id,

@@ -1,16 +1,13 @@
 import "dotenv/config";
 import { readFileSync, readdirSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prograds/db";
 import { Resolver, reconcileExamSubjects, syncFile } from "./sync.js";
 
-// Resolve the content root: CONTENT_DIR env, else <repo>/content (this package is tools/content-sync).
-function contentRoot(): string {
+function contentRoot(): string | null {
   if (process.env.CONTENT_DIR) return path.resolve(process.env.CONTENT_DIR);
-  const here = path.dirname(fileURLToPath(import.meta.url));
-  return path.resolve(here, "../../../content");
+  return null;
 }
 
 function listQuestionFiles(root: string): string[] {
@@ -34,6 +31,13 @@ async function main(): Promise<void> {
     throw new Error("DATABASE_URL is not configured");
   }
   const root = contentRoot();
+  if (!root) {
+    // eslint-disable-next-line no-console
+    console.log(
+      "content-sync: CONTENT_DIR not set — nothing to sync. Clone ProGrads-content and set CONTENT_DIR in .env.",
+    );
+    return;
+  }
   const files = listQuestionFiles(root);
   // eslint-disable-next-line no-console
   console.log(`content-sync: ${files.length} question file(s) under ${root}`);

@@ -1,20 +1,16 @@
 import type { PrismaClient } from "@prograds/db";
 import { type QuestionFrontmatter as Frontmatter, QuestionFrontmatter } from "@prograds/shared";
 import matter from "gray-matter";
-import { parseSections } from "./body.js";
+import { parseAnswer, parseChoices, parseSections } from "./body.js";
 import { parseQuestionPath } from "./paths.js";
 
-// question_type -> Explanation.answer_type (drives AI pipeline + rendering; docs/02 lever #4).
-const ANSWER_TYPE: Record<
-  string,
-  "single_choice" | "multi_choice" | "numeric" | "essay" | "proof"
-> = {
+// question_type -> Explanation.answer_type for non-MC types.
+const ANSWER_TYPE: Record<string, "numeric" | "essay" | "proof"> = {
   essay: "essay",
   calc: "numeric",
   proof: "proof",
   cloze: "essay",
   listening: "essay",
-  mc: "single_choice",
 };
 
 // Resolves reference entities by slug, cached. Throws if missing (must be seeded first).
@@ -93,11 +89,6 @@ export async function syncFile(
     );
   }
 
-  // First slice: MC choices/answer format deferred.
-  if (fm.question_type === "mc") {
-    return { skipped: `mc not supported yet: ${relPath}` };
-  }
-
   const track = await resolver.track(path.track);
   const school = await resolver.school(path.school);
   const department = await resolver.department(school.id, path.department);
@@ -110,10 +101,27 @@ export async function syncFile(
 
   const sections = parseSections(parsed.content);
   const questionMd = sections.get("題目");
-  const standardAnswer = sections.get("標準解答");
+  const standardAnswer = sections.get("標準解答") ?? "";
   if (!questionMd) throw new Error(`missing "## 題目" section: ${relPath}`);
-  if (!standardAnswer) throw new Error(`missing "## 標準解答" section: ${relPath}`);
   const knowledgeExtension = sections.get("知識點延伸") ?? null;
+
+  // MC: parse choices + answer; derive answerType dynamically.
+  let answerType: "single_choice" | "multi_choice" | "numeric" | "essay" | "proof";
+  let choiceRows: Array<{ label: string; contentMd: string; isCorrect: boolean }> = [];
+  if (fm.question_type === "mc") {
+    const choicesSection = sections.get("選項");
+    const answerSection = sections.get("答案");
+    if (!choicesSection) throw new Error(`missing "## 選項" section for mc: ${relPath}`);
+    if (!answerSection) throw new Error(`missing "## 答案" section for mc: ${relPath}`);
+    const rawChoices = parseChoices(choicesSection);
+    const correctLabels = parseAnswer(answerSection);
+    if (rawChoices.length === 0) throw new Error(`no choices parsed from "## 選項": ${relPath}`);
+    if (correctLabels.length === 0) throw new Error(`no answer parsed from "## 答案": ${relPath}`);
+    answerType = correctLabels.length > 1 ? "multi_choice" : "single_choice";
+    choiceRows = rawChoices.map((c) => ({ ...c, isCorrect: correctLabels.includes(c.label) }));
+  } else {
+    answerType = ANSWER_TYPE[fm.question_type] ?? "essay";
+  }
 
   const questionMeta = {
     sourceUrl: fm.source_url,
@@ -172,9 +180,17 @@ export async function syncFile(
       data: subjects.map((s) => ({ questionId: question.id, subjectId: s.id })),
     });
 
+    // Replace choices (MC only; no-op for other types).
+    await tx.choice.deleteMany({ where: { questionId: question.id } });
+    if (choiceRows.length > 0) {
+      await tx.choice.createMany({
+        data: choiceRows.map((c) => ({ questionId: question.id, ...c })),
+      });
+    }
+
     const explanationData = {
       standardAnswer,
-      answerType: ANSWER_TYPE[fm.question_type] ?? "essay",
+      answerType,
       confidence: fm.confidence ?? null,
       modelUsed: fm.model_used ?? null,
       reviewStatus: fm.review_status,

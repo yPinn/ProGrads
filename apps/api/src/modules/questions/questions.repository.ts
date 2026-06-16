@@ -65,6 +65,7 @@ export class QuestionsRepository {
       where: { externalId },
       include: {
         subjects: { include: { subject: true } },
+        choices: { orderBy: { label: "asc" } },
         explanation: true,
         examSubject: {
           include: {

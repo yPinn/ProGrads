@@ -21,7 +21,7 @@ for 每題官方考題:
     申論 / 證明  → 共識合併 + 潤稿
   產出 標準解答 + 知識點 + confidence
   confidence 低 → review_queue（人工或強模型複核）
-  寫入 content/*.md（frontmatter: model_used / confidence / review_status）
+  寫入 ProGrads-content/*.md（frontmatter: model_used / confidence / review_status）
 ```
 
 執行位置：`tools/` 腳本或 `nestjs-commander` CLI（非 runtime）。

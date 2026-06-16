@@ -15,7 +15,7 @@ export const QuestionFrontmatter = z.object({
   exam_subject: z.string().min(1), // paper display name (ExamSubject.name)
   subjects: z.array(z.string().min(1)).min(1), // granular practice tags (question_subject), by slug
   question_type: QuestionType,
-  source_url: z.string().url(),
+  source_url: z.union([z.string().url(), z.literal("")]),
   license_status: ContentLicenseStatus,
   group: z.string().default(""), // 組別 (甲/乙/丙); empty = none
   knowledge_points: z.array(z.string().min(1)).default([]), // parsed; not yet persisted (phase 2)
