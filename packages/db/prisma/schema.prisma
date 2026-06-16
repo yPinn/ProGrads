@@ -187,7 +187,8 @@ model ExamSubject {
   questions Question[]
   metadata  Json?
 
-  @@index([examId])
+  // (examId, name) is the idempotent upsert key for sync; also indexes examId.
+  @@unique([examId, name])
 }
 
 model ExamSubjectSubject {
@@ -206,6 +207,7 @@ model Question {
   examSubjectId   String
   examSubject     ExamSubject              @relation(fields: [examSubjectId], references: [id], onDelete: Cascade)
   number          String // 題號, e.g. 3 / 3a
+  order           Int                      @default(0) // reliable whole-paper ordering
   type            QuestionType
   contentMd       String
   points          Float?
