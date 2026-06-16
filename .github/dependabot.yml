@@ -5,6 +5,10 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    ignore:
+      # Zod pinned to v3 for @vee-validate/zod and nestjs-zod compatibility (D13).
+      - dependency-name: "zod"
+        update-types: ["version-update:semver-major"]
     groups:
       dev-dependencies:
         dependency-type: development
