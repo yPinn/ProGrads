@@ -11,11 +11,8 @@
       "cache": false,
       "persistent": true
     },
-    "lint": {
-      "dependsOn": ["^build"]
-    },
+    "lint": {},
     "lint:fix": {
-      "dependsOn": ["^build"],
       "cache": false
     },
     "typecheck": {
