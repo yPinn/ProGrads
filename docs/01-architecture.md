@@ -108,7 +108,7 @@ modules/{taxonomy, questions, explanations, schedules, stats, ai, users}
 
 ### Monorepo
 
-pnpm workspaces + Turborepo。結構：`apps/web`(Nuxt)、`apps/api`(Nest)、`packages/shared`(Zod)、`packages/db`(Prisma)、`content/`(題庫 md)、`tools/`(AI 腳本)。
+pnpm workspaces + Turborepo。結構：`apps/web`(Nuxt)、`apps/api`(Nest)、`packages/shared`(Zod)、`packages/db`(Prisma)、`tools/`(AI 腳本)。題庫 markdown 存於獨立私有 repo（ProGrads-content）。
 
 ### 前端（Nuxt）
 

@@ -1,7 +1,7 @@
 import type { PrismaClient } from "../../generated/client/client.ts";
 
 // Taxonomy reference data. Authoritative L1/L2 from 大碩 (TKB). See docs/02-data-model.md.
-// Subjects + track_subject links cover the starter tracks 資工所 / 資管所 only.
+// Subjects + track_subject links cover the starter tracks cs / info-mgmt only.
 
 type TrackSeed = { slug: string; name: string };
 
@@ -12,12 +12,12 @@ const TAXONOMY: { slug: string; name: string; tracks: TrackSeed[] }[] = [
     tracks: [
       { slug: "business-admin", name: "企管所" },
       { slug: "intl-business", name: "國企所" },
-      { slug: "economics", name: "經濟所" },
+      { slug: "econ", name: "經濟所" },
       { slug: "finance", name: "財金所" },
-      { slug: "statistics", name: "統計所" },
-      { slug: "mathematics", name: "數學所" },
-      { slug: "info-management", name: "資管所" },
-      { slug: "industrial-management", name: "工管所" },
+      { slug: "stat", name: "統計所" },
+      { slug: "math", name: "數學所" },
+      { slug: "info-mgmt", name: "資管所" },
+      { slug: "ind-mgmt", name: "工管所" },
       { slug: "tourism", name: "觀光所" },
       { slug: "leisure", name: "休閒所" },
     ],
@@ -26,15 +26,15 @@ const TAXONOMY: { slug: string; name: string; tracks: TrackSeed[] }[] = [
     slug: "science-engineering",
     name: "理工類",
     tracks: [
-      { slug: "electrical-engineering", name: "電機所" },
-      { slug: "computer-science", name: "資工所" },
-      { slug: "mechanical-engineering", name: "機械所" },
-      { slug: "civil-engineering", name: "土木所" },
-      { slug: "environmental-engineering", name: "環工所" },
+      { slug: "ee", name: "電機所" },
+      { slug: "cs", name: "資工所" },
+      { slug: "me", name: "機械所" },
+      { slug: "ce", name: "土木所" },
+      { slug: "env-eng", name: "環工所" },
       { slug: "materials", name: "材料所" },
-      { slug: "chemical-engineering", name: "化工所" },
-      { slug: "chemistry", name: "化學所" },
-      { slug: "life-science", name: "生科所" },
+      { slug: "chem-eng", name: "化工所" },
+      { slug: "chem", name: "化學所" },
+      { slug: "life-sci", name: "生科所" },
       { slug: "biomedical", name: "生醫所" },
     ],
   },
@@ -42,54 +42,39 @@ const TAXONOMY: { slug: string; name: string; tracks: TrackSeed[] }[] = [
     slug: "humanities",
     name: "人文類",
     tracks: [
-      { slug: "english-teaching", name: "英教所" },
-      { slug: "applied-foreign-languages", name: "應外所" },
-      { slug: "chinese-literature", name: "中文所" },
-      { slug: "chinese-language", name: "華文所" },
+      { slug: "eng-teach", name: "英教所" },
+      { slug: "afl", name: "應外所" },
+      { slug: "zh-lit", name: "中文所" },
+      { slug: "zh-lang", name: "華文所" },
       { slug: "arts", name: "藝術所" },
-      { slug: "communication", name: "傳播所" },
+      { slug: "comm", name: "傳播所" },
       { slug: "counseling", name: "心輔所" },
-      { slug: "education", name: "教育所" },
-      { slug: "political-science", name: "政治所" },
+      { slug: "edu", name: "教育所" },
+      { slug: "poli-sci", name: "政治所" },
       { slug: "diplomacy", name: "外交所" },
     ],
   },
 ];
 
 const SUBJECTS: TrackSeed[] = [
-  { slug: "data-structures", name: "資料結構" },
-  { slug: "algorithms", name: "演算法" },
-  { slug: "computer-organization", name: "計算機組織與結構" },
-  { slug: "operating-systems", name: "作業系統" },
-  { slug: "linear-algebra", name: "線性代數" },
-  { slug: "discrete-mathematics", name: "離散數學" },
-  { slug: "statistics", name: "統計學" },
-  { slug: "management-information-systems", name: "管理資訊系統" },
-  { slug: "computer-concepts", name: "計算機概論" },
-  { slug: "databases", name: "資料庫" },
-  { slug: "internet-concepts", name: "網際網路概論" },
+  { slug: "ds", name: "資料結構" },
+  { slug: "algo", name: "演算法" },
+  { slug: "co", name: "計算機組織與結構" },
+  { slug: "os", name: "作業系統" },
+  { slug: "la", name: "線性代數" },
+  { slug: "dm", name: "離散數學" },
+  { slug: "stat", name: "統計學" },
+  { slug: "mis", name: "管理資訊系統" },
+  { slug: "cs-intro", name: "計算機概論" },
+  { slug: "db", name: "資料庫" },
+  { slug: "networking", name: "網際網路概論" },
 ];
 
-// track slug → subject slugs (the global shared library; note data-structures/algorithms
-// are shared across 資工所[理工] and 資管所[商管] — a cross-category shared subject).
+// track slug → subject slugs (the global shared library; note ds/algo
+// are shared across cs[理工] and info-mgmt[商管] — a cross-category shared subject).
 const TRACK_SUBJECTS: Record<string, string[]> = {
-  "computer-science": [
-    "data-structures",
-    "algorithms",
-    "computer-organization",
-    "operating-systems",
-    "linear-algebra",
-    "discrete-mathematics",
-  ],
-  "info-management": [
-    "statistics",
-    "management-information-systems",
-    "computer-concepts",
-    "data-structures",
-    "databases",
-    "internet-concepts",
-    "algorithms",
-  ],
+  cs: ["ds", "algo", "co", "os", "la", "dm"],
+  "info-mgmt": ["stat", "mis", "cs-intro", "ds", "db", "networking", "algo"],
 };
 
 export interface TaxonomySeedResult {

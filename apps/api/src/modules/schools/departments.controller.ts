@@ -10,7 +10,7 @@ import { SchoolsService } from "./schools.service.js";
 export class DepartmentsController {
   constructor(private readonly service: SchoolsService) {}
 
-  // Cross-axis query: e.g. ?track=computer-science → which schools offer 資工所.
+  // Cross-axis query: e.g. ?track=cs → which schools offer 資工所.
   @Get()
   @ApiOkResponse({ type: DepartmentsResponseDto })
   async list(@Query() query: DepartmentQueryDto): Promise<{ data: DepartmentWithSchool[] }> {

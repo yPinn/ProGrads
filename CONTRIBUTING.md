@@ -46,11 +46,13 @@
 - 不可變優先、小檔案高內聚、邊界以 Zod 驗證、錯誤完整處理（見 [docs/05-api-conventions.md](docs/05-api-conventions.md)）。
 - 測試：runner 全棧統一 **Vitest**（E2E 用 Playwright），目標 80%（單元 + 整合 + E2E）。指令一律從 root 跑（`pnpm lint` / `typecheck` / `test`，turbo fan-out），見 [docs/06-decisions.md](docs/06-decisions.md) D16。
 
-## 貢獻考題內容（content/）
+## 貢獻考題內容
+
+考題內容存放於私有 repo [ProGrads-content](https://github.com/yPinn/ProGrads-content)，非本 monorepo。
 
 - **只收官方已公開考題**，每檔 frontmatter 必含 `source_url` 與 `license_status`。
 - `unknown` 授權狀態不得合併。
-- 標準解答以 Claude 離線生成為主；人工修正請更新 `review_status`。
+- 標準解答由 AI 離線生成；人工修正請更新 `review_status`。
 - 格式見 [docs/03-content-pipeline.md](docs/03-content-pipeline.md)。
 
 ## 文件

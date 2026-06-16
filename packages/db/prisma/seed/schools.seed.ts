@@ -10,42 +10,42 @@ const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
     slug: "ntu",
     name: "國立臺灣大學",
     departments: [
-      { slug: "csie", name: "資訊工程學系", track: "computer-science" },
-      { slug: "im", name: "資訊管理學系", track: "info-management" },
+      { slug: "csie", name: "資訊工程學系", track: "cs" },
+      { slug: "im", name: "資訊管理學系", track: "info-mgmt" },
     ],
   },
   {
     slug: "nthu",
     name: "國立清華大學",
-    departments: [{ slug: "csie", name: "資訊工程學系", track: "computer-science" }],
+    departments: [{ slug: "csie", name: "資訊工程學系", track: "cs" }],
   },
   {
     slug: "nycu",
     name: "國立陽明交通大學",
-    departments: [{ slug: "csie", name: "資訊工程學系", track: "computer-science" }],
+    departments: [{ slug: "csie", name: "資訊工程學系", track: "cs" }],
   },
   {
     slug: "ncku",
     name: "國立成功大學",
     departments: [
-      { slug: "csie", name: "資訊工程學系", track: "computer-science" },
-      { slug: "iim", name: "資訊管理研究所", track: "info-management" },
+      { slug: "csie", name: "資訊工程學系", track: "cs" },
+      { slug: "iim", name: "資訊管理研究所", track: "info-mgmt" },
     ],
   },
   {
     slug: "nccu",
     name: "國立政治大學",
-    departments: [{ slug: "mis", name: "資訊管理學系", track: "info-management" }],
+    departments: [{ slug: "mis", name: "資訊管理學系", track: "info-mgmt" }],
   },
   {
     slug: "ntust",
     name: "國立臺灣科技大學",
-    departments: [{ slug: "csie", name: "資訊工程系", track: "computer-science" }],
+    departments: [{ slug: "csie", name: "資訊工程系", track: "cs" }],
   },
   {
     slug: "ntnu",
     name: "國立臺灣師範大學",
-    departments: [{ slug: "csie", name: "資訊工程學系", track: "computer-science" }],
+    departments: [{ slug: "csie", name: "資訊工程學系", track: "cs" }],
   },
 ];
 

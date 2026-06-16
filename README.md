@@ -33,8 +33,7 @@ apps/web        Nuxt 前端（CF Pages）
 apps/api        NestJS 後端（自有 server）
 packages/shared Zod 型別與契約（前後端共用）
 packages/db     Prisma schema 與 client
-content/        題庫與標準解答（markdown，真相層）
-tools/          離線腳本：content-sync（content→DB）、AI 內容工廠
+tools/          離線腳本：content-sync（ProGrads-content→DB）、AI 內容工廠
 docs/           規格與決策文件
 ```
 

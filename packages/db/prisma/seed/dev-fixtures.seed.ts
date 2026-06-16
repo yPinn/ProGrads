@@ -1,8 +1,8 @@
 import type { PrismaClient } from "../../generated/client/client.ts";
 
-// DEV FIXTURES ONLY — not canonical content. Real exams/questions come from content/
-// via the sync script (docs/03). These let the exams API be exercised locally before
-// the content pipeline exists; the sync will eventually supersede them.
+// DEV FIXTURES ONLY — not canonical content. Real exams/questions come from ProGrads-content
+// via the sync script (docs/03). These let the exams API be exercised locally without
+// needing a content repo checkout.
 
 // 台大資工 2024 考試入學 — demonstrates 合科卷 (one paper bundling multiple subjects).
 const NTU_CSIE_2024 = {
@@ -14,9 +14,9 @@ const NTU_CSIE_2024 = {
   licenseStatus: "school_official" as const,
   sourceUrl: "https://www.csie.ntu.edu.tw/",
   papers: [
-    { name: "資料結構與演算法", subjects: ["data-structures", "algorithms"] },
-    { name: "計算機結構與作業系統", subjects: ["computer-organization", "operating-systems"] },
-    { name: "數學（線性代數、離散數學）", subjects: ["linear-algebra", "discrete-mathematics"] },
+    { name: "資料結構與演算法", subjects: ["ds", "algo"] },
+    { name: "計算機結構與作業系統", subjects: ["co", "os"] },
+    { name: "數學（線性代數、離散數學）", subjects: ["la", "dm"] },
   ],
 };
 

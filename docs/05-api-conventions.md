@@ -4,7 +4,7 @@
 
 - REST，資源命名用複數名詞：`/categories`、`/tracks`、`/subjects`、`/schools`、`/departments`、`/exams`、`/questions`、`/schedules`、`/stats`。
 - 版本前綴：`/api/v1`。
-- 過濾/分頁用 query，**以 slug 過濾**（非顯示名）：`?track=computer-science&school=ntu&year=2025&page=1&pageSize=20`。
+- 過濾/分頁用 query，**以 slug 過濾**（非顯示名）：`?track=cs&school=ntu&year=2025&page=1&pageSize=20`。
 
 ## 契約：Zod 單一事實來源
 
