@@ -34,25 +34,27 @@ apps/api        NestJS 後端（自有 server）
 packages/shared Zod 型別與契約（前後端共用）
 packages/db     Prisma schema 與 client
 content/        題庫與標準解答（markdown，真相層）
-tools/          AI 內容工廠等離線腳本
+tools/          離線腳本：content-sync（content→DB）、AI 內容工廠
 docs/           規格與決策文件
 ```
 
 ## 開發
 
-需求：Node ≥22（建議 24 LTS，見 `.nvmrc`）、pnpm 10（`corepack enable pnpm`，版本由 `packageManager` 鎖定）、PostgreSQL、Redis。
+需求：Node ≥22（建議 24 LTS，見 `.nvmrc`）、pnpm 10（`corepack enable pnpm`，版本由 `packageManager` 鎖定）、Docker（本機 PostgreSQL）。Redis 後期才需要。
 
 ```bash
-pnpm install      # 需先 corepack enable pnpm
-pnpm dev          # 啟動各 app（apps/web）
-pnpm lint         # ESLint：root + 各 app
-pnpm lint:fix     # ESLint 自動修復
-pnpm format       # Prettier 寫入
-pnpm format:check # Prettier 檢查
-pnpm fix          # format + lint:fix 一次修復
+pnpm install                              # 需先 corepack enable pnpm
+docker compose up -d postgres             # 本機 Postgres（host 5433，僅綁 localhost）
+cp packages/db/.env.example packages/db/.env   # 設 DATABASE_URL
+pnpm --filter @prograds/db db:migrate     # 套用 migration（建表）
+pnpm --filter @prograds/db db:seed        # 灌參照資料（分類/學校/系所）
+pnpm --filter @prograds/api dev           # 後端 API（http://localhost:8088/api/v1，docs 於 /api/v1/docs）
+pnpm --filter @prograds/web dev           # 前端（http://localhost:3000）
 ```
 
-> 進度：`apps/web`（Nuxt 4，含前端套件）已 scaffold；`apps/api`（NestJS）與 Prisma schema 為下一步。
+工作區指令：`pnpm dev`（各 app）、`pnpm lint` / `lint:fix`、`pnpm format` / `format:check`、`pnpm fix`、`pnpm typecheck`、`pnpm test`。
+
+> 進度：`apps/web` 已 scaffold；`packages/db`（Prisma）+ `apps/api`（taxonomy / schools / exams 讀取 API）+ `tools/content-sync`（content → DB 同步）已就緒。下一步：questions 讀取 API、AI pipeline。
 
 ## 授權
 
