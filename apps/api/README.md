@@ -12,5 +12,7 @@ pnpm --filter @prograds/api start   # node dist/main.js
 ```
 
 - ESM + tsc（NodeNext）以正確發出 decorator metadata（DI 所需）；相對 import 帶 `.js`。
-- 目前為最小骨架：`/health` 可用。規劃模組：`taxonomy / questions / explanations / schedules / stats / ai / users`。
-- **下一步**：`@prograds/db` 出 JS build → PrismaModule（`@prisma/adapter-pg` + `pg`）→ Swagger / config / pino / 模組實作。
+- 全域 prefix **`/api/v1`**（D10 API 版本）；`GET /api/v1/health`；Swagger UI 於 **`/api/v1/docs`**。
+- 已接：PrismaModule（`@prisma/adapter-pg`）、env 驗證（Zod，啟動即驗）、pino 結構化日誌、`@fastify/helmet`、全域 `ZodValidationPipe`（nestjs-zod）。
+- 規劃模組：`taxonomy / questions / explanations / schedules / stats / ai / users`（DTO 用 `@prograds/shared` 的 Zod 契約）。
+- **下一步**：實作 feature 模組（CRUD + Repository）。
