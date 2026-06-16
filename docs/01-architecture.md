@@ -76,6 +76,8 @@ apps/api/src/
 1. **module = domain、controller = resource、service/repository 各一**。分層體現在 class 與檔名後綴（`.controller`/`.service`/`.repository`），**不開 `controllers/`、`services/` 這類「按技術層分組」的資料夾**（group-by-layer 是規模越大越痛的反模式；更別把層 hoist 成全域 `src/services/`）。
 2. **先平鋪，肥了才局部拆**（YAGNI）。唯有當**單一 module** 真的肥起來（如 `questions` 長出 5+ controller、多個 service）才**只在該 module 內**再切子資料夾；其餘小 module 維持平鋪。
 
+檔名規格：`<resource 複數>.controller.ts`、`<domain>.{module,service,repository}.ts`、`dto/<domain>-response.dto.ts`、`dto/<resource 單數>-query.dto.ts`。
+
 理由：會成長的軸是 **domain（→ 數十個）**，不是**技術層（恆為 3）**；沿會長的軸切，且修改多為 feature-scoped（一次動同一 domain 的 controller+service+repo），feature 平鋪讓相關檔聚在一起。
 
 ### modules 藍圖
@@ -128,6 +130,6 @@ PostgreSQL + Prisma（後期 pgvector）；AI 離線 `@anthropic-ai/sdk`(Claude 
 
 ### 測試 / DX / 部署
 
-Jest + Supertest + Testcontainers（後端）、Vitest + `@nuxt/test-utils`（前端）、Playwright（E2E），目標 80%；
-ESLint + Prettier + TS strict + Husky + lint-staged + commitlint + Changesets；
+Vitest（前後端統一 runner）+ Supertest/Testcontainers（後端整合）、`@nuxt/test-utils`（前端元件）、Playwright（E2E），目標 80%；
+ESLint + Prettier + TS strict + Husky + lint-staged + commitlint + release-please；各 app/package 自帶 ESLint 設定（共用 root `base`）；
 前端 CF Pages、後端/DB Docker Compose（api + postgres + redis）+ Caddy 反代、CI GitHub Actions、Sentry。

@@ -99,3 +99,10 @@
   - **build script 預設封鎖**（安全性）→ 以 `pnpm.onlyBuiltDependencies` 明確授權原生套件（better-sqlite3、sharp、esbuild、@parcel/watcher、unrs-resolver、vue-demi）。
   - **嚴格 node_modules（不 hoist）**→ 程式直接 import 的套件須列為直接依賴，故 `tailwindcss` 加進 `apps/web`（`main.css` 的 `@import "tailwindcss"`）。
 - **維護**：Dependabot 每週升級依賴；major 版本（如 Node/pnpm）以穩定性為先，不盲目追最新。
+
+## D16. 品質工具鏈：統一 Vitest + 各套件自帶 ESLint
+
+- **決策**：測試 runner 全棧統一 **Vitest**（不採後端 Jest）；lint/typecheck/test/format 由 **Turborepo** 從 root 單一入口 fan-out。每個有 lint 的 app/package **自帶 `eslint.config.mjs`**（共用 root 匯出的 `base`，前端 `@nuxt/eslint`、後端 Nest 例外各自覆寫）；root ESLint 只 lint 根層級設定檔，避免重複 lint。
+- **理由**：前後端框架天生不同（Nuxt vs Nest），硬塞單一巨型 config 更糟；「規則共用一份 `base`、差異各自覆寫」兼顧一致與隔離。Vitest 與 ESM/Vite 生態契合，前後端同一 runner 降低心智負擔。
+- **取捨**：因 pnpm 嚴格 node_modules（不 hoist，見 D15），Vitest 須列為各套件直接 devDep；`packages/db` 僅 re-export 生成的 Prisma client，無原始碼可測/可 lint，刻意不接。
+- **入口**：日常一律 root 下 `pnpm lint` / `format` / `typecheck` / `test`（turbo 自動分派、排序、快取）；針對單一套件用 `pnpm -F <name> <task>`。

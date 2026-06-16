@@ -6,13 +6,19 @@ Feature-module-per-domain、Repository + 薄 controller。架構見
 [docs/05-api-conventions.md](../../docs/05-api-conventions.md)。
 
 ```bash
-pnpm --filter @prograds/api build   # nest build (tsc, ESM)
-pnpm --filter @prograds/api dev     # nest start --watch
-pnpm --filter @prograds/api start   # node dist/main.js
+pnpm --filter @prograds/api build     # nest build (tsc, ESM)
+pnpm --filter @prograds/api dev       # nest start --watch
+pnpm --filter @prograds/api start     # node dist/main.js
+pnpm --filter @prograds/api lint      # ESLint（自帶 config：共用 base + Nest 覆寫）
+pnpm --filter @prograds/api typecheck # tsc --noEmit
+pnpm --filter @prograds/api test      # Vitest
 ```
 
+> 工具鏈一律可從 root 單一入口跑（`pnpm lint` / `typecheck` / `test`，turbo fan-out）；上面 filter 形式僅供針對性除錯。
+
 - ESM + tsc（NodeNext）以正確發出 decorator metadata（DI 所需）；相對 import 帶 `.js`。
-- 全域 prefix **`/api/v1`**（D10 API 版本）；`GET /api/v1/health`；Swagger UI 於 **`/api/v1/docs`**。
-- 已接：PrismaModule（`@prisma/adapter-pg`）、env 驗證（Zod，啟動即驗）、pino 結構化日誌、`@fastify/helmet`、全域 `ZodValidationPipe`（nestjs-zod）。
-- 規劃模組：`taxonomy / questions / explanations / schedules / stats / ai / users`（DTO 用 `@prograds/shared` 的 Zod 契約）。
-- **下一步**：實作 feature 模組（CRUD + Repository）。
+- 預設埠 **8088**（`PORT`）；全域 prefix **`/api/v1`**（D10 API 版本）；`GET /api/v1/health`；Swagger UI 於 **`/api/v1/docs`**。
+- 已接：PrismaModule（`@prisma/adapter-pg`）、env 驗證（Zod，啟動即驗）、pino 結構化日誌、`@fastify/helmet`、全域 `ZodValidationPipe`（nestjs-zod）、全域 `HttpExceptionFilter`（統一錯誤信封）。
+- 已實作模組：`taxonomy`（categories/tracks/subjects）、`schools`（schools/departments）、`exams`（含合科卷）。DTO 由 `@prograds/shared` 的 Zod 契約生成。
+- 規劃中：`questions / explanations / schedules / stats / ai / users`。
+- **下一步**：`questions` 讀取 API（資料由 `tools/content-sync` 同步入庫）。

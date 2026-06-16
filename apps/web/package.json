@@ -10,6 +10,8 @@
     "preview": "nuxt preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "typecheck": "nuxt typecheck",
+    "test": "vitest run --coverage",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
@@ -38,6 +40,13 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.16.0",
-    "eslint": "^10.5.0"
+    "@nuxt/test-utils": "^4.0.3",
+    "@vitest/coverage-v8": "^4.1.9",
+    "@vue/test-utils": "^2.4.11",
+    "eslint": "^10.5.0",
+    "happy-dom": "^20.10.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9",
+    "vue-tsc": "^3.1.1"
   }
 }

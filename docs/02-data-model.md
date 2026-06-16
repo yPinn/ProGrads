@@ -69,6 +69,22 @@ admission_stat     (school, dept, admission_type, year, applicants/quota/admitte
 4. `explanation.answer_type` 讓 AI pipeline 分流（mc/數值→投票；申論→合併）。
 5. 後端 feature-sliced；領域特有功能（跑 code、音檔）當 plugin 掛 `question_type`。
 
+## 內容 pipeline 衍生的 schema 增量
+
+由 [03-content-pipeline.md](03-content-pipeline.md) 的存檔設計引入。
+
+**本次已實作**（migration `content_sync_schema`）：
+
+- **`ExamSubject @@unique([examId, name])`**：讓 sync 能以 (exam, 卷名) 冪等 upsert（否則無法去重重建合科卷）。
+- **`Question.order Int`**：可靠的整卷排序（`number` 為 `"3"/"3a"/"10"` 字串，字典序會錯）；整卷答案匯出與重現整卷靠此。
+- **解答結構化**（`Explanation` / `Choice` model 既有）：`Explanation` 以 `answer_type` 判別式表達（選擇→`Choice.isCorrect`、數值→值、申論→markdown）。MC 的選項寫入由 sync 暫緩（見 03）。
+
+**規劃中（尚未實作）**：
+
+- **`Asset`（blob 參照表）**：二進位大檔（Tier0 raw 整卷、整卷答案匯出快取）永不進 DB / git，存 blob store；DB 只留參照列：`storageKey / sha256 / bytes / contentType`（內容定址、去重、license-gated 下載）。
+- **raw 參照**：`ExamSubject` 連到 `Asset`（Tier0）；下載權限由 `license_status` gate。
+- **整卷答案匯出快取**：整卷答案不另存實體，由 index（`Question.order`）即時組合，產生後做內容定址快取（見 03）。
+
 ## 列舉（放 packages/shared，Zod）
 
 - `license_status`：`national_exam | school_official | unknown`
