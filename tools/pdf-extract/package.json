@@ -1,0 +1,20 @@
+{
+  "name": "@prograds/pdf-extract",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "to-images": "tsx src/to-images.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "pdf-to-png-converter": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "tsx": "^4.20.6",
+    "typescript": "^6.0.3"
+  }
+}
