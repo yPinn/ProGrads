@@ -10,9 +10,14 @@ export const MetaSchema = z.object({
 });
 export type Meta = z.infer<typeof MetaSchema>;
 
-// Success envelope: { data, meta? }.
+// Success envelope: { data }.
 export function dataResponse<T extends z.ZodTypeAny>(data: T) {
   return z.object({ data });
+}
+
+// Paginated success envelope: { data: item[], meta }.
+export function paginatedResponse<T extends z.ZodTypeAny>(item: T) {
+  return z.object({ data: z.array(item), meta: MetaSchema });
 }
 
 // Stable, client-facing error codes.
