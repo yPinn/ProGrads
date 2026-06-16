@@ -43,6 +43,49 @@ markdown push → CI:
 2. Feature module = 擴充切片，對齊資料層 `category/track/subject`：`modules/{taxonomy,questions,explanations,schedules,stats,ai,users}`。
 3. DI 只當接線層；service 寫純邏輯 + Repository(Prisma)；controller 維持薄 → 邏輯可攜、可測。
 
+### 資料夾結構與分層慣例
+
+**組織按 domain（feature-sliced），分層按 class（責任分離）——兩者刻意分離。**
+
+頂層分兩類：
+
+- `modules/`：**domain 功能切片**，會隨專案一直長。
+- `config/`、`common/`、`prisma/`、`health/`：**跨切面/基礎設施**，相對固定。
+
+```text
+apps/api/src/
+├─ main.ts          bootstrap（Fastify、helmet、global prefix、ZodValidationPipe、exception filter、swagger）
+├─ app.module.ts    根 module
+├─ config/          env 驗證（Zod，啟動即 fail fast）
+├─ common/          跨切面：HttpExceptionFilter（統一錯誤信封）等
+├─ prisma/          全域 PrismaModule/Service（pg driver adapter）
+├─ health/          存活探針
+└─ modules/         feature-module-per-domain
+   └─ taxonomy/      一個 domain 一個資料夾，內部「平鋪」
+      ├─ taxonomy.module.ts
+      ├─ categories.controller.ts   ┐ Controller 層（薄：HTTP I/O + { data } 信封）
+      ├─ tracks.controller.ts       │ 一個 controller = 一個資源（@Controller("tracks")）
+      ├─ subjects.controller.ts     ┘
+      ├─ taxonomy.service.ts        Service 層（純 domain 邏輯：映射、NotFound、未來規則）
+      ├─ taxonomy.repository.ts     Repository 層（Prisma 存取，無邏輯）
+      └─ dto/                       createZodDto(shared schema) → 驗證 + Swagger
+```
+
+兩條規則：
+
+1. **module = domain、controller = resource、service/repository 各一**。分層體現在 class 與檔名後綴（`.controller`/`.service`/`.repository`），**不開 `controllers/`、`services/` 這類「按技術層分組」的資料夾**（group-by-layer 是規模越大越痛的反模式；更別把層 hoist 成全域 `src/services/`）。
+2. **先平鋪，肥了才局部拆**（YAGNI）。唯有當**單一 module** 真的肥起來（如 `questions` 長出 5+ controller、多個 service）才**只在該 module 內**再切子資料夾；其餘小 module 維持平鋪。
+
+理由：會成長的軸是 **domain（→ 數十個）**，不是**技術層（恆為 3）**；沿會長的軸切，且修改多為 feature-scoped（一次動同一 domain 的 controller+service+repo），feature 平鋪讓相關檔聚在一起。
+
+### modules 藍圖
+
+對齊資料層，逐一照上述範本擴充（已做：`taxonomy`）：
+
+```text
+modules/{taxonomy, questions, explanations, schedules, stats, ai, users}
+```
+
 效能替換三層（profiling 驅動，非預先）：Fastify adapter（全域）→ 熱路徑 raw handler / `fast-json-stringify` → 極端熱點走 CF/nginx 閘道改道到獨立服務（Nest 亦原生支援 microservices）。
 
 ## TypeScript（已定案：全棧 strict）

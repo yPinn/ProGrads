@@ -4,6 +4,9 @@ import { LoggerModule } from "nestjs-pino";
 import { validateEnv } from "./config/env.js";
 import { HealthModule } from "./health/health.module.js";
 import { PrismaModule } from "./prisma/prisma.module.js";
+import { TaxonomyModule } from "./modules/taxonomy/taxonomy.module.js";
+import { SchoolsModule } from "./modules/schools/schools.module.js";
+import { ExamsModule } from "./modules/exams/exams.module.js";
 
 @Module({
   imports: [
@@ -15,6 +18,9 @@ import { PrismaModule } from "./prisma/prisma.module.js";
     }),
     PrismaModule,
     HealthModule,
+    TaxonomyModule,
+    SchoolsModule,
+    ExamsModule,
   ],
 })
 export class AppModule {}
