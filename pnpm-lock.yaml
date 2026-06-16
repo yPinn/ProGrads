@@ -189,6 +189,12 @@ importers:
         specifier: ^7.8.0
         version: 7.8.0(@types/react@19.2.17)(better-sqlite3@12.11.1)(magicast@0.5.3)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)
 
+  packages/shared:
+    dependencies:
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+
 packages:
 
   '@alloc/quick-lru@5.2.0':
