@@ -1,7 +1,7 @@
 import type { PrismaClient } from "../../generated/client/client.ts";
 
 // Taxonomy reference data. Authoritative L1/L2 from 大碩 (TKB). See docs/02-data-model.md.
-// Subjects + track_subject links cover the starter tracks cs / info-mgmt only.
+// Subjects + track_subject links cover cs / ee / info-mgmt tracks.
 
 type TrackSeed = { slug: string; name: string };
 
@@ -69,12 +69,50 @@ const SUBJECTS: TrackSeed[] = [
   { slug: "db", name: "資料庫" },
   { slug: "networking", name: "網際網路概論" },
   { slug: "infosec-intro", name: "資訊安全概論" },
+  // 電機所 考科（大碩/TKB 分類）；ds/algo/co/la/dm 沿用 cs 共用
+  { slug: "engmath", name: "工程數學" },
+  { slug: "prob", name: "機率" },
+  { slug: "electronics", name: "電子學" },
+  { slug: "circuits", name: "電路學" },
+  { slug: "control", name: "控制系統" },
+  { slug: "em", name: "電磁學" },
+  { slug: "semicon", name: "半導體元件" },
+  { slug: "edevices", name: "電子元件" },
+  { slug: "modphys", name: "近代物理" },
+  { slug: "genphys", name: "普通物理" },
+  { slug: "powersys", name: "電力系統" },
+  { slug: "emachine", name: "電機機械" },
+  { slug: "powerelec", name: "電力電子" },
+  { slug: "commtheory", name: "通訊原理" },
+  { slug: "signals", name: "信號與系統" },
 ];
 
 // track slug → subject slugs (the global shared library; note ds/algo
 // are shared across cs[理工] and info-mgmt[商管] — a cross-category shared subject).
 const TRACK_SUBJECTS: Record<string, string[]> = {
   cs: ["ds", "algo", "co", "os", "la", "dm", "infosec-intro"],
+  ee: [
+    "engmath",
+    "prob",
+    "la",
+    "dm",
+    "electronics",
+    "circuits",
+    "control",
+    "em",
+    "semicon",
+    "edevices",
+    "modphys",
+    "genphys",
+    "powersys",
+    "emachine",
+    "powerelec",
+    "commtheory",
+    "signals",
+    "co",
+    "ds",
+    "algo",
+  ],
   "info-mgmt": ["stat", "mis", "cs-intro", "ds", "db", "networking", "algo"],
 };
 
