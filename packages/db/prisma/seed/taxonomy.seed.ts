@@ -68,12 +68,13 @@ const SUBJECTS: TrackSeed[] = [
   { slug: "cs-intro", name: "計算機概論" },
   { slug: "db", name: "資料庫" },
   { slug: "networking", name: "網際網路概論" },
+  { slug: "infosec-intro", name: "資訊安全概論" },
 ];
 
 // track slug → subject slugs (the global shared library; note ds/algo
 // are shared across cs[理工] and info-mgmt[商管] — a cross-category shared subject).
 const TRACK_SUBJECTS: Record<string, string[]> = {
-  cs: ["ds", "algo", "co", "os", "la", "dm"],
+  cs: ["ds", "algo", "co", "os", "la", "dm", "infosec-intro"],
   "info-mgmt": ["stat", "mis", "cs-intro", "ds", "db", "networking", "algo"],
 };
 

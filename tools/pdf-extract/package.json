@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "pdf-to-png-converter": "^3.3.0"
+    "mupdf": "^1.27.0"
   },
   "devDependencies": {
     "@types/node": "^25.9.3",

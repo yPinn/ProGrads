@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
 import type { Meta, QuestionDetail, QuestionSummary } from "@prograds/shared";
-import { ApiOkResponse, ApiTags } from "@nestjs/swagger";
+import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { QuestionQueryDto } from "./dto/question-query.dto.js";
 import { QuestionResponseDto, QuestionsResponseDto } from "./dto/questions-response.dto.js";
 import { QuestionsService } from "./questions.service.js";
@@ -10,8 +10,12 @@ import { QuestionsService } from "./questions.service.js";
 export class QuestionsController {
   constructor(private readonly service: QuestionsService) {}
 
-  // Cross-school practice of one subject: ?subject=algorithms (the killer query). Paginated.
   @Get()
+  @ApiOperation({
+    summary: "列出題目（跨校練單科）",
+    description:
+      "核心查詢：`?subject=algorithms` 跨校練習同一考科。另支援 `?track=`、`?school=`、`?year=`、`?type=` 過濾，並以 `page` / `pageSize` 分頁（回應含 meta）。",
+  })
   @ApiOkResponse({ type: QuestionsResponseDto })
   async list(@Query() query: QuestionQueryDto): Promise<{ data: QuestionSummary[]; meta: Meta }> {
     return this.service.getQuestions(
@@ -28,6 +32,10 @@ export class QuestionsController {
   }
 
   @Get(":externalId")
+  @ApiOperation({
+    summary: "取得單一題目",
+    description: "依 externalId 取得題目詳情，含題幹、選項與所屬考卷 / 考科。",
+  })
   @ApiOkResponse({ type: QuestionResponseDto })
   async get(@Param("externalId") externalId: string): Promise<{ data: QuestionDetail }> {
     return { data: await this.service.getQuestion(externalId) };

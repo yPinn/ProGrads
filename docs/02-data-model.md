@@ -36,6 +36,7 @@ subject 【全域共用題庫】(資料結構/演算法/線代/經濟學…)
   └ knowledge_point (tree, 屬 subject)
 
 school └ department (台大資工系) ──歸屬──> program_track (nullable)
+            ├ admission_group (招生組別: 甲/乙/丙…)  ← 報考單位; 招生方式/名額/考科 掛勾於此
             └ exam (school + dept + year + admission_type [+ group])
                   └ exam_subject (考卷節次/科目組, 綁 1..n subject)  ← 合科卷
                         └ question ─┬ exam_subject_id (來源整卷)
@@ -46,12 +47,31 @@ admission_stat     (school, dept, admission_type, year, applicants/quota/admitte
 -- 第二階段：user / attempt(做題記錄) / reminder_subscription
 ```
 
+### 招生組別（admission_group）：報考的真正單位
+
+考生報考的是「**A 校 B 系所的 C 組**」（如台大電子所甲組）；**招生方式、名額、考科都跟「組別」掛勾**，而非系所。因此「組別」既不屬系所層（會逐年變動）也不屬考卷層（考卷只是某組某年的產物），而是**介於兩者的招生實體**：
+
+```text
+department (系所, 穩定)
+  └ admission_group (招生組別, 穩定身分 = department + code)   ← 招生方式/名額/考科 的掛勾點
+        └ (組別 × 年) 的記錄：exam(考卷) / admission_stat(名額) / schedule(日程)
+```
+
+**時間性切分（回應「組別/考科逐年變動」）**：
+
+- **穩定身分**（組別存在、代號甲乙丙、名稱）→ `admission_group`，可進 **seed/reference**。新增一組 = INSERT 一列，不動舊資料。
+- **逐年變動的事實**（考科、名額、報名日程、錄取標準）→ 掛在 `(組別 × 年)` 的記錄上，由 sync/scrape 灌。改考科/補名額 = 新增當年一列，**永不改寫組別身分**。
+
+> **考卷↔組別**：`exam.admission_group_id`（nullable FK）已串接——sync 時以 `(department, code=group)` 解析填入，不分組或該組未建則為 null。`exam.group` 字串保留為來自路徑的冪等 upsert key，FK 為 join 加速欄。刪組別不連帶刪已歸檔考卷（`SetNull`）。
+>
+> ⚠️ **未竟**：`admission_stat` 的 key 仍為 `(school, dept, admission_type, year)` **無 group** → 名額分組改掛 `admission_round.quota`（見下）；`admission_stat` 之整併待後續。
+
 ## 例外驗證（資工/資管 壓測後的修正）
 
 原模型整體成立，以下 4 個例外已併入上方模型：
 
 1. **合科卷**（台大資工「資料結構與演算法」一卷兩科）：`exam_subject` 可綁多 subject；`question.exam_subject_id`（整卷重現）+ `question_subject` M:N（跨校練單科）。
-2. **組別**（電機所甲/乙/丙組考不同科）：`exam.group`（nullable）。
+2. **組別**（電機所甲/乙/丙組考不同科、名額分組）：升級為 `admission_group` 實體（招生的真正單位，見上「招生組別」節）；`exam.admission_group_id` FK 已串接（`group` 字串續為 sync key）。
 3. **招生管道獨立於筆試**（推甄只有書審+面試、無考古題）：`admission_schedule` / `admission_stat` 綁 `(school, dept, admission_type, year)`，不依賴 `exam`；`exam` 只在 `考試入學` 管道存在。
 4. **未分類系所**：`department.track_id` 可 null + 「其他」catch-all + `metadata jsonb`。
 
@@ -81,7 +101,7 @@ admission_stat     (school, dept, admission_type, year, applicants/quota/admitte
 
 **規劃中（尚未實作）**：
 
-- **`Asset`（blob 參照表）**：二進位大檔（Tier0 raw 整卷、整卷答案匯出快取）永不進 DB / git，存 blob store；DB 只留參照列：`storageKey / sha256 / bytes / contentType`（內容定址、去重、license-gated 下載）。
+- **`Asset`（blob 參照表，規劃中）**：二進位大檔（Tier0 raw 整卷、整卷答案匯出快取）永不進 DB。**現況**以 Git LFS 存於私有 content repo；**規劃**大規模後遷 blob store，DB 只留參照列：`storageKey / sha256 / bytes / contentType`（內容定址、去重、license-gated 下載）。
 - **raw 參照**：`ExamSubject` 連到 `Asset`（Tier0）；下載權限由 `license_status` gate。
 - **整卷答案匯出快取**：整卷答案不另存實體，由 index（`Question.order`）即時組合，產生後做內容定址快取（見 03）。
 

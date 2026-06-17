@@ -8,7 +8,8 @@
    pnpm --filter @prograds/pdf-extract to-images <pdf路徑> [output-dir]
    ```
 
-   建議 output-dir：`{content-repo}/raw/images/{track}/{school}/{dept}/{year}/{exam-subject-slug}/`
+   建議 output-dir：`{content-repo}/images/raw/{track}/{school}/{dept}/{year}/[{group}/]{exam-subject-slug}/`
+   （gitignored 的獨立 `images/` 樹，鏡射來源路徑，不與內容檔同層）
    輸出：`page-01.png, page-02.png, ...`
 
 2. **確認 session metadata**（用於 frontmatter）：
@@ -20,8 +21,10 @@
 4. **存檔**：每題建立對應檔案，補填 `source_url`（官方公告連結）：
 
    ```text
-   {content-repo}/questions/{track}/{school}/{dept}/{year}/{exam-subject-slug}/q{NN}.md
+   {content-repo}/questions/{track}/{school}/{dept}/{year}/[{group}/]{exam-subject-slug}/q{NN}.md
    ```
+
+   分組系所才有 `{group}` 段（組別代號 `a/b/c`，＝甲/乙/丙，介於 year 與 卷之間）；不分組則省略。
 
 5. **驗證**：
 
@@ -62,7 +65,7 @@
 
 ```markdown
 ---
-question_id: {school}-{dept}-{year}-{exam-subject-slug}-q{NN}
+question_id: {school}-{dept}-{year}[-{group}]-{exam-subject-slug}-q{NN}
 exam_subject: {卷名中文顯示名}
 subjects: [{slug}]
 question_type: mc
@@ -90,15 +93,15 @@ A
 
 ## 欄位規則
 
-| 欄位               | 說明                                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------ |
-| `question_id`      | `{school}-{dept}-{year}-{exam-subject-slug}-q01`（序號 01–99，子題 `q01a` / `q01b`） |
-| `question_type`    | `mc` 選擇題 / `essay` 問答申論 / `calc` 計算 / `proof` 推導證明                      |
-| `subjects`         | 確定的 slug 才填，不確定留 `[]`                                                      |
-| `knowledge_points` | 中文短語，≤5 個                                                                      |
-| `license_status`   | `school_official`（預設）；政府統一考試用 `national_exam`                            |
-| `group`            | 有甲乙丙組才填對應組名，否則空字串 `""`                                              |
-| `source_url`       | 用戶補填，輸出時留 `""`                                                              |
+| 欄位               | 說明                                                                               |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| `question_id`      | `{school}-{dept}-{year}[-{group}]-{exam-subject-slug}-q01`（子題 `q01a` / `q01b`） |
+| `question_type`    | `mc` 選擇題 / `essay` 問答申論 / `calc` 計算 / `proof` 推導證明                    |
+| `subjects`         | 確定的 slug 才填，不確定留 `[]`                                                    |
+| `knowledge_points` | 中文短語，≤5 個                                                                    |
+| `license_status`   | `school_official`（預設）；政府統一考試用 `national_exam`                          |
+| `group`            | 分組填代號 `a`/`b`/`c`（＝甲/乙/丙），不分組空字串 `""`                            |
+| `source_url`       | 用戶補填，輸出時留 `""`                                                            |
 
 ## 區塊規則
 

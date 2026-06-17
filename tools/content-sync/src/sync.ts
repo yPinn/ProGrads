@@ -19,6 +19,7 @@ export class Resolver {
   private schools = new Map<string, { id: string }>();
   private departments = new Map<string, { id: string; trackId: string | null }>();
   private subjects = new Map<string, { id: string }>();
+  private admissionGroups = new Map<string, string | null>();
 
   constructor(private readonly prisma: PrismaClient) {}
 
@@ -67,6 +68,23 @@ export class Resolver {
     this.subjects.set(slug, row);
     return row;
   }
+
+  // Resolve the admission group id for a (department, code). Returns null when the
+  // exam is ungrouped (empty code) or no matching group is seeded — both are valid:
+  // the FK is a denormalized join accelerator, not a sync prerequisite.
+  async admissionGroup(departmentId: string, code: string): Promise<string | null> {
+    if (!code) return null;
+    const key = `${departmentId}|${code}`;
+    const hit = this.admissionGroups.get(key);
+    if (hit !== undefined) return hit;
+    const row = await this.prisma.admissionGroup.findUnique({
+      where: { departmentId_code: { departmentId, code } },
+      select: { id: true },
+    });
+    const id = row?.id ?? null;
+    this.admissionGroups.set(key, id);
+    return id;
+  }
 }
 
 export type SyncResult = { examSubjectId: string } | { skipped: string };
@@ -98,6 +116,7 @@ export async function syncFile(
     );
   }
   const subjects = await Promise.all(fm.subjects.map((s) => resolver.subject(s)));
+  const admissionGroupId = await resolver.admissionGroup(department.id, fm.group);
 
   const sections = parseSections(parsed.content);
   const questionMd = sections.get("題目");
@@ -142,13 +161,14 @@ export async function syncFile(
           group: fm.group,
         },
       },
-      update: { licenseStatus: fm.license_status },
+      update: { licenseStatus: fm.license_status, admissionGroupId },
       create: {
         schoolId: school.id,
         departmentId: department.id,
         year: path.year,
         admissionType: fm.admission_type,
         group: fm.group,
+        admissionGroupId,
         licenseStatus: fm.license_status,
       },
     });
