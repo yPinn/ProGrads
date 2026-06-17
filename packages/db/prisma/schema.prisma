@@ -159,23 +159,28 @@ model Department {
 
 // One admission paper set for a (school, dept, year, admissionType, group).
 model Exam {
-  id            String        @id @default(cuid())
-  schoolId      String
-  departmentId  String
-  year          Int
-  admissionType AdmissionType
-  group         String        @default("") // 組別; empty = no division
-  sourceUrl     String?
-  licenseStatus LicenseStatus @default(unknown)
-  school        School        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  department    Department    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  examSubjects  ExamSubject[]
-  metadata      Json?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id               String          @id @default(cuid())
+  schoolId         String
+  departmentId     String
+  year             Int
+  admissionType    AdmissionType
+  group            String          @default("") // 組別代號 (sync key, 來自路徑); empty = 不分組
+  // 解析後的招生組身分 (sync 時以 (departmentId, code=group) 查得); null = 不分組或該組未建。
+  // 刪組別不連帶刪已歸檔考卷 → SetNull。group 仍為冪等 upsert key, 此為 join 加速欄。
+  admissionGroupId String?
+  sourceUrl        String?
+  licenseStatus    LicenseStatus   @default(unknown)
+  school           School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  department       Department      @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  admissionGroup   AdmissionGroup? @relation(fields: [admissionGroupId], references: [id], onDelete: SetNull)
+  examSubjects     ExamSubject[]
+  metadata         Json?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
   @@unique([schoolId, departmentId, year, admissionType, group])
   @@index([year])
+  @@index([admissionGroupId])
 }
 
 // A paper/section within an exam; may bundle multiple subjects (合科卷).
@@ -308,7 +313,7 @@ model AdmissionStat {
 
 // 招生組別: 報考單位 = 校×系所×組; 招生方式/名額/考科 掛勾於組。只存穩定身分 (department+code);
 // 逐年事實 (考科/名額/日程) 另存於 (組,年) 記錄。不分組系所無此列 (缺列=單一招生)。
-// 雛形: exam.group / admission_stat 尚未串接此 entity (「考卷↔組別」下一步; 見 docs/02-data-model.md)。
+// 考卷以 exam.admissionGroupId 串接此 entity (sync 時依 code 解析)。admission_stat 仍待後續。
 model AdmissionGroup {
   id           String           @id @default(cuid())
   departmentId String
@@ -318,6 +323,7 @@ model AdmissionGroup {
   sourceUrl    String?
   department   Department       @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   rounds       AdmissionRound[]
+  exams        Exam[]
 
   @@unique([departmentId, code])
   @@index([departmentId])
