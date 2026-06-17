@@ -17,7 +17,7 @@ export const QuestionFrontmatter = z.object({
   question_type: QuestionType,
   source_url: z.union([z.string().url(), z.literal("")]),
   license_status: ContentLicenseStatus,
-  group: z.string().default(""), // 組別 (甲/乙/丙); empty = none
+  group: z.string().default(""), // 組別代號 a/b/c（＝甲/乙/丙 顯示）; empty = 不分組
   knowledge_points: z.array(z.string().min(1)).default([]), // parsed; not yet persisted (phase 2)
   // --- answer (Tier2) metadata ---
   model_used: z.string().optional(),

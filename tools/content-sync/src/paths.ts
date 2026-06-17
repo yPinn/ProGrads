@@ -1,6 +1,6 @@
 // Parse a question file path into derived references + the canonical (path-derived) id.
-// Expected: questions/<track>/<school>/<department>/<year>/<exam-subject>[/<group>]/<qNN>.md
-// See docs/03-content-pipeline.md.
+// Expected: questions/<track>/<school>/<department>/<year>/[<group>/]<exam-subject>/<qNN>.md
+// 組在卷之上（組含多卷）；不分組則省略 <group> 段。See docs/03-content-pipeline.md.
 
 export interface ParsedPath {
   track: string;
@@ -31,9 +31,9 @@ export function parseQuestionPath(relPath: string): ParsedPath {
   const school = rest[1]!;
   const department = rest[2]!;
   const yearStr = rest[3]!;
-  const examSubjectSlug = rest[4]!;
   const hasGroup = rest.length === 7;
-  const group = hasGroup ? rest[5]! : "";
+  const group = hasGroup ? rest[4]! : ""; // 組在卷之前
+  const examSubjectSlug = hasGroup ? rest[5]! : rest[4]!;
   const file = rest[rest.length - 1]!;
 
   const year = Number.parseInt(yearStr, 10);
@@ -51,9 +51,9 @@ export function parseQuestionPath(relPath: string): ParsedPath {
   const number = `${num}${suffix}`;
   const order = num * 10 + (suffix ? suffix.charCodeAt(0) - 96 : 0);
 
-  const idParts = [school, department, String(year), examSubjectSlug];
-  if (group) idParts.push(group);
-  idParts.push(fileStem);
+  const idParts = [school, department, String(year)];
+  if (group) idParts.push(group); // 組在卷之前: <school>-<dept>-<year>[-<group>]-<exam-subject>-<qNN>
+  idParts.push(examSubjectSlug, fileStem);
   const questionId = idParts.join("-");
 
   return {
