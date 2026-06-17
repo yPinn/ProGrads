@@ -8,7 +8,8 @@
    pnpm --filter @prograds/pdf-extract to-images <pdf路徑> [output-dir]
    ```
 
-   建議 output-dir：`{content-repo}/raw/images/{track}/{school}/{dept}/{year}/{exam-subject-slug}/`
+   建議 output-dir：`{content-repo}/images/raw/{track}/{school}/{dept}/{year}/[{group}/]{exam-subject-slug}/`
+   （gitignored 的獨立 `images/` 樹，鏡射來源路徑，不與內容檔同層）
    輸出：`page-01.png, page-02.png, ...`
 
 2. **確認 session metadata**（用於 frontmatter）：
