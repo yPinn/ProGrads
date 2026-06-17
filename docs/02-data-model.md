@@ -36,6 +36,7 @@ subject 【全域共用題庫】(資料結構/演算法/線代/經濟學…)
   └ knowledge_point (tree, 屬 subject)
 
 school └ department (台大資工系) ──歸屬──> program_track (nullable)
+            ├ admission_group (招生組別: 甲/乙/丙…)  ← 報考單位; 招生方式/名額/考科 掛勾於此
             └ exam (school + dept + year + admission_type [+ group])
                   └ exam_subject (考卷節次/科目組, 綁 1..n subject)  ← 合科卷
                         └ question ─┬ exam_subject_id (來源整卷)
@@ -46,12 +47,29 @@ admission_stat     (school, dept, admission_type, year, applicants/quota/admitte
 -- 第二階段：user / attempt(做題記錄) / reminder_subscription
 ```
 
+### 招生組別（admission_group）：報考的真正單位
+
+考生報考的是「**A 校 B 系所的 C 組**」（如台大電子所甲組）；**招生方式、名額、考科都跟「組別」掛勾**，而非系所。因此「組別」既不屬系所層（會逐年變動）也不屬考卷層（考卷只是某組某年的產物），而是**介於兩者的招生實體**：
+
+```text
+department (系所, 穩定)
+  └ admission_group (招生組別, 穩定身分 = department + code)   ← 招生方式/名額/考科 的掛勾點
+        └ (組別 × 年) 的記錄：exam(考卷) / admission_stat(名額) / schedule(日程)
+```
+
+**時間性切分（回應「組別/考科逐年變動」）**：
+
+- **穩定身分**（組別存在、代號甲乙丙、名稱）→ `admission_group`，可進 **seed/reference**。新增一組 = INSERT 一列，不動舊資料。
+- **逐年變動的事實**（考科、名額、報名日程、錄取標準）→ 掛在 `(組別 × 年)` 的記錄上，由 sync/scrape 灌。改考科/補名額 = 新增當年一列，**永不改寫組別身分**。
+
+> ⚠️ **現況一致性洞**：`exam` 已有 `group`，但 `admission_stat` 的 key 為 `(school, dept, admission_type, year)` **無 group** → 名額目前無法分組儲存。`exam.group` 字串改為指向 `admission_group` 的 FK、以及 `admission_stat` 加上 group —— 即「考卷↔組別對應」，列為下一步（雛形階段尚未串接）。
+
 ## 例外驗證（資工/資管 壓測後的修正）
 
 原模型整體成立，以下 4 個例外已併入上方模型：
 
 1. **合科卷**（台大資工「資料結構與演算法」一卷兩科）：`exam_subject` 可綁多 subject；`question.exam_subject_id`（整卷重現）+ `question_subject` M:N（跨校練單科）。
-2. **組別**（電機所甲/乙/丙組考不同科）：`exam.group`（nullable）。
+2. **組別**（電機所甲/乙/丙組考不同科、名額分組）：升級為 `admission_group` 實體（招生的真正單位，見上「招生組別」節）；`exam.group` 字串為過渡，FK 串接列為下一步。
 3. **招生管道獨立於筆試**（推甄只有書審+面試、無考古題）：`admission_schedule` / `admission_stat` 綁 `(school, dept, admission_type, year)`，不依賴 `exam`；`exam` 只在 `考試入學` 管道存在。
 4. **未分類系所**：`department.track_id` 可 null + 「其他」catch-all + `metadata jsonb`。
 

@@ -88,15 +88,16 @@ model ProgramTrack {
 
 // Global shared subject library (reused across schools and tracks).
 model Subject {
-  id              String               @id @default(cuid())
-  slug            String               @unique
-  name            String
-  tracks          TrackSubject[]
-  knowledgePoints KnowledgePoint[]
-  examSubjects    ExamSubjectSubject[]
-  questions       QuestionSubject[]
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  id                     String                  @id @default(cuid())
+  slug                   String                  @unique
+  name                   String
+  tracks                 TrackSubject[]
+  knowledgePoints        KnowledgePoint[]
+  examSubjects           ExamSubjectSubject[]
+  questions              QuestionSubject[]
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  admissionRoundSubjects AdmissionRoundSubject[]
 }
 
 model TrackSubject {
@@ -149,6 +150,7 @@ model Department {
   exams     Exam[]
   schedules AdmissionSchedule[]
   stats     AdmissionStat[]
+  groups    AdmissionGroup[]
   metadata  Json?
 
   @@unique([schoolId, slug])
@@ -302,6 +304,67 @@ model AdmissionStat {
 
   @@unique([schoolId, departmentId, admissionType, year])
   @@index([departmentId])
+}
+
+// 招生組別: 報考單位 = 校×系所×組; 招生方式/名額/考科 掛勾於組。只存穩定身分 (department+code);
+// 逐年事實 (考科/名額/日程) 另存於 (組,年) 記錄。不分組系所無此列 (缺列=單一招生)。
+// 雛形: exam.group / admission_stat 尚未串接此 entity (「考卷↔組別」下一步; 見 docs/02-data-model.md)。
+model AdmissionGroup {
+  id           String           @id @default(cuid())
+  departmentId String
+  code         String // 組別代號: ASCII a/b/c/d（＝甲/乙/丙/丁 顯示）
+  name         String           @default("") // 組別名稱, e.g. 數位積體電路與系統; 可空
+  displayOrder Int              @default(0)
+  sourceUrl    String?
+  department   Department       @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  rounds       AdmissionRound[]
+
+  @@unique([departmentId, code])
+  @@index([departmentId])
+}
+
+// 招生梯次: 一筆 = 某組 × 某年 × 某管道。年度變動事實的中樞 (名額掛此; 考科/日程為子表)。
+// 不串 exam (考卷↔組別 為後續)。
+model AdmissionRound {
+  id               String                  @id @default(cuid())
+  admissionGroupId String
+  year             Int // 西元學年, e.g. 2026 = 115 學年度
+  admissionType    AdmissionType
+  quota            Int? // 名額: 分組存於此, 補 admission_stat 無 group 的洞
+  applicants       Int?
+  admitted         Int?
+  sourceUrl        String? // 招生簡章連結
+  group            AdmissionGroup          @relation(fields: [admissionGroupId], references: [id], onDelete: Cascade)
+  events           AdmissionRoundEvent[]
+  subjects         AdmissionRoundSubject[]
+
+  @@unique([admissionGroupId, year, admissionType])
+  @@index([admissionGroupId])
+  @@index([year])
+}
+
+// 招生事件: 報名/考試/放榜 的日期時間 + 地點 (一對多)。
+model AdmissionRoundEvent {
+  id       String         @id @default(cuid())
+  roundId  String
+  event    AdmissionEvent
+  at       DateTime
+  location String?
+  round    AdmissionRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+
+  @@index([roundId])
+}
+
+// 考科 spec: 該梯次規定考哪些科 (連 shared Subject 庫; 與考卷 ExamSubject 共用分類、用途不同)。
+model AdmissionRoundSubject {
+  roundId   String
+  subjectId String
+  note      String? // 備註, e.g. 二選一 / 合科
+  round     AdmissionRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  subject   Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@id([roundId, subjectId])
+  @@index([subjectId])
 }
 
 // Phase 2 (deferred): User / Attempt / ReminderSubscription — see docs/00-product.md.
