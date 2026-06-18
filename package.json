@@ -51,6 +51,11 @@
       "sharp",
       "unrs-resolver",
       "vue-demi"
-    ]
+    ],
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "@unhead/bundler>unhead": "2"
+      }
+    }
   }
 }
