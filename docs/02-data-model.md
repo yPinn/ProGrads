@@ -15,7 +15,7 @@
 - **理工類**：電機所、資工所、機械所、土木所、環工所、材料所、化工所、化學所、生科所、生醫所
 - **人文類**：英教所、應外所、中文所、華文所、藝術所、傳播所、心輔所、教育所、政治所、外交所
 
-> ⚠️ **數學所**與**資管所**皆被大碩歸於「商管類」（非理工）→ 印證 `category` 必須資料化、禁止「理工=有程式/數學」的寫死假設。
+> **數學所**與**資管所**皆被大碩歸於「商管類」（非理工）→ 印證 `category` 必須資料化、禁止「理工=有程式/數學」的寫死假設。
 > 大碩跨頁對同一所有不同命名（如「電機所」vs「電子電機所」、「生科所」vs「生化化學所」）→ 印證 `slug`/`name` 分離為必要。
 > 大碩另有「工轉商 / EMBA」跨考路徑，屬課程包而非 L2 類組，暫不入分類軸。
 
@@ -25,7 +25,7 @@
 - **考科是全域共用題庫**：台大資工、清大資工都考「演算法」→ 同一 subject 匯集各校各年題目；考生要跨校一起練。
 - **考科跨類組共用**：線代/離散同屬資工所與電機所；微積分/經濟學橫跨更多 → `subject` ↔ `track` 為 M:N。
 - **物理考卷跨系所共用**：台大資工與多媒體所考同一份「資料結構與演算法」「英文」（位元相同）→ 考卷的身分是 `(校,年,管道,卷slug)`、**不含系所**；共用卷只存一份，「哪些系所考此卷」掛 `exam_subject` ↔ `department` M:N。**只有「對卷單一從屬」的維度（校/年）能當儲存層**，subject 與 department 皆 M:N → 退化為標籤（合科卷證明 subject 當不了儲存單位；共用卷證明 department 當不了）。
-- ⚠️ 大碩把**資管歸「商管類」**（非理工）→ category 必須資料化，禁止「理工=有程式」這類寫死假設。
+- 大碩把**資管歸「商管類」**（非理工）→ category 必須資料化，禁止「理工=有程式」這類寫死假設。
 
 ## 核心模型（雙軸 + 共用題庫）
 
@@ -62,12 +62,12 @@ department (系所, 穩定)
 
 **時間性切分（回應「組別/考科逐年變動」）**：
 
-- **穩定身分**（組別存在、代號甲乙丙、名稱）→ `admission_group`，可進 **seed/reference**。新增一組 = INSERT 一列，不動舊資料。
-- **逐年變動的事實**（考科、名額、報名日程、錄取標準）→ 掛在 `(組別 × 年)` 的記錄上，由 sync/scrape 灌。改考科/補名額 = 新增當年一列，**永不改寫組別身分**。
+- **穩定身分**（組別存在、代號甲乙丙、名稱）→ `admission_group`。由 `departments.yml` 冪等 upsert（鍵 = department + code），非 seed —— 解耦後題目 content 已不引用組別，組別不再是參照資料，故與逐年事實同源於招生 content（避免第二事實來源）。組別身分跨年穩定，逐年檔重複宣告同一組即冪等。
+- **逐年變動的事實**（考科、名額、報名日程、錄取標準）→ 掛在 `(組別 × 年)` 的 `admission_round`，同檔帶入。改考科/補名額 = 新增當年一列，**永不改寫組別身分**。
 
 > **考卷↔組別**：考卷去系所化後，`exam` 不再帶 `department_id`/`group`/`admission_group_id`——共用卷橫跨多組，單一 group FK 本就失真。卷↔系所改走 `exam_subject.departments`（M:N，來源＝題目 frontmatter `departments` 的聯集）；卷↔招生組別 M:N 留待招生 pipeline（另一刀）。
 >
-> ⚠️ **未竟**：`admission_stat` 的 key 仍為 `(school, dept, admission_type, year)` **無 group** → 名額分組改掛 `admission_round.quota`（見下）；`admission_stat` 之整併待後續。
+> **未竟**：`admission_stat` 的 key 仍為 `(school, dept, admission_type, year)` **無 group** → 名額分組改掛 `admission_round.quota`（見下）；`admission_stat` 之整併待後續。
 
 ## 例外驗證（資工/資管 壓測後的修正）
 
@@ -98,7 +98,7 @@ department (系所, 穩定)
 
 **本次已實作**（migration `content_sync_schema`）：
 
-- **`ExamSubject @@unique([examId, name])`**：讓 sync 能以 (exam, 卷名) 冪等 upsert（否則無法去重重建合科卷）。
+- **`ExamSubject @@unique([examId, slug])`**：讓 sync 能以 (exam, 卷 slug) 冪等 upsert（否則無法去重重建合科卷）。卷去系所化後 upsert 鍵由卷名改為**路徑帶入的卷 slug**（`name` 不再唯一，可有重複顯示名）；見 migration `decouple_exam_from_department`。
 - **`Question.order Int`**：可靠的整卷排序（`number` 為 `"3"/"3a"/"10"` 字串，字典序會錯）；整卷答案匯出與重現整卷靠此。
 - **解答結構化**（`Explanation` / `Choice` model 既有）：`Explanation` 以 `answer_type` 判別式表達（選擇→`Choice.isCorrect`、數值→值、申論→markdown）。MC 的選項寫入由 sync 暫緩（見 03）。
 
@@ -108,7 +108,7 @@ department (系所, 穩定)
 - **raw 參照**：`ExamSubject` 連到 `Asset`（Tier0）；下載權限由 `license_status` gate。
 - **整卷答案匯出快取**：整卷答案不另存實體，由 index（`Question.order`）即時組合，產生後做內容定址快取（見 03）。
 
-**招生增量（規劃中，由 [03](03-content-pipeline.md) §招生資料 五份壓測導出）**——三層擁有者 ①季 → ②時間表 → ③組：
+**招生增量（schema 已落地 migration `admission_season_papers`；content 到 DB 的 importer 待實作，見 [03](03-content-pipeline.md) §招生資料 落地狀態）**——三層擁有者 ①季 → ②時間表 → ③組：
 
 - **①季**：新欄/實體——`application_fee` + 減免、`announced_at`（公告日＝簡章新鮮度錨點）、新鮮度狀態（`not_published/published/superseded`）、放榜 `batch`/`sequence`（多梯次）。
 - **②`exam_timetable`（新實體，校級）**：subject × 節次 × `at`(時分) × `calculator_allowed` × 考場。**考試時間掛科目/節次（校級共用），非掛組**——筆試時間表全校共用，系所明細頁只有佔分%。
