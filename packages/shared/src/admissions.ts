@@ -1,36 +1,40 @@
 import { z } from "zod";
 import { dataResponse } from "./api.js";
-import { AdmissionEvent, AdmissionType } from "./enums.js";
+import { AdmissionEvent, AdmissionType, ExamMethod } from "./enums.js";
+import { SubjectSchema } from "./taxonomy.js";
 
-// 招生情報 contracts. department → admission_group → admission_round(年) → events + subjects。
-// 報考單位 = 校×系所×組;穩定身分掛 group,逐年事實掛 round。See docs/02-data-model.md.
+// 招生情報 contracts. department → admission_group → admission_round(年) → papers。
+// 報考單位 = 校×系所×組;穩定身分掛 group,逐年事實掛 round。校級日程見 /schedules。
+// See docs/02-data-model.md.
 
-// 該梯次規定的考科(連 shared subject 庫)。
-export const AdmissionRoundSubjectSchema = z.object({
-  slug: z.string().describe("考科 slug(如 ds)"),
-  name: z.string().describe("考科顯示名"),
-  note: z.string().nullable().describe("備註,如合科/節次;無則 null"),
+// 該梯次的一張卷(合科卷綁多 subject;含佔分/節次)。
+export const AdmissionRoundPaperSchema = z.object({
+  name: z.string().describe("卷/科目顯示名(如 計算機數學)"),
+  section: z.number().int().nullable().describe("節次(接校級時間表);無則 null"),
+  weight: z.number().nullable().describe("佔總分 %;無則 null"),
+  note: z.string().nullable().describe("備註,如合科組成比例;無則 null"),
+  subjects: z.array(SubjectSchema).describe("該卷涵蓋的考科;合科卷為多科"),
 });
-export type AdmissionRoundSubject = z.infer<typeof AdmissionRoundSubjectSchema>;
+export type AdmissionRoundPaper = z.infer<typeof AdmissionRoundPaperSchema>;
 
-// 招生事件(報名起訖 / 筆試 / 面試 / 放榜)。
-export const AdmissionEventItemSchema = z.object({
-  event: AdmissionEvent.describe("事件類型"),
-  at: z.string().datetime({ offset: true }).describe("事件時間(ISO 8601,+08:00)"),
-  location: z.string().nullable().describe("地點;無則 null"),
-});
-export type AdmissionEventItem = z.infer<typeof AdmissionEventItemSchema>;
-
-// 招生梯次:某組 × 某年 × 某管道。年度變動事實(名額/考科/日程)的中樞。
+// 招生梯次:某組 × 某年 × 某管道。年度變動事實(名額/考科/採計)的中樞。
 export const AdmissionRoundSchema = z.object({
   year: z.number().int().describe("西元學年(如 2025 = 114 學年度)"),
   admissionType: AdmissionType.describe("招生管道"),
+  admissionCode: z.string().nullable().describe("官方招生代碼(如 8611);無則 null"),
+  applicantType: z.string().nullable().describe("身分別(如 一般生);無則 null"),
   quota: z.number().int().nullable().describe("招生名額;無則 null"),
   applicants: z.number().int().nullable().describe("報名人數;無則 null"),
   admitted: z.number().int().nullable().describe("錄取人數;無則 null"),
+  resultBatch: z.number().int().nullable().describe("放榜梯次;無則 null"),
+  methods: z.array(ExamMethod).describe("採計方式:筆試/審查/口試"),
+  calculator: z.boolean().nullable().describe("可否使用計算機;未知為 null"),
+  writtenWeight: z.number().int().nullable().describe("筆試佔分 %;無則 null"),
+  interviewWeight: z.number().int().nullable().describe("面試佔分 %;無則 null"),
+  interviewAt: z.string().datetime({ offset: true }).nullable().describe("該組面試時間;無則 null"),
+  tiebreak: z.array(z.string()).describe("同分參酌順序(科目顯示名)"),
   sourceUrl: z.string().nullable().describe("簡章連結;無則 null"),
-  events: z.array(AdmissionEventItemSchema).describe("該梯次日程(依時間排序)"),
-  subjects: z.array(AdmissionRoundSubjectSchema).describe("該梯次考科"),
+  papers: z.array(AdmissionRoundPaperSchema).describe("該梯次考卷(含合科卷組成與佔分)"),
 });
 export type AdmissionRound = z.infer<typeof AdmissionRoundSchema>;
 

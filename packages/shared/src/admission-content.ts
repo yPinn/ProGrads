@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AdmissionType } from "./enums.js";
+import { AdmissionType, ExamMethod } from "./enums.js";
 
 // 招生內容檔契約 (schedule.yml / departments.yml, 位於 admissions/<year>/<school>/[<season>/]).
 // 招生內容 sync 的單一真相. snake_case = 檔案鍵. 區A schedule.yml = 季框架 + 節次時間表;
@@ -81,9 +81,6 @@ export const ScheduleYml = z
 export type ScheduleYml = z.infer<typeof ScheduleYml>;
 
 // ---------- 區B: departments.yml ----------
-
-export const ExamMethod = z.enum(["written", "review", "interview"]); // 筆試/審查/口試
-export type ExamMethod = z.infer<typeof ExamMethod>;
 
 export const AdmissionPaper = z
   .object({

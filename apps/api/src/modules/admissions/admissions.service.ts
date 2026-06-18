@@ -21,19 +21,29 @@ export class AdmissionsService {
       rounds: g.rounds.map((r) => ({
         year: r.year,
         admissionType: r.admissionType,
+        admissionCode: r.admissionCode,
+        applicantType: r.applicantType,
         quota: r.quota,
         applicants: r.applicants,
         admitted: r.admitted,
+        resultBatch: r.resultBatch,
+        methods: r.methods,
+        calculator: r.calculator,
+        writtenWeight: r.writtenWeight,
+        interviewWeight: r.interviewWeight,
+        interviewAt: r.interviewAt ? r.interviewAt.toISOString() : null,
+        tiebreak: r.tiebreak,
         sourceUrl: r.sourceUrl,
-        events: r.events.map((e) => ({
-          event: e.event,
-          at: e.at.toISOString(),
-          location: e.location,
-        })),
-        subjects: r.subjects.map((s) => ({
-          slug: s.subject.slug,
-          name: s.subject.name,
-          note: s.note,
+        papers: r.papers.map((p) => ({
+          name: p.name,
+          section: p.section,
+          weight: p.weight,
+          note: p.note,
+          subjects: p.subjects.map((link) => ({
+            id: link.subject.id,
+            slug: link.subject.slug,
+            name: link.subject.name,
+          })),
         })),
       })),
     }));

@@ -243,24 +243,6 @@ export async function syncDepartments(
           }
           papers++;
         }
-
-        // Rebuild the round's flat subject list (union of paper subjects, note = paper name);
-        // a denormalized projection that keeps the /admissions response populated.
-        await tx.admissionRoundSubject.deleteMany({ where: { roundId: round.id } });
-        const noteBySubjectId = new Map<string, string>();
-        for (const pd of paperDefs) {
-          for (const id of pd.subjectIds)
-            if (!noteBySubjectId.has(id)) noteBySubjectId.set(id, pd.name);
-        }
-        if (noteBySubjectId.size > 0) {
-          await tx.admissionRoundSubject.createMany({
-            data: [...noteBySubjectId].map(([subjectId, note]) => ({
-              roundId: round.id,
-              subjectId,
-              note,
-            })),
-          });
-        }
       });
       groups++;
     }

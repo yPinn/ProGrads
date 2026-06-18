@@ -3,14 +3,14 @@ import type { AdmissionEvent } from "@prograds/shared";
 import { PrismaService } from "../../prisma/prisma.service.js";
 
 // Thin data-access layer over Prisma for the admissions axis: groups/rounds
-// (admission_group → admission_round → subjects) and the school-level season calendar
+// (admission_group → admission_round → papers) and the school-level season calendar
 // (admission_season → events).
 @Injectable()
 export class AdmissionsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   // Groups for one (school, dept), each with its rounds (optionally a single year),
-  // and each round's events + subject specs.
+  // and each round's papers (with subjects).
   findGroups(filters: { school: string; dept: string; year?: number }) {
     return this.prisma.admissionGroup.findMany({
       where: { department: { slug: filters.dept, school: { slug: filters.school } } },
@@ -19,8 +19,7 @@ export class AdmissionsRepository {
           where: filters.year !== undefined ? { year: filters.year } : undefined,
           orderBy: [{ year: "desc" }, { admissionType: "asc" }],
           include: {
-            events: { orderBy: { at: "asc" } },
-            subjects: { include: { subject: true } },
+            papers: { include: { subjects: { include: { subject: true } } } },
           },
         },
       },
