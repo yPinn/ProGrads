@@ -39,7 +39,8 @@ export class AdmissionsRepository {
         },
       },
       include: { season: { include: { school: true } } },
-      orderBy: { at: "asc" },
+      // id tiebreaks same-time events so the calendar order is deterministic.
+      orderBy: [{ at: "asc" }, { id: "asc" }],
     });
   }
 }

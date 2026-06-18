@@ -53,7 +53,15 @@ export class QuestionsRepository {
             },
           },
         },
-        orderBy: [{ examSubject: { exam: { year: "desc" } } }, { order: "asc" }],
+        // Group each paper's questions together (newest year → school → paper), then by
+        // in-paper order; externalId is the unique tiebreaker for stable pagination.
+        orderBy: [
+          { examSubject: { exam: { year: "desc" } } },
+          { examSubject: { exam: { school: { slug: "asc" } } } },
+          { examSubject: { slug: "asc" } },
+          { order: "asc" },
+          { externalId: "asc" },
+        ],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
