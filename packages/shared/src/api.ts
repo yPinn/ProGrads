@@ -4,9 +4,9 @@ import { z } from "zod";
 
 // Pagination metadata; only paginated endpoints include it.
 export const MetaSchema = z.object({
-  page: z.number().int().positive(),
-  pageSize: z.number().int().positive(),
-  total: z.number().int().nonnegative(),
+  page: z.number().int().positive().describe("目前頁碼(自 1 起)"),
+  pageSize: z.number().int().positive().describe("每頁筆數"),
+  total: z.number().int().nonnegative().describe("符合條件的總筆數"),
 });
 export type Meta = z.infer<typeof MetaSchema>;
 
@@ -34,9 +34,9 @@ export type ErrorCode = z.infer<typeof ErrorCode>;
 // Error envelope: { error: { code, message, details } }.
 export const ErrorResponseSchema = z.object({
   error: z.object({
-    code: ErrorCode,
-    message: z.string(),
-    details: z.unknown().nullable(),
+    code: ErrorCode.describe("穩定錯誤碼(供前端判斷)"),
+    message: z.string().describe("人類可讀的錯誤訊息"),
+    details: z.unknown().nullable().describe("額外細節(如欄位驗證錯誤);無則為 null"),
   }),
 });
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
