@@ -54,11 +54,28 @@ enum Confidence {
 }
 
 enum AdmissionEvent {
+  account_open // 取得繳費帳號 (報名前置)
   registration_start
   registration_end
+  document_deadline // 審查資料上傳截止
+  admit_card // 准考證列印
   written_exam
+  shortlist // 公告參加面試名單
   interview
   result
+  enrollment // 報到
+}
+
+enum AdmissionStatus {
+  not_published
+  published
+  superseded
+}
+
+enum ExamMethod {
+  written // 筆試
+  review // 審查
+  interview // 口試
 }
 
 // ---------- Taxonomy ----------
@@ -88,16 +105,17 @@ model ProgramTrack {
 
 // Global shared subject library (reused across schools and tracks).
 model Subject {
-  id                     String                  @id @default(cuid())
-  slug                   String                  @unique
+  id                     String                       @id @default(cuid())
+  slug                   String                       @unique
   name                   String
   tracks                 TrackSubject[]
   knowledgePoints        KnowledgePoint[]
   examSubjects           ExamSubjectSubject[]
   questions              QuestionSubject[]
-  createdAt              DateTime                @default(now())
-  updatedAt              DateTime                @updatedAt
+  createdAt              DateTime                     @default(now())
+  updatedAt              DateTime                     @updatedAt
   admissionRoundSubjects AdmissionRoundSubject[]
+  admissionPaperSubjects AdmissionRoundPaperSubject[]
 }
 
 model TrackSubject {
@@ -135,67 +153,72 @@ model School {
   exams       Exam[]
   schedules   AdmissionSchedule[]
   stats       AdmissionStat[]
+  seasons     AdmissionSeason[]
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 }
 
 model Department {
-  id        String              @id @default(cuid())
-  slug      String
-  name      String
-  schoolId  String
-  school    School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  trackId   String?
-  track     ProgramTrack?       @relation(fields: [trackId], references: [id])
-  exams     Exam[]
-  schedules AdmissionSchedule[]
-  stats     AdmissionStat[]
-  groups    AdmissionGroup[]
-  metadata  Json?
+  id           String                  @id @default(cuid())
+  slug         String
+  name         String
+  schoolId     String
+  school       School                  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  trackId      String?
+  track        ProgramTrack?           @relation(fields: [trackId], references: [id])
+  examSubjects ExamSubjectDepartment[]
+  schedules    AdmissionSchedule[]
+  stats        AdmissionStat[]
+  groups       AdmissionGroup[]
+  metadata     Json?
 
   @@unique([schoolId, slug])
   @@index([trackId])
 }
 
-// One admission paper set for a (school, dept, year, admissionType, group).
+// A school's exam session: (school, year, admissionType). 卷脫離系所——共用卷只存一份;
+// 「哪些系所考此卷」改掛 ExamSubject.departments (M:N)。卷↔招生組別 M:N 留待招生 pipeline。
 model Exam {
-  id               String          @id @default(cuid())
-  schoolId         String
-  departmentId     String
-  year             Int
-  admissionType    AdmissionType
-  group            String          @default("") // 組別代號 (sync key, 來自路徑); empty = 不分組
-  // 解析後的招生組身分 (sync 時以 (departmentId, code=group) 查得); null = 不分組或該組未建。
-  // 刪組別不連帶刪已歸檔考卷 → SetNull。group 仍為冪等 upsert key, 此為 join 加速欄。
-  admissionGroupId String?
-  sourceUrl        String?
-  licenseStatus    LicenseStatus   @default(unknown)
-  school           School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  department       Department      @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  admissionGroup   AdmissionGroup? @relation(fields: [admissionGroupId], references: [id], onDelete: SetNull)
-  examSubjects     ExamSubject[]
-  metadata         Json?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  id            String        @id @default(cuid())
+  schoolId      String
+  year          Int
+  admissionType AdmissionType
+  school        School        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  examSubjects  ExamSubject[]
+  metadata      Json?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
-  @@unique([schoolId, departmentId, year, admissionType, group])
+  @@unique([schoolId, year, admissionType])
   @@index([year])
-  @@index([admissionGroupId])
 }
 
-// A paper/section within an exam; may bundle multiple subjects (合科卷).
+// 物理考卷 (去重單位): 一份卷 = (exam, slug)。合科卷綁多 subject;共用卷掛多 department (M:N)。
 model ExamSubject {
-  id        String               @id @default(cuid())
-  examId    String
-  exam      Exam                 @relation(fields: [examId], references: [id], onDelete: Cascade)
-  name      String // e.g. 資料結構與演算法
-  sourceUrl String?
-  subjects  ExamSubjectSubject[]
-  questions Question[]
-  metadata  Json?
+  id            String                  @id @default(cuid())
+  examId        String
+  exam          Exam                    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  slug          String // 卷 slug (來自路徑, 含卷別如 dsa-a); (examId, slug) 為冪等 upsert key
+  name          String // 顯示名, e.g. 資料結構與演算法(A); 不再唯一
+  licenseStatus LicenseStatus           @default(unknown) // 授權為逐卷事實
+  sourceUrl     String?
+  subjects      ExamSubjectSubject[]
+  departments   ExamSubjectDepartment[]
+  questions     Question[]
+  metadata      Json?
 
-  // (examId, name) is the idempotent upsert key for sync; also indexes examId.
-  @@unique([examId, name])
+  @@unique([examId, slug])
+}
+
+// 卷↔系所 M:N: 共用卷被多系所採用 (來源 = 題目 frontmatter departments 的聯集)。
+model ExamSubjectDepartment {
+  examSubjectId String
+  departmentId  String
+  examSubject   ExamSubject @relation(fields: [examSubjectId], references: [id], onDelete: Cascade)
+  department    Department  @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@id([examSubjectId, departmentId])
+  @@index([departmentId])
 }
 
 model ExamSubjectSubject {
@@ -321,9 +344,9 @@ model AdmissionGroup {
   name         String           @default("") // 組別名稱, e.g. 數位積體電路與系統; 可空
   displayOrder Int              @default(0)
   sourceUrl    String?
+  metadata     Json?
   department   Department       @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   rounds       AdmissionRound[]
-  exams        Exam[]
 
   @@unique([departmentId, code])
   @@index([departmentId])
@@ -340,9 +363,20 @@ model AdmissionRound {
   applicants       Int?
   admitted         Int?
   sourceUrl        String? // 招生簡章連結
+  admissionCode    String? // 官方招生代碼, e.g. 8611
+  applicantType    String? // 身分別, e.g. 一般生
+  resultBatch      Int? // 放榜梯次
+  methods          ExamMethod[] // 筆試/審查/口試
+  calculator       Boolean? // 可用計算機
+  writtenWeight    Int? // 筆試佔分 %
+  interviewWeight  Int? // 面試佔分 %
+  interviewAt      DateTime? // 該組面試日
+  tiebreak         String[] // 同分參酌順序 (科目顯示名)
+  metadata         Json?
   group            AdmissionGroup          @relation(fields: [admissionGroupId], references: [id], onDelete: Cascade)
   events           AdmissionRoundEvent[]
   subjects         AdmissionRoundSubject[]
+  papers           AdmissionRoundPaper[]
 
   @@unique([admissionGroupId, year, admissionType])
   @@index([admissionGroupId])
@@ -370,6 +404,86 @@ model AdmissionRoundSubject {
   subject   Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@id([roundId, subjectId])
+  @@index([subjectId])
+}
+
+// 招生季: 校級 (校×年×管道)。區A 校級事實: 報名費/狀態/公告日/事件/節次時間表 掛此。
+// 事件由 round 上移至此 (校級不重複); round 只留組年度事實。AdmissionSchedule(legacy) 整併待後續。
+model AdmissionSeason {
+  id             String                 @id @default(cuid())
+  schoolId       String
+  year           Int // 西元學年
+  admissionType  AdmissionType
+  status         AdmissionStatus        @default(published)
+  announcedAt    DateTime? // 公告日 = 新鮮度錨點
+  applicationFee Int? // 報名費
+  interviewFee   Int? // 口試費
+  feeWaiver      String[] // 減免身分, e.g. low_income
+  sourceUrl      String?
+  metadata       Json?
+  school         School                 @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  events         AdmissionSeasonEvent[]
+  slots          AdmissionExamSlot[]
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  @@unique([schoolId, year, admissionType])
+  @@index([year])
+}
+
+// 招生事件 (校級): 報名/筆試/放榜/報到 等。詞彙見 AdmissionEvent enum。
+model AdmissionSeasonEvent {
+  id       String          @id @default(cuid())
+  seasonId String
+  event    AdmissionEvent
+  at       DateTime
+  endAt    DateTime? // 跨日/區間結束
+  location String?
+  sequence Int? // 放榜梯次
+  note     String?
+  metadata Json?
+  season   AdmissionSeason @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  @@index([seasonId])
+}
+
+// 節次時間表 (校級): 某日第幾節的考試時段。系所考哪科哪節由 AdmissionRoundPaper.section 串接。
+model AdmissionExamSlot {
+  id        String          @id @default(cuid())
+  seasonId  String
+  date      DateTime
+  period    Int // 節次
+  startTime String // HH:MM
+  endTime   String // HH:MM
+  note      String?
+  season    AdmissionSeason @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  @@index([seasonId])
+}
+
+// 招生考卷 (該梯次的卷/科目組): 合科卷綁多 subject; section 接節次時間表。
+model AdmissionRoundPaper {
+  id       String                       @id @default(cuid())
+  roundId  String
+  name     String // 卷/科目顯示名, e.g. 軟體設計
+  section  Int? // 節次 (接 AdmissionExamSlot)
+  weight   Float? // 佔總分 %
+  note     String?
+  metadata Json?
+  round    AdmissionRound               @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  subjects AdmissionRoundPaperSubject[]
+
+  @@unique([roundId, name])
+  @@index([roundId])
+}
+
+model AdmissionRoundPaperSubject {
+  paperId   String
+  subjectId String
+  paper     AdmissionRoundPaper @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  subject   Subject             @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@id([paperId, subjectId])
   @@index([subjectId])
 }
 

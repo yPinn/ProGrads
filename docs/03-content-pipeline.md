@@ -25,16 +25,16 @@ Tier1/Tier2 **同檔**（見下）；Tier0 是大檔、永不進 DB，**現以 G
 
 ```text
 ProGrads-content/
-  raw/<track>/<school>/<department>/<year>/[<group>/]<exam-subject>.pdf   # Tier0 整卷（LFS）
-  questions/<track>/<school>/<department>/<year>/[<group>/]<exam-subject>/<qNN>.md
-  admissions/<year>/<school>/prospectus.{pdf,yml}                        # 招生簡章（獨立樹，見 §招生資料）
+  raw/<school>/<year>/<paper>.pdf                       # Tier0 整卷（LFS）
+  questions/<school>/<year>/<paper>/<qNN>.md            # Tier1/2 結構化單題＋解答
+  admissions/<year>/<school>/<season>/{prospectus.pdf,schedule.yml,departments.yml}  # 招生簡章（獨立樹，見 §招生資料）
 ```
 
-- 路徑段用 **slug**（ASCII、穩定）；`<exam-subject>` 用「整張卷」的 slug（合科卷一個 slug）。
-- `<group>` 目錄層在 `<year>` 與 `<exam-subject>` **之間**，**僅分組時存在**（一組含多卷）；不分組則省略。
-  group 用 ASCII 代號 `a/b/c`（＝甲/乙/丙，僅作顯示；與招生 `admission_group.code` 對齊）。
+- 路徑段用 **slug**（ASCII、穩定）；`<paper>` 用「整張卷」的 slug（合科卷一個 slug，含卷別如 `dsa-a`）。
+- **儲存軸只到「對卷單一從屬」的維度**：`school / year / 卷`。`track`、`department`、`group` **不進路徑**——它們對共用卷是 M:N，當資料夾會撞「該放哪/放幾份」。系所改由題目 frontmatter `departments` 帶（→ `exam_subject` ↔ `department` M:N）；track 由 DB 推導。
+- `<paper>` 為**去重單位**：多系所共用的同一份物理卷只存一份（如台大資工與多媒體的 `dsa-a` 同檔）。
 - `admission_type` **預設 `exam`（考試入學）**，不進路徑；推甄無考古題，極少數例外才於 frontmatter 明寫。
-- 例：不分組 `questions/cs/ntu/csie/2025/dsa/q03.md`；分組 `questions/cs/nchu/cse/2025/a/dsa/q01.md`。
+- 例：`questions/ntu/2025/dsa/q03.md`；含卷別 `questions/ntu/2021/dsa-a/q01.md`。
 
 ### Slug 命名慣例
 
@@ -48,24 +48,24 @@ ProGrads-content/
 ## 身分與命名（id 策略）
 
 - `question_id` 寫在 frontmatter、**是唯一的 upsert 鍵，發布後不可變**（被 explanation / attempt / URL / SEO 引用）。
-- 首次可由路徑推導預設值：`<school>-<department>-<year>[-<group>]-<exam-subject>-<qNN>`
-  （不分組 `ntu-csie-2025-dsa-q03`；分組 `nchu-cse-2025-a-dsa-q01`）。
+- 首次可由路徑推導預設值：`<school>-<year>-<paper>-<qNN>`
+  （`ntu-2025-dsa-q03`；含卷別 `ntu-2021-dsa-a-q01`）。id 屬「卷」而非「系」，共用卷天然不撞。
 - sync **驗證「路徑推導值 == frontmatter id」**，不一致則 red（抓誤分類）；但**搬檔不改 id**（id 已釘選）。
 - 子題：`q03a` / `q03b`。
 
 ## 題目檔格式（單檔：frontmatter + 區塊）
 
-題目與解答**同檔**（策展耦合、原子、MC 正解不跨檔）。分類欄（track/school/department/year）由**路徑決定**，不在 frontmatter 重複；frontmatter 只留無法從路徑推導者。
+題目與解答**同檔**（策展耦合、原子、MC 正解不跨檔）。卷的定位欄（school/year/paper）由**路徑決定**，不在 frontmatter 重複；系所（`departments`，對卷為 M:N、無法塞進路徑）與其餘無法從路徑推導者留在 frontmatter。
 
 ```markdown
 ---
-question_id: ntu-csie-2025-dsa-q03 # 釘選，唯一鍵
+question_id: ntu-2025-dsa-q03 # 釘選，唯一鍵（<school>-<year>-<paper>-<qNN>）
 exam_subject: 資料結構與演算法 # 卷的顯示名（ExamSubject.name；合科卷可多 subject）
 subjects: [algo] # granular 練習標記（question_subject），用 slug
+departments: [csie, mmng] # 考此卷的系所 slugs → exam_subject ↔ department M:N（共用卷列多系）
 question_type: essay # mc | essay | calc | proof | cloze | listening
 source_url: https://example.ntu.edu.tw/exam/...
 license_status: school_official # national_exam | school_official | unknown
-group: "" # 組別代號 a/b/c（＝甲/乙/丙）；不分組空字串
 knowledge_points: [動態規劃, 最短路徑] # 第一刀暫不寫入 DB
 # --- 解答 metadata（Tier2）---
 model_used: claude-opus-4-8
@@ -106,8 +106,8 @@ B
 
 ## 參照 vs 內容實體（sync 行為分兩類）
 
-- **參照資料（須先存在，由 seed 管）**：category / track / subject / school / department → sync **只解析、不建立**；缺則 red（逼先補 seed/PR）。
-- **內容資料（sync 建立/更新）**：exam / exam_subject / question / choice / explanation / question_subject。
+- **參照資料（須先存在，由 seed 管）**：category / track / subject / school / department → sync **只解析、不建立**；缺則 red（逼先補 seed/PR）。frontmatter `subjects`/`departments` 皆以 slug 引用既有列。
+- **內容資料（sync 建立/更新）**：exam / exam_subject / question / choice / explanation / question_subject / exam_subject_department。
 
 ## 合規與顯示閘門
 
@@ -184,25 +184,50 @@ content push → 雲端 CI：
 
 merge → server 端（self-hosted runner / webhook，搆得到 localhost DB）：
   1. pull content
-  2. sync：逐檔 transaction —— 解析參照 → upsert Exam → upsert ExamSubject
-     → upsert Question(by question_id) → 重建子表（choices / question_subjects）→ upsert Explanation
-  3. 收尾 reconcile：每個 ExamSubject 重算合科卷 subject 組成（= 其題目 subjects 聯集）
+  2. sync：逐檔 transaction —— 解析參照（school/subjects/departments）→ upsert Exam(by 校×年×管道)
+     → upsert ExamSubject(by examId+slug) → upsert Question(by question_id)
+     → 重建子表（choices / question_subjects）→ upsert Explanation
+  3. 收尾 reconcile：每個 ExamSubject 重算 ① 合科卷 subject 組成（= 其題目 subjects 聯集）
+     ② 採用系所（= 其題目 frontmatter departments 聯集 → exam_subject_department）
   4. 觸發 CF Pages rebuild → 重新 prerender
 ```
 
 - 冪等：依 `question_id` upsert；子表 delete + 重建（在 transaction 內）。
-- 合科卷組成是**全量收尾**（不可逐檔，否則只得部分聯集）。
+- 合科卷 subject 組成與卷↔系所 M:N 皆為**全量收尾**（卷層事實，逐檔只得部分聯集）。
 - 孤兒清理（檔案刪除 → DB 刪除）列為 phase 2。
 
 ## 招生資料（admissions，規劃中）
 
-招生簡章是「**一校一年一份**、跨全系所」的文件，與考卷顆粒度（track×系所×組×科）不同，故獨立成樹、以 **`年/校`** 為軸（招生屬年度循環）；系所/組細節進檔案內容、不進路徑。
+招生簡章是「**一校一年一管道一份**、跨全系所」的文件，與考卷顆粒度（track×系所×組×科）不同，故獨立成樹、以 **`年/校/管道`** 為軸（招生屬年度循環）；系所/組細節進檔案內容、不進路徑。
+
+> **五份壓測**（NTU/NCCU/NCKU/CCU 115 + 台聯大 115）證實一份簡章可乾淨切成兩區：**區 A 日程/地點**（校級、A 層 regex 可抽）與**區 B 系所/組明細**（B 層、須 vision）。NTU 那份甚至**只有區 A**（2 頁「重要日程表」單獨發），坐實兩區可獨立成檔。故 `prospectus.yml` 拆為 `schedule.yml`（區 A）+ `departments.yml`（區 B），沿抽取層邊界切：A 層先落地、不被卡 vision 的 B 層綁架，且兩區 git diff 互不污染。
 
 ```text
-admissions/<year>/<school>/
-  prospectus.pdf   # 簡章原始快照（LFS）
-  prospectus.yml   # 正規化（組/名額/考科/日程）；延後產，累積多校再建 parser
+admissions/<year>/<school>/<season>/         # season: exam(預設可省) / recruit(推甄) / in-service(在職)
+  prospectus.pdf     # 簡章原始快照（Tier0,LFS）
+  schedule.yml       # 區A:①季框架 + ②科目節次時間表（校級,A 層）
+  departments.yml    # 區B:③各系所組明細（系所→組 keyed entry,大時可 shard 成 depts/<dept>.yml）
 ```
+
+- **`<season>` 段**對齊 `admission_type`；同校同年有考試/推甄/在職多份簡章（NCKU 含在職、推甄另發），不加段會撞檔。**預設 `exam` 可省略**以相容現況。
+- **聯招**走 `admissions/<year>/ust/<season>/`，`ust` 為 pseudo-school；`departments.yml` 每筆帶 `school`(成員校) 欄（見 §聯招）。
+
+### 三層擁有者（抽象結論）
+
+切完五份後，區 A 內部還要再切一刀——**「考試時間」掛在「科目/節次」(校級)，不掛「組」**（NTU/NCKU/CCU 的筆試時間都在校級科目時間表，系所明細頁只有佔分%）：
+
+```text
+①招生季 admission_season   一筆 = 校 × 年 × 管道  →  schedule.yml
+   報名起訖 + 報名費(+減免) + 簡章公告日 + 放榜梯次日期
+        │
+②科目節次時間表 exam_timetable   校級,掛「科目/節次」  →  schedule.yml
+   某科 第幾節 / 日期時間 / 可否用計算機 / 考場（CCU 另依筆試/無筆試分流）
+        ▼
+③組級明細 admission_round（現有）  一筆 = 系所 × 組 × 年  →  departments.yml
+   招生代碼 + 名額 + 身分別 + 考科加權% + 面試%/日期 + 同分參酌 + 放榜梯次 + 規定
+```
+
+跨層連結（抽取時須對齊）：組(③)考科名 → 時間表(②)得各科考試時間；組(③)放榜梯次 → 季(①)得第 N 梯放榜日；**面試時間為例外**，掛組(③)（NCCU 財政面試 3/14）、非掛②。
 
 ### 抽象：通用 schema + 逐校 adapter
 
@@ -211,25 +236,44 @@ admissions/<year>/<school>/
 - **正規化 schema 校無關**——每份簡章含同一組語意件（公告/報名/筆試/複試/放榜/報到/名額/考科），DB 與 `prospectus.yml` 用同一套。
 - **抽取逐校、跨年攤提**——「讀取器(adapter)」一校寫一次、該校每年複用。規則是 per 校（約 10 校，有界），非 per (校×年)。
 
-抽取分三層：A 自動（民國日期、名額數字，regex 即可，CID 字型也行）；B 視覺（系所/組/考科 CJK，須 PDF→圖 + vision，**待修 renderer**）；C 略過（報名費、試場規則、地圖）。
+抽取分三層：A 自動（民國日期、名額數字、**報名費**，regex 即可，CID 字型也行）；B 視覺（系所/組/考科 CJK，須 PDF→圖 + vision，renderer 已具備：`tools/pdf-extract`，mupdf/FreeType 實心 CJK）；C 略過（試場規則、地圖）。
+
+> 修正：**報名費改列 A 層收錄**（NTU 1,500／口試 500、NCKU 低收/中低收減免都是日程表裡的乾淨數字）；原列「C 略過」係低估。renderer 已實作，B 層不再受阻。
 
 ### 欄位集（聚合表視角定稿）
 
-必備：簡章**新鮮度狀態**（`not_published/published/superseded`，避免拿舊資料當今年）、報名（起訖**含時分**）、筆試（可跨天）、**放榜（多梯次）**。
-納入：競爭數據（名額/報名人數/錄取→競爭比）、複試/口試（落組層、可依系所）、報到、連結（`prospectus_url`/`rules_url`）、考場（地點/是否另設）、**指定參考用書**與備註（分則每組皆列，對備考高價值）。
+依三層擁有者分列（↔ schedule.yml / departments.yml）：
+
+- **①季（schedule.yml）**：簡章**新鮮度狀態**（`not_published/published/superseded`，避免拿舊資料當今年）＋`announced_at`（公告日，即新鮮度錨點）、報名起訖（**含時分**）、**報名費**（＋低收/中低收減免、口試費）、放榜**多梯次**日期、連結（`prospectus_url`/`rules_url`）。
+- **②時間表（schedule.yml）**：科目 × 節次 × 日期時間（可跨天）、可否用計算機、考場（地點/是否另設；CCU 依筆試/無筆試分流）。
+- **③組（departments.yml）**：**招生代碼**(官方,如 NCCU 2131／CCU 1000)、名額、**身分別**(一般/在職/外籍/低收)、特定報考資格、**考試項目**(筆試各科加權% + 面試%)、面試日期、同分參酌順序、放榜梯次、**指定參考用書**與其他規定（對備考高價值）、競爭數據（報名人數/錄取→競爭比）。
 
 ### schema 缺口（落地時補，見 [02-data-model.md](02-data-model.md)）
 
-- `AdmissionEvent` 新增 `enrollment`（報到）。
-- 放榜**多梯次** → 事件加 `sequence`/batch。
-- 事件存到「時分」+ 區間（`endAt?` 或維持成對事件）。
-- 簡章新鮮度狀態欄、`announced_at`（公告日）。
+- **①季**：新實體（或擴 `AdmissionRound` 校級欄）——`application_fee` + 減免規則、`announced_at`（公告日）、簡章新鮮度狀態欄、放榜 `batch`/`sequence`（多梯次）。
+- **②時間表**：**新實體 `exam_timetable`**——subject × 節次 × `at`(時分) × `calculator_allowed` × 考場；考試時間改掛此（校級共用），非掛組。
+- **③組**（擴 `AdmissionRound` / `AdmissionRoundSubject`）：`code`(官方招生代碼)、考科 `weight`(%) + 筆試/面試別、面試 `at`、`身分別`、同分參酌順序、特定報考資格、指定參考用書、放榜梯次。
+- `AdmissionEvent` 新增 `enrollment`（報到）；事件存到「時分」+ 區間（`endAt?` 或維持成對事件）。
 
 ### 聯招（台聯大）— 核心大例外，先研究後實踐
 
 台灣聯合大學系統（成員：中央/陽明交通/清華/政治，全在本專案範圍）辦碩士聯招：**一次報名、一次筆試、選多校系組志願**；涵蓋化學/物理/**電機**/文化研究類（**資工未納入** → 主要影響 EE），名額各校依當年簡章自訂。
 
-結構衝擊：一份考卷/考科被**多個 (校,系,組) 共用**（打破 `Exam` 1:校系組）；獨招/聯招並存而 `AdmissionType` 無法區分管道（缺「招生管道」維度）；聯招簡章非單校（歸 `admissions/<year>/ust/`）。正解約為「**台聯大=招生聯盟實體，擁有共用考卷；成員校的組各自掛名額**」——中型改動，列為獨立後續。
+115 實證（`台聯大 115.pdf`）：一次報名 114/11/21~24、四校（中央/政大/陽明交通/清華）、日程表聯盟級但繳費/考場/複查導回各校。
+
+結構衝擊：一份考卷/考科被**多個 (校,系,組) 共用**（打破 `Exam` 1:校系組）；獨招/聯招並存而 `AdmissionType` 無法區分管道（缺「招生管道」維度）；聯招簡章非單校。正解約為「**台聯大=招生聯盟實體，擁有共用考卷；成員校的組各自掛名額**」——中型改動。
+
+**定案命名（先佔位、不實作）**：聯招歸 `admissions/<year>/ust/<season>/`，`ust` 為 pseudo-school；`departments.yml` 每筆帶 `school`(成員校) 欄。**列為獨立後續 spike**（見落地優先序），現階段僅保留此 slot，避免主路徑被聯招卡住。
+
+### 落地優先序
+
+以「風險低、解鎖廣」排序——命名是地基（建檔後改路徑＝牽動 git 史與重抽），聯招是打破 `Exam 1:校系組` 的大例外、現在動會卡主路徑，故先佔位不實作。
+
+1. **文件先行**（本節）：鎖命名＋三層擁有者＋schema 增量，給策展與實作單一真相。
+2. **區 A schema migration**：①季欄位（費/公告/放榜 batch）＋②`exam_timetable`。只動區 A、不碰 vision。
+3. **MVP 端到端**：拿 **NTU_115**（純區 A、2 頁、A 層 regex）做第一份 `schedule.yml`，跑通 檔案→sync→DB，最低成本驗證新命名＋schedule schema。
+4. **區 B（需 vision）**：③`departments.yml` schema 增量 + 單校 adapter（建議 NCKU/NCCU，系所多、模板穩）。
+5. **聯招 spike（延後）**：一卷多校系所 + member-school 維度，另開設計；現僅保留 `ust/` slot。
 
 ## 第一刀範圍
 

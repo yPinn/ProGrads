@@ -1,14 +1,11 @@
 // Parse a question file path into derived references + the canonical (path-derived) id.
-// Expected: questions/<track>/<school>/<department>/<year>/[<group>/]<exam-subject>/<qNN>.md
-// 組在卷之上（組含多卷）；不分組則省略 <group> 段。See docs/03-content-pipeline.md.
+// Expected: questions/<school>/<year>/<paperSlug>/<qNN>.md
+// 卷脫離系所: 路徑只到 (校,年,卷); 系所改由 frontmatter departments 帶。See docs/03-content-pipeline.md.
 
 export interface ParsedPath {
-  track: string;
   school: string;
-  department: string;
   year: number;
-  examSubjectSlug: string;
-  group: string;
+  paperSlug: string; // 整張卷的 slug (含卷別, e.g. dsa-a / co-os)
   fileStem: string; // e.g. "q03"
   number: string; // display, e.g. "3" / "3a"
   order: number; // sortable: q3 -> 30, q3a -> 31, q4 -> 40
@@ -21,20 +18,16 @@ export function parseQuestionPath(relPath: string): ParsedPath {
     throw new Error(`path must start with "questions/": ${relPath}`);
   }
   const rest = parts.slice(1);
-  if (rest.length !== 6 && rest.length !== 7) {
+  if (rest.length !== 4) {
     throw new Error(
-      `unexpected path depth (${rest.length}); want 6 (no group) or 7 (with group): ${relPath}`,
+      `unexpected path depth (${rest.length}); want 4: questions/<school>/<year>/<paperSlug>/<qNN>.md: ${relPath}`,
     );
   }
 
-  const track = rest[0]!;
-  const school = rest[1]!;
-  const department = rest[2]!;
-  const yearStr = rest[3]!;
-  const hasGroup = rest.length === 7;
-  const group = hasGroup ? rest[4]! : ""; // 組在卷之前
-  const examSubjectSlug = hasGroup ? rest[5]! : rest[4]!;
-  const file = rest[rest.length - 1]!;
+  const school = rest[0]!;
+  const yearStr = rest[1]!;
+  const paperSlug = rest[2]!;
+  const file = rest[3]!;
 
   const year = Number.parseInt(yearStr, 10);
   if (!Number.isInteger(year) || String(year) !== yearStr) {
@@ -51,21 +44,8 @@ export function parseQuestionPath(relPath: string): ParsedPath {
   const number = `${num}${suffix}`;
   const order = num * 10 + (suffix ? suffix.charCodeAt(0) - 96 : 0);
 
-  const idParts = [school, department, String(year)];
-  if (group) idParts.push(group); // 組在卷之前: <school>-<dept>-<year>[-<group>]-<exam-subject>-<qNN>
-  idParts.push(examSubjectSlug, fileStem);
-  const questionId = idParts.join("-");
+  // <school>-<year>-<paperSlug>-<qNN>, e.g. ntu-2021-dsa-a-q01
+  const questionId = [school, String(year), paperSlug, fileStem].join("-");
 
-  return {
-    track,
-    school,
-    department,
-    year,
-    examSubjectSlug,
-    group,
-    fileStem,
-    number,
-    order,
-    questionId,
-  };
+  return { school, year, paperSlug, fileStem, number, order, questionId };
 }

@@ -15,15 +15,22 @@ export class QuestionsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   private where(f: QuestionFilters) {
-    const examWhere = {
-      ...(f.school ? { school: { slug: f.school } } : {}),
-      ...(f.track ? { department: { track: { slug: f.track } } } : {}),
-      ...(f.year !== undefined ? { year: f.year } : {}),
+    // School/year live on the exam; track is reached via the paper's departments (M:N).
+    const examSubjectWhere = {
+      ...(f.track ? { departments: { some: { department: { track: { slug: f.track } } } } } : {}),
+      ...(f.school || f.year !== undefined
+        ? {
+            exam: {
+              ...(f.school ? { school: { slug: f.school } } : {}),
+              ...(f.year !== undefined ? { year: f.year } : {}),
+            },
+          }
+        : {}),
     };
     return {
       ...(f.type ? { type: f.type } : {}),
       ...(f.subject ? { subjects: { some: { subject: { slug: f.subject } } } } : {}),
-      ...(Object.keys(examWhere).length > 0 ? { examSubject: { exam: examWhere } } : {}),
+      ...(Object.keys(examSubjectWhere).length > 0 ? { examSubject: examSubjectWhere } : {}),
     };
   }
 
@@ -37,16 +44,11 @@ export class QuestionsRepository {
           examSubject: {
             select: {
               id: true,
+              slug: true,
               name: true,
+              departments: { include: { department: true } },
               exam: {
-                select: {
-                  id: true,
-                  year: true,
-                  admissionType: true,
-                  group: true,
-                  school: true,
-                  department: true,
-                },
+                select: { id: true, year: true, admissionType: true, school: true },
               },
             },
           },
@@ -70,7 +72,8 @@ export class QuestionsRepository {
         examSubject: {
           include: {
             subjects: { include: { subject: true } },
-            exam: { include: { school: true, department: true } },
+            departments: { include: { department: true } },
+            exam: { include: { school: true } },
           },
         },
       },

@@ -15,25 +15,11 @@ const ANSWER_TYPE: Record<string, "numeric" | "essay" | "proof"> = {
 
 // Resolves reference entities by slug, cached. Throws if missing (must be seeded first).
 export class Resolver {
-  private tracks = new Map<string, { id: string }>();
   private schools = new Map<string, { id: string }>();
-  private departments = new Map<string, { id: string; trackId: string | null }>();
+  private departments = new Map<string, { id: string }>();
   private subjects = new Map<string, { id: string }>();
-  private admissionGroups = new Map<string, string | null>();
 
   constructor(private readonly prisma: PrismaClient) {}
-
-  async track(slug: string): Promise<{ id: string }> {
-    const hit = this.tracks.get(slug);
-    if (hit) return hit;
-    const row = await this.prisma.programTrack.findUnique({
-      where: { slug },
-      select: { id: true },
-    });
-    if (!row) throw new Error(`unknown track slug "${slug}" (seed it first)`);
-    this.tracks.set(slug, row);
-    return row;
-  }
 
   async school(slug: string): Promise<{ id: string }> {
     const hit = this.schools.get(slug);
@@ -44,16 +30,14 @@ export class Resolver {
     return row;
   }
 
-  async department(
-    schoolId: string,
-    slug: string,
-  ): Promise<{ id: string; trackId: string | null }> {
+  // Resolve a department by (school, slug). Used for the question's `departments` list.
+  async department(schoolId: string, slug: string): Promise<{ id: string }> {
     const key = `${schoolId}|${slug}`;
     const hit = this.departments.get(key);
     if (hit) return hit;
     const row = await this.prisma.department.findUnique({
       where: { schoolId_slug: { schoolId, slug } },
-      select: { id: true, trackId: true },
+      select: { id: true },
     });
     if (!row) throw new Error(`unknown department slug "${slug}" for school (seed it first)`);
     this.departments.set(key, row);
@@ -68,26 +52,9 @@ export class Resolver {
     this.subjects.set(slug, row);
     return row;
   }
-
-  // Resolve the admission group id for a (department, code). Returns null when the
-  // exam is ungrouped (empty code) or no matching group is seeded — both are valid:
-  // the FK is a denormalized join accelerator, not a sync prerequisite.
-  async admissionGroup(departmentId: string, code: string): Promise<string | null> {
-    if (!code) return null;
-    const key = `${departmentId}|${code}`;
-    const hit = this.admissionGroups.get(key);
-    if (hit !== undefined) return hit;
-    const row = await this.prisma.admissionGroup.findUnique({
-      where: { departmentId_code: { departmentId, code } },
-      select: { id: true },
-    });
-    const id = row?.id ?? null;
-    this.admissionGroups.set(key, id);
-    return id;
-  }
 }
 
-export type SyncResult = { examSubjectId: string } | { skipped: string };
+export type SyncResult = { examSubjectId: string; departmentIds: string[] } | { skipped: string };
 
 // Parse, validate, resolve and upsert one question file. Returns the touched
 // examSubjectId (for end-of-run composition reconcile) or a skip reason.
@@ -107,16 +74,11 @@ export async function syncFile(
     );
   }
 
-  const track = await resolver.track(path.track);
   const school = await resolver.school(path.school);
-  const department = await resolver.department(school.id, path.department);
-  if (department.trackId !== track.id) {
-    throw new Error(
-      `misfiled: ${relPath} is under track "${path.track}" but its department belongs to another track`,
-    );
-  }
   const subjects = await Promise.all(fm.subjects.map((s) => resolver.subject(s)));
-  const admissionGroupId = await resolver.admissionGroup(department.id, fm.group);
+  const departments = await Promise.all(
+    fm.departments.map((d) => resolver.department(school.id, d)),
+  );
 
   const sections = parseSections(parsed.content);
   const questionMd = sections.get("題目");
@@ -153,30 +115,34 @@ export async function syncFile(
   await prisma.$transaction(async (tx) => {
     const exam = await tx.exam.upsert({
       where: {
-        schoolId_departmentId_year_admissionType_group: {
+        schoolId_year_admissionType: {
           schoolId: school.id,
-          departmentId: department.id,
           year: path.year,
           admissionType: fm.admission_type,
-          group: fm.group,
         },
       },
-      update: { licenseStatus: fm.license_status, admissionGroupId },
+      update: {},
       create: {
         schoolId: school.id,
-        departmentId: department.id,
         year: path.year,
         admissionType: fm.admission_type,
-        group: fm.group,
-        admissionGroupId,
-        licenseStatus: fm.license_status,
       },
     });
 
     const examSubject = await tx.examSubject.upsert({
-      where: { examId_name: { examId: exam.id, name: fm.exam_subject } },
-      update: { sourceUrl: fm.source_url },
-      create: { examId: exam.id, name: fm.exam_subject, sourceUrl: fm.source_url },
+      where: { examId_slug: { examId: exam.id, slug: path.paperSlug } },
+      update: {
+        name: fm.exam_subject,
+        sourceUrl: fm.source_url,
+        licenseStatus: fm.license_status,
+      },
+      create: {
+        examId: exam.id,
+        slug: path.paperSlug,
+        name: fm.exam_subject,
+        sourceUrl: fm.source_url,
+        licenseStatus: fm.license_status,
+      },
     });
     examSubjectId = examSubject.id;
 
@@ -222,7 +188,7 @@ export async function syncFile(
     });
   });
 
-  return { examSubjectId };
+  return { examSubjectId, departmentIds: departments.map((d) => d.id) };
 }
 
 // End-of-run: recompute each ExamSubject's subject composition as the union of its
@@ -257,6 +223,39 @@ export async function reconcileExamSubjects(
     if (toRemove.length > 0) {
       await prisma.examSubjectSubject.deleteMany({
         where: { examSubjectId, subjectId: { in: toRemove } },
+      });
+      changed += toRemove.length;
+    }
+  }
+  return changed;
+}
+
+// End-of-run: reconcile each ExamSubject's department links to the union accumulated
+// from its questions' frontmatter `departments` (a paper-level fact, not per-question).
+export async function reconcileExamSubjectDepartments(
+  prisma: PrismaClient,
+  wantByExamSubject: Map<string, Set<string>>,
+): Promise<number> {
+  let changed = 0;
+  for (const [examSubjectId, want] of wantByExamSubject) {
+    const existing = await prisma.examSubjectDepartment.findMany({
+      where: { examSubjectId },
+      select: { departmentId: true },
+    });
+    const have = new Set(existing.map((e) => e.departmentId));
+
+    const toAdd = [...want].filter((id) => !have.has(id));
+    const toRemove = [...have].filter((id) => !want.has(id));
+
+    if (toAdd.length > 0) {
+      await prisma.examSubjectDepartment.createMany({
+        data: toAdd.map((departmentId) => ({ examSubjectId, departmentId })),
+      });
+      changed += toAdd.length;
+    }
+    if (toRemove.length > 0) {
+      await prisma.examSubjectDepartment.deleteMany({
+        where: { examSubjectId, departmentId: { in: toRemove } },
       });
       changed += toRemove.length;
     }

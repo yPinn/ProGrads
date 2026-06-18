@@ -4,16 +4,19 @@ import { AdmissionType, LicenseStatus } from "./enums.js";
 import { DepartmentSchema, SchoolSchema } from "./schools.js";
 import { SubjectSchema } from "./taxonomy.js";
 
-// Exam axis contracts: where the school axis (school+department) meets the track axis
-// (subject). An exam bundles papers (exam_subjects), each mapping to 1..n subjects (合科卷).
-// See docs/02-data-model.md.
+// Exam axis contracts: an exam is a school's session (school × year × admissionType) that
+// bundles physical papers (exam_subjects). A paper maps to 1..n subjects (合科卷) and is
+// taken by 1..n departments (共用卷). See docs/02-data-model.md.
 
-// A paper/section within an exam; may bundle multiple subjects (合科卷).
+// A physical paper within an exam; bundles subjects (合科卷) + departments that sat it (共用卷).
 export const ExamSubjectSchema = z.object({
   id: z.string(),
+  slug: z.string().describe("卷 slug(含卷別,如 dsa-a)"),
   name: z.string().describe("卷別名稱(如 計算機概論與資料結構)"),
+  licenseStatus: LicenseStatus,
   sourceUrl: z.string().nullable().describe("原始來源 URL,可能為 null"),
   subjects: z.array(SubjectSchema).describe("該卷涵蓋的考科;合科卷為多科"),
+  departments: z.array(DepartmentSchema).describe("考此卷的系所;共用卷為多系所"),
 });
 export type ExamSubject = z.infer<typeof ExamSubjectSchema>;
 
@@ -22,17 +25,14 @@ export const ExamSummarySchema = z.object({
   id: z.string(),
   year: z.number().int().describe("考試年度(西元,如 2025)"),
   admissionType: AdmissionType,
-  group: z.string().describe("招生組別(如 甲組)"),
-  licenseStatus: LicenseStatus,
-  sourceUrl: z.string().nullable().describe("原始來源 URL,可能為 null"),
   school: SchoolSchema,
-  department: DepartmentSchema,
+  departments: z.array(DepartmentSchema).describe("此場考試各卷涵蓋的系所(跨卷聚合)"),
 });
 export type ExamSummary = z.infer<typeof ExamSummarySchema>;
 
-// Detail adds the papers (exam_subjects with their subjects).
+// Detail adds the papers (exam_subjects with their subjects + departments).
 export const ExamDetailSchema = ExamSummarySchema.extend({
-  examSubjects: z.array(ExamSubjectSchema).describe("考卷的卷別清單(含合科卷組成)"),
+  examSubjects: z.array(ExamSubjectSchema).describe("考卷的卷別清單(含合科卷組成與採用系所)"),
 });
 export type ExamDetail = z.infer<typeof ExamDetailSchema>;
 

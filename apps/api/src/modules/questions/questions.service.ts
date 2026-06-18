@@ -35,8 +35,14 @@ function mapSchool(s: SchoolRow) {
   return { id: s.id, slug: s.slug, name: s.name };
 }
 
-function mapDepartment(d: DepartmentRow) {
-  return { id: d.id, slug: d.slug, name: d.name, schoolId: d.schoolId, trackId: d.trackId };
+function mapDepartments(rows: { department: DepartmentRow }[]) {
+  return rows.map((r) => ({
+    id: r.department.id,
+    slug: r.department.slug,
+    name: r.department.name,
+    schoolId: r.department.schoolId,
+    trackId: r.department.trackId,
+  }));
 }
 
 @Injectable()
@@ -54,14 +60,17 @@ export class QuestionsService {
       number: q.number,
       type: q.type,
       subjects: mapSubjects(q.subjects),
-      examSubject: { id: q.examSubject.id, name: q.examSubject.name },
+      examSubject: {
+        id: q.examSubject.id,
+        slug: q.examSubject.slug,
+        name: q.examSubject.name,
+        departments: mapDepartments(q.examSubject.departments),
+      },
       exam: {
         id: q.examSubject.exam.id,
         year: q.examSubject.exam.year,
         admissionType: q.examSubject.exam.admissionType,
-        group: q.examSubject.exam.group,
         school: mapSchool(q.examSubject.exam.school),
-        department: mapDepartment(q.examSubject.exam.department),
       },
     }));
     return { data, meta: { page, pageSize, total } };
@@ -74,7 +83,7 @@ export class QuestionsService {
     }
     const meta = (q.metadata ?? null) as { sourceUrl?: unknown } | null;
     const sourceUrl = meta && typeof meta.sourceUrl === "string" ? meta.sourceUrl : null;
-    const exam = q.examSubject.exam;
+    const es = q.examSubject;
 
     return {
       externalId: q.externalId,
@@ -82,21 +91,21 @@ export class QuestionsService {
       type: q.type,
       contentMd: q.contentMd,
       sourceUrl,
-      licenseStatus: exam.licenseStatus,
+      licenseStatus: es.licenseStatus,
       choices: mapChoices(q.choices),
       subjects: mapSubjects(q.subjects),
       examSubject: {
-        id: q.examSubject.id,
-        name: q.examSubject.name,
-        subjects: mapSubjects(q.examSubject.subjects),
+        id: es.id,
+        slug: es.slug,
+        name: es.name,
+        subjects: mapSubjects(es.subjects),
+        departments: mapDepartments(es.departments),
       },
       exam: {
-        id: exam.id,
-        year: exam.year,
-        admissionType: exam.admissionType,
-        group: exam.group,
-        school: mapSchool(exam.school),
-        department: mapDepartment(exam.department),
+        id: es.exam.id,
+        year: es.exam.year,
+        admissionType: es.exam.admissionType,
+        school: mapSchool(es.exam.school),
       },
       explanation: q.explanation
         ? {

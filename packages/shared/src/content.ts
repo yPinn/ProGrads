@@ -14,10 +14,10 @@ export const QuestionFrontmatter = z.object({
   question_id: z.string().min(1), // pinned upsert key; validated against the path-derived default
   exam_subject: z.string().min(1), // paper display name (ExamSubject.name)
   subjects: z.array(z.string().min(1)).min(1), // granular practice tags (question_subject), by slug
+  departments: z.array(z.string().min(1)).min(1), // 考此卷的系所 slugs → ExamSubject↔Department M:N
   question_type: QuestionType,
   source_url: z.union([z.string().url(), z.literal("")]),
   license_status: ContentLicenseStatus,
-  group: z.string().default(""), // 組別代號 a/b/c（＝甲/乙/丙 顯示）; empty = 不分組
   knowledge_points: z.array(z.string().min(1)).default([]), // parsed; not yet persisted (phase 2)
   // --- answer (Tier2) metadata ---
   model_used: z.string().optional(),
