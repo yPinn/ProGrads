@@ -2,6 +2,8 @@ import type { PrismaClient } from "../../generated/client/client.ts";
 
 // Taxonomy reference data. Authoritative L1/L2 from 大碩 (TKB). See docs/02-data-model.md.
 // Subjects + track_subject links cover cs / ee / info-mgmt tracks.
+// Subject slug 命名: 小寫精簡 token, 公認縮寫優先 (ds/os/la/dm/co/em/db/mis),
+// 多字串接, 僅可讀性需要時加 hyphen (cs-intro/infosec-intro). 此處為 slug 唯一登記; 引用前查, 勿造變體.
 
 type TrackSeed = { slug: string; name: string };
 
@@ -69,6 +71,8 @@ const SUBJECTS: TrackSeed[] = [
   { slug: "db", name: "資料庫" },
   { slug: "networking", name: "網際網路概論" },
   { slug: "infosec-intro", name: "資訊安全概論" },
+  { slug: "prog", name: "程式設計" },
+  { slug: "english", name: "英文" },
   // 電機所 考科（大碩/TKB 分類）；ds/algo/co/la/dm 沿用 cs 共用
   { slug: "engmath", name: "工程數學" },
   { slug: "prob", name: "機率" },
@@ -84,13 +88,14 @@ const SUBJECTS: TrackSeed[] = [
   { slug: "emachine", name: "電機機械" },
   { slug: "powerelec", name: "電力電子" },
   { slug: "commtheory", name: "通訊原理" },
+  { slug: "commsys", name: "通訊系統" },
   { slug: "signals", name: "信號與系統" },
 ];
 
 // track slug → subject slugs (the global shared library; note ds/algo
 // are shared across cs[理工] and info-mgmt[商管] — a cross-category shared subject).
 const TRACK_SUBJECTS: Record<string, string[]> = {
-  cs: ["ds", "algo", "co", "os", "la", "dm", "infosec-intro"],
+  cs: ["ds", "algo", "co", "os", "la", "dm", "infosec-intro", "prog"],
   ee: [
     "engmath",
     "prob",
@@ -108,12 +113,24 @@ const TRACK_SUBJECTS: Record<string, string[]> = {
     "emachine",
     "powerelec",
     "commtheory",
+    "commsys",
     "signals",
     "co",
     "ds",
     "algo",
   ],
-  "info-mgmt": ["stat", "mis", "cs-intro", "ds", "db", "networking", "algo"],
+  "info-mgmt": [
+    "stat",
+    "mis",
+    "cs-intro",
+    "ds",
+    "db",
+    "networking",
+    "algo",
+    "english",
+    "prog",
+    "co",
+  ],
 };
 
 export interface TaxonomySeedResult {
