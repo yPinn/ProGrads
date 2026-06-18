@@ -13,9 +13,25 @@ export default defineNuxtConfig({
     "@nuxt/eslint",
   ],
   css: ["~/assets/css/main.css"],
+  // Public runtime config; override per-env via NUXT_PUBLIC_* (see docs/01-architecture.md env layers).
+  runtimeConfig: {
+    public: {
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || "http://localhost:8088/api/v1",
+    },
+  },
+  // CF Pages hybrid: content pages prerender at build, dynamic (API-driven) pages render client-side.
+  nitro: { preset: "cloudflare-pages" },
+  routeRules: {
+    "/": { prerender: true },
+    // API-driven pages render client-side (edge can't reach the origin DB at build time).
+    // SEO prerender of question/answer pages comes with the content pipeline (Phase 2).
+    "/schedules": { ssr: false },
+    "/questions/**": { ssr: false },
+  },
   // Formatting is handled by Prettier.
   eslint: { config: { stylistic: false } },
-  site: { name: "ProGrads", url: "https://example.com" },
+  // url is env-driven (NUXT_PUBLIC_SITE_URL) so prod/staging/preview each set their own; no real domain yet.
+  site: { name: "ProGrads", url: process.env.NUXT_PUBLIC_SITE_URL || "https://app.example.com" },
   // OG image generation needs a native renderer; enable later when needed.
   ogImage: { enabled: false },
   i18n: {
