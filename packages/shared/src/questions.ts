@@ -14,14 +14,12 @@ import { SubjectSchema } from "./taxonomy.js";
 // Question (global shared bank) contracts. The killer query: practice one subject across
 // all schools (?subject=algorithms). See docs/02-data-model.md.
 
-// Compact exam context carried on each question.
+// Compact exam context carried on each question (school × year × admissionType).
 export const QuestionExamRefSchema = z.object({
   id: z.string(),
   year: z.number().int().describe("考試年度(西元,如 2025)"),
   admissionType: AdmissionType,
-  group: z.string().describe("招生組別(如 甲組)"),
   school: SchoolSchema,
-  department: DepartmentSchema,
 });
 export type QuestionExamRef = z.infer<typeof QuestionExamRefSchema>;
 
@@ -30,7 +28,14 @@ export const QuestionSummarySchema = z.object({
   number: z.string().describe("題號(如 1、2-(1))"),
   type: QuestionType,
   subjects: z.array(SubjectSchema).describe("細粒度練習標籤(供跨校單科練習)"),
-  examSubject: z.object({ id: z.string(), name: z.string() }).describe("題目所屬卷別"),
+  examSubject: z
+    .object({
+      id: z.string(),
+      slug: z.string(),
+      name: z.string(),
+      departments: z.array(DepartmentSchema).describe("考此卷的系所;共用卷為多系所"),
+    })
+    .describe("題目所屬卷別"),
   exam: QuestionExamRefSchema.describe("題目所屬考卷的精簡資訊"),
 });
 export type QuestionSummary = z.infer<typeof QuestionSummarySchema>;
@@ -57,14 +62,16 @@ export const QuestionDetailSchema = QuestionSummarySchema.extend({
   sourceUrl: z.string().nullable().describe("原始來源 URL,可能為 null"),
   licenseStatus: LicenseStatus,
   choices: z.array(ChoiceSchema).describe("選項清單;非選擇題為空陣列"),
-  // examSubject detail includes its 合科卷 composition.
+  // examSubject detail includes its 合科卷 composition + departments that sat it.
   examSubject: z
     .object({
       id: z.string(),
+      slug: z.string(),
       name: z.string(),
       subjects: z.array(SubjectSchema).describe("該卷涵蓋的考科;合科卷為多科"),
+      departments: z.array(DepartmentSchema).describe("考此卷的系所;共用卷為多系所"),
     })
-    .describe("題目所屬卷別(含合科卷組成)"),
+    .describe("題目所屬卷別(含合科卷組成與採用系所)"),
   explanation: ExplanationSchema.nullable().describe("快取的標準解析;尚未產生為 null"),
 });
 export type QuestionDetail = z.infer<typeof QuestionDetailSchema>;

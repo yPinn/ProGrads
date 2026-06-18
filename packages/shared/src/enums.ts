@@ -30,11 +30,17 @@ export type ReviewStatus = z.infer<typeof ReviewStatus>;
 export const Confidence = z.enum(["high", "medium", "low"]).describe("AI 解析信心度:高 / 中 / 低");
 export type Confidence = z.infer<typeof Confidence>;
 
+// Mirrors the DB AdmissionEvent enum (schema.prisma); keep in sync.
 export const AdmissionEvent = z.enum([
+  "account_open",
   "registration_start",
   "registration_end",
+  "document_deadline",
+  "admit_card",
   "written_exam",
+  "shortlist",
   "interview",
   "result",
+  "enrollment",
 ]);
 export type AdmissionEvent = z.infer<typeof AdmissionEvent>;

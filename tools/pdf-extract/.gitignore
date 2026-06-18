@@ -1,0 +1,6 @@
+# Rendered PDF page images are LOCAL intermediates and must never be committed here.
+# This repo is PUBLIC OSS; prospectus/exam renders contain copyrighted content and
+# belong in the PRIVATE content repo's ignored images/ tree (see ProGrads-content/.gitignore),
+# e.g. ProGrads-content/images/admissions/<year>/<school>/<season>/prospectus/page-NN.png
+out/
+*.png

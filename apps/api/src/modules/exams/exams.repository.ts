@@ -15,11 +15,20 @@ export class ExamsRepository {
     return this.prisma.exam.findMany({
       where: {
         ...(filters.school ? { school: { slug: filters.school } } : {}),
-        ...(filters.track ? { department: { track: { slug: filters.track } } } : {}),
+        ...(filters.track
+          ? {
+              examSubjects: {
+                some: { departments: { some: { department: { track: { slug: filters.track } } } } },
+              },
+            }
+          : {}),
         ...(filters.year ? { year: filters.year } : {}),
         ...(filters.admissionType ? { admissionType: filters.admissionType } : {}),
       },
-      include: { school: true, department: true },
+      include: {
+        school: true,
+        examSubjects: { include: { departments: { include: { department: true } } } },
+      },
       orderBy: [{ year: "desc" }, { school: { slug: "asc" } }],
     });
   }
@@ -29,10 +38,12 @@ export class ExamsRepository {
       where: { id },
       include: {
         school: true,
-        department: true,
         examSubjects: {
-          include: { subjects: { include: { subject: true } } },
-          orderBy: { name: "asc" },
+          include: {
+            subjects: { include: { subject: true } },
+            departments: { include: { department: true } },
+          },
+          orderBy: { slug: "asc" },
         },
       },
     });

@@ -24,6 +24,7 @@
 - **主軸是「類組(track)」不是「學校」**：考生心智 = 先定「我要考資工所」→ 挑學校 → 看考哪幾科。導覽、URL、SEO 以 track 為入口。
 - **考科是全域共用題庫**：台大資工、清大資工都考「演算法」→ 同一 subject 匯集各校各年題目；考生要跨校一起練。
 - **考科跨類組共用**：線代/離散同屬資工所與電機所；微積分/經濟學橫跨更多 → `subject` ↔ `track` 為 M:N。
+- **物理考卷跨系所共用**：台大資工與多媒體所考同一份「資料結構與演算法」「英文」（位元相同）→ 考卷的身分是 `(校,年,管道,卷slug)`、**不含系所**；共用卷只存一份，「哪些系所考此卷」掛 `exam_subject` ↔ `department` M:N。**只有「對卷單一從屬」的維度（校/年）能當儲存層**，subject 與 department 皆 M:N → 退化為標籤（合科卷證明 subject 當不了儲存單位；共用卷證明 department 當不了）。
 - ⚠️ 大碩把**資管歸「商管類」**（非理工）→ category 必須資料化，禁止「理工=有程式」這類寫死假設。
 
 ## 核心模型（雙軸 + 共用題庫）
@@ -36,11 +37,13 @@ subject 【全域共用題庫】(資料結構/演算法/線代/經濟學…)
   └ knowledge_point (tree, 屬 subject)
 
 school └ department (台大資工系) ──歸屬──> program_track (nullable)
-            ├ admission_group (招生組別: 甲/乙/丙…)  ← 報考單位; 招生方式/名額/考科 掛勾於此
-            └ exam (school + dept + year + admission_type [+ group])
-                  └ exam_subject (考卷節次/科目組, 綁 1..n subject)  ← 合科卷
-                        └ question ─┬ exam_subject_id (來源整卷)
-                                    └ ⇅ M:N question_subject (granular 練習標記)
+            └ admission_group (招生組別: 甲/乙/丙…)  ← 報考單位; 招生方式/名額/考科 掛勾於此
+
+school └ exam (school + year + admission_type)  ← 某校某年某管道的考試場次 (不含系所)
+            └ exam_subject (物理考卷, slug 唯一, 綁 1..n subject)  ← 合科卷, 去重單位
+                  ├ ⇅ M:N exam_subject_department (共用卷被多系所採用)  ← 系所退化為標籤
+                  └ question ─┬ exam_subject_id (來源整卷)
+                              └ ⇅ M:N question_subject (granular 練習標記)
 
 admission_schedule (school, dept?, admission_type, year, event_type, date)
 admission_stat     (school, dept, admission_type, year, applicants/quota/admitted)
@@ -62,7 +65,7 @@ department (系所, 穩定)
 - **穩定身分**（組別存在、代號甲乙丙、名稱）→ `admission_group`，可進 **seed/reference**。新增一組 = INSERT 一列，不動舊資料。
 - **逐年變動的事實**（考科、名額、報名日程、錄取標準）→ 掛在 `(組別 × 年)` 的記錄上，由 sync/scrape 灌。改考科/補名額 = 新增當年一列，**永不改寫組別身分**。
 
-> **考卷↔組別**：`exam.admission_group_id`（nullable FK）已串接——sync 時以 `(department, code=group)` 解析填入，不分組或該組未建則為 null。`exam.group` 字串保留為來自路徑的冪等 upsert key，FK 為 join 加速欄。刪組別不連帶刪已歸檔考卷（`SetNull`）。
+> **考卷↔組別**：考卷去系所化後，`exam` 不再帶 `department_id`/`group`/`admission_group_id`——共用卷橫跨多組，單一 group FK 本就失真。卷↔系所改走 `exam_subject.departments`（M:N，來源＝題目 frontmatter `departments` 的聯集）；卷↔招生組別 M:N 留待招生 pipeline（另一刀）。
 >
 > ⚠️ **未竟**：`admission_stat` 的 key 仍為 `(school, dept, admission_type, year)` **無 group** → 名額分組改掛 `admission_round.quota`（見下）；`admission_stat` 之整併待後續。
 
@@ -71,7 +74,7 @@ department (系所, 穩定)
 原模型整體成立，以下 4 個例外已併入上方模型：
 
 1. **合科卷**（台大資工「資料結構與演算法」一卷兩科）：`exam_subject` 可綁多 subject；`question.exam_subject_id`（整卷重現）+ `question_subject` M:N（跨校練單科）。
-2. **組別**（電機所甲/乙/丙組考不同科、名額分組）：升級為 `admission_group` 實體（招生的真正單位，見上「招生組別」節）；`exam.admission_group_id` FK 已串接（`group` 字串續為 sync key）。
+2. **組別**（電機所甲/乙/丙組考不同科、名額分組）：升級為 `admission_group` 實體（招生的真正單位，見上「招生組別」節）。考卷已去系所化（`exam` = 校×年×管道），不再掛 `group`/`admission_group_id`；卷↔組 M:N 留待招生 pipeline。
 3. **招生管道獨立於筆試**（推甄只有書審+面試、無考古題）：`admission_schedule` / `admission_stat` 綁 `(school, dept, admission_type, year)`，不依賴 `exam`；`exam` 只在 `考試入學` 管道存在。
 4. **未分類系所**：`department.track_id` 可 null + 「其他」catch-all + `metadata jsonb`。
 
@@ -104,6 +107,14 @@ department (系所, 穩定)
 - **`Asset`（blob 參照表，規劃中）**：二進位大檔（Tier0 raw 整卷、整卷答案匯出快取）永不進 DB。**現況**以 Git LFS 存於私有 content repo；**規劃**大規模後遷 blob store，DB 只留參照列：`storageKey / sha256 / bytes / contentType`（內容定址、去重、license-gated 下載）。
 - **raw 參照**：`ExamSubject` 連到 `Asset`（Tier0）；下載權限由 `license_status` gate。
 - **整卷答案匯出快取**：整卷答案不另存實體，由 index（`Question.order`）即時組合，產生後做內容定址快取（見 03）。
+
+**招生增量（規劃中，由 [03](03-content-pipeline.md) §招生資料 五份壓測導出）**——三層擁有者 ①季 → ②時間表 → ③組：
+
+- **①季**：新欄/實體——`application_fee` + 減免、`announced_at`（公告日＝簡章新鮮度錨點）、新鮮度狀態（`not_published/published/superseded`）、放榜 `batch`/`sequence`（多梯次）。
+- **②`exam_timetable`（新實體，校級）**：subject × 節次 × `at`(時分) × `calculator_allowed` × 考場。**考試時間掛科目/節次（校級共用），非掛組**——筆試時間表全校共用，系所明細頁只有佔分%。
+- **③`AdmissionRound` / `AdmissionRoundSubject` 擴欄**：`code`(官方招生代碼,如 2131/1000)、考科 `weight`(%) + 筆試/面試別、面試 `at`、`身分別`(一般/在職/外籍/低收)、同分參酌順序、特定報考資格、指定參考用書、放榜梯次。
+- `AdmissionEvent` 新增 `enrollment`（報到）。
+- **聯招（台聯大）**：一卷被多 (校,系,組) 共用，打破 `Exam` 1:校系組 → 招生聯盟實體，列為獨立後續 spike（見 03 §聯招）。
 
 ## 列舉（放 packages/shared，Zod）
 
