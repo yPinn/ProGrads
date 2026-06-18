@@ -52,16 +52,17 @@ export const AdmissionQuerySchema = z.object({
 });
 export type AdmissionQuery = z.infer<typeof AdmissionQuerySchema>;
 
-// 行事曆項目:攤平的單一招生事件(供時程瀏覽與 deadline 提醒)。
+// 行事曆項目:攤平的單一招生事件(供時程瀏覽與 deadline 提醒)。事件為校級(招生季),
+// 故只到校,不含系所/組;各組面試日期等組級事實見 /admissions 的 round。
 export const AdmissionScheduleItemSchema = z.object({
   school: z.object({ slug: z.string(), name: z.string() }).describe("學校"),
-  department: z.object({ slug: z.string(), name: z.string() }).describe("系所"),
-  groupCode: z.string().describe("組別代號;不分組為空字串"),
   year: z.number().int().describe("西元學年"),
   admissionType: AdmissionType,
   event: AdmissionEvent,
   at: z.string().datetime({ offset: true }).describe("事件時間(ISO 8601)"),
+  endAt: z.string().datetime({ offset: true }).nullable().describe("跨日/區間結束;無則 null"),
   location: z.string().nullable().describe("地點;無則 null"),
+  sequence: z.number().int().nullable().describe("放榜梯次;無則 null"),
 });
 export type AdmissionScheduleItem = z.infer<typeof AdmissionScheduleItemSchema>;
 

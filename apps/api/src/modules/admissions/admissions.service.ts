@@ -39,25 +39,22 @@ export class AdmissionsService {
     }));
   }
 
-  // 行事曆:某招生季(年)的事件,攤平含校/系/組與時間。
+  // 行事曆:某招生季(年)的校級事件,攤平含校與時間。
   async getSchedule(filters: {
     year: number;
     school?: string;
     event?: AdmissionEvent;
   }): Promise<AdmissionScheduleItem[]> {
     const events = await this.repo.findEvents(filters);
-    return events.map((e) => {
-      const dept = e.round.group.department;
-      return {
-        school: { slug: dept.school.slug, name: dept.school.name },
-        department: { slug: dept.slug, name: dept.name },
-        groupCode: e.round.group.code,
-        year: e.round.year,
-        admissionType: e.round.admissionType,
-        event: e.event,
-        at: e.at.toISOString(),
-        location: e.location,
-      };
-    });
+    return events.map((e) => ({
+      school: { slug: e.season.school.slug, name: e.season.school.name },
+      year: e.season.year,
+      admissionType: e.season.admissionType,
+      event: e.event,
+      at: e.at.toISOString(),
+      endAt: e.endAt ? e.endAt.toISOString() : null,
+      location: e.location,
+      sequence: e.sequence,
+    }));
   }
 }

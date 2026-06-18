@@ -2,8 +2,9 @@ import { Injectable } from "@nestjs/common";
 import type { AdmissionEvent } from "@prograds/shared";
 import { PrismaService } from "../../prisma/prisma.service.js";
 
-// Thin data-access layer over Prisma for the admissions axis
-// (admission_group → admission_round → events + subjects).
+// Thin data-access layer over Prisma for the admissions axis: groups/rounds
+// (admission_group → admission_round → subjects) and the school-level season calendar
+// (admission_season → events).
 @Injectable()
 export class AdmissionsRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -27,23 +28,18 @@ export class AdmissionsRepository {
     });
   }
 
-  // Flat calendar of events for a year, optionally filtered by school / event type.
+  // Flat calendar of school-level season events for a year, optionally filtered by
+  // school / event type.
   findEvents(filters: { year: number; school?: string; event?: AdmissionEvent }) {
-    return this.prisma.admissionRoundEvent.findMany({
+    return this.prisma.admissionSeasonEvent.findMany({
       where: {
         ...(filters.event ? { event: filters.event } : {}),
-        round: {
+        season: {
           year: filters.year,
-          ...(filters.school
-            ? { group: { department: { school: { slug: filters.school } } } }
-            : {}),
+          ...(filters.school ? { school: { slug: filters.school } } : {}),
         },
       },
-      include: {
-        round: {
-          include: { group: { include: { department: { include: { school: true } } } } },
-        },
-      },
+      include: { season: { include: { school: true } } },
       orderBy: { at: "asc" },
     });
   }
