@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import type { Choice, Meta, QuestionDetail, QuestionSummary, Subject } from "@prograds/shared";
+import { mapSchool, uniqueDepartments } from "../../common/mappers.js";
 import { QuestionFilters, QuestionsRepository } from "./questions.repository.js";
 
 interface ChoiceRow {
@@ -10,18 +11,6 @@ interface ChoiceRow {
 interface SubjectRow {
   subject: { id: string; slug: string; name: string };
 }
-interface SchoolRow {
-  id: string;
-  slug: string;
-  name: string;
-}
-interface DepartmentRow {
-  id: string;
-  slug: string;
-  name: string;
-  schoolId: string;
-  trackId: string | null;
-}
 
 function mapSubjects(rows: SubjectRow[]): Subject[] {
   return rows.map((r) => ({ id: r.subject.id, slug: r.subject.slug, name: r.subject.name }));
@@ -29,20 +18,6 @@ function mapSubjects(rows: SubjectRow[]): Subject[] {
 
 function mapChoices(rows: ChoiceRow[]): Choice[] {
   return rows.map((c) => ({ label: c.label, contentMd: c.contentMd, isCorrect: c.isCorrect }));
-}
-
-function mapSchool(s: SchoolRow) {
-  return { id: s.id, slug: s.slug, name: s.name };
-}
-
-function mapDepartments(rows: { department: DepartmentRow }[]) {
-  return rows.map((r) => ({
-    id: r.department.id,
-    slug: r.department.slug,
-    name: r.department.name,
-    schoolId: r.department.schoolId,
-    trackId: r.department.trackId,
-  }));
 }
 
 @Injectable()
@@ -64,7 +39,7 @@ export class QuestionsService {
         id: q.examSubject.id,
         slug: q.examSubject.slug,
         name: q.examSubject.name,
-        departments: mapDepartments(q.examSubject.departments),
+        departments: uniqueDepartments(q.examSubject.departments),
       },
       exam: {
         id: q.examSubject.exam.id,
@@ -99,7 +74,7 @@ export class QuestionsService {
         slug: es.slug,
         name: es.name,
         subjects: mapSubjects(es.subjects),
-        departments: mapDepartments(es.departments),
+        departments: uniqueDepartments(es.departments),
       },
       exam: {
         id: es.exam.id,
