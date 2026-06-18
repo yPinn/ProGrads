@@ -11,5 +11,9 @@ export default defineVitestConfig({
     // Booting the Nuxt env (first run) is slow, especially on Windows.
     hookTimeout: 120_000,
     testTimeout: 30_000,
+    environmentOptions: {
+      // Empty API base in tests so registerEndpoint() mocks intercept relative requests.
+      nuxt: { overrides: { runtimeConfig: { public: { apiBaseUrl: "" } } } },
+    },
   },
 });
