@@ -4,7 +4,7 @@ import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { Logger } from "nestjs-pino";
-import { ZodValidationPipe } from "nestjs-zod";
+import { cleanupOpenApiDoc, ZodValidationPipe } from "nestjs-zod";
 import { AppModule } from "./app.module.js";
 import { HttpExceptionFilter } from "./common/http-exception.filter.js";
 
@@ -32,7 +32,8 @@ async function bootstrap(): Promise<void> {
     .addTag("departments", "系所（跨軸：track ↔ school）")
     .addTag("exams", "考卷（school × dept × year；含合科卷）")
     .build();
-  SwaggerModule.setup("api/v1/docs", app, SwaggerModule.createDocument(app, config), {
+  const document = cleanupOpenApiDoc(SwaggerModule.createDocument(app, config));
+  SwaggerModule.setup("api/v1/docs", app, document, {
     jsonDocumentUrl: "api/v1/docs-json",
     customSiteTitle: "ProGrads API Docs",
     swaggerOptions: { operationsSorter: "alpha", persistAuthorization: true },
