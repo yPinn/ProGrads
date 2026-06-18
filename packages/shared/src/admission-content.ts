@@ -20,7 +20,7 @@ export type AdmissionStatus = z.infer<typeof AdmissionStatus>;
 
 // ---------- 區A: schedule.yml ----------
 
-// 事件詞彙 = DB AdmissionEvent 的超集 (sync 對映已知, 其餘待 schema 增量).
+// 事件詞彙, 與 DB AdmissionEvent enum 一一對應 (sync 直接映射, 同序).
 export const ScheduleEvent = z.enum([
   "account_open", // 取得繳費帳號 (報名前置)
   "registration_start",
