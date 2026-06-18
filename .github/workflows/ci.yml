@@ -37,5 +37,26 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+  # One job per package so each Vitest job-summary is attributed to its package
+  # (vitest's "Vitest Test Report" header is fixed, so separate jobs disambiguate).
+  test:
+    name: test (${{ matrix.package }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [apps/api, apps/web, packages/shared]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
       - name: Test
-        run: pnpm test
+        run: pnpm turbo run test --filter="./${{ matrix.package }}"
