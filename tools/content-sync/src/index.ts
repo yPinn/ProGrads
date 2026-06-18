@@ -3,6 +3,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prograds/db";
+import { syncDepartments, syncSchedule } from "./admissions.js";
 import {
   Resolver,
   reconcileExamSubjectDepartments,
@@ -15,18 +16,18 @@ function contentRoot(): string | null {
   return null;
 }
 
-function listQuestionFiles(root: string): string[] {
-  const questionsDir = path.join(root, "questions");
+// List files under `subdir` matching `ext`, returned as repo-relative POSIX paths.
+function listFiles(root: string, subdir: string, ext: string): string[] {
   let entries: string[];
   try {
-    entries = readdirSync(questionsDir, { recursive: true }) as string[];
+    entries = readdirSync(path.join(root, subdir), { recursive: true }) as string[];
   } catch {
-    return []; // no questions/ yet
+    return []; // subdir not present yet
   }
   return entries
     .map((e) => e.replace(/\\/g, "/"))
-    .filter((e) => e.endsWith(".md"))
-    .map((e) => `questions/${e}`)
+    .filter((e) => e.endsWith(ext))
+    .map((e) => `${subdir}/${e}`)
     .sort();
 }
 
@@ -43,9 +44,13 @@ async function main(): Promise<void> {
     );
     return;
   }
-  const files = listQuestionFiles(root);
+  const files = listFiles(root, "questions", ".md");
+  const scheduleFiles = listFiles(root, "admissions", "schedule.yml");
+  const departmentFiles = listFiles(root, "admissions", "departments.yml");
   // eslint-disable-next-line no-console
-  console.log(`content-sync: ${files.length} question file(s) under ${root}`);
+  console.log(
+    `content-sync: ${files.length} question file(s), ${scheduleFiles.length} schedule.yml, ${departmentFiles.length} departments.yml under ${root}`,
+  );
 
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
   const resolver = new Resolver(prisma);
@@ -53,6 +58,8 @@ async function main(): Promise<void> {
   const deptsByExamSubject = new Map<string, Set<string>>();
   let synced = 0;
   let skipped = 0;
+  let seasons = 0;
+  let admissionGroups = 0;
   const errors: string[] = [];
 
   try {
@@ -76,11 +83,31 @@ async function main(): Promise<void> {
       }
     }
 
+    for (const rel of scheduleFiles) {
+      try {
+        const raw = readFileSync(path.join(root, rel), "utf8");
+        const result = await syncSchedule(prisma, resolver, rel, raw);
+        if (!("skipped" in result)) seasons++;
+      } catch (err) {
+        errors.push(`${rel}: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
+    for (const rel of departmentFiles) {
+      try {
+        const raw = readFileSync(path.join(root, rel), "utf8");
+        const result = await syncDepartments(prisma, resolver, rel, raw);
+        if (!("skipped" in result)) admissionGroups += result.groups;
+      } catch (err) {
+        errors.push(`${rel}: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
     const reconciled = await reconcileExamSubjects(prisma, touched);
     const deptLinks = await reconcileExamSubjectDepartments(prisma, deptsByExamSubject);
     // eslint-disable-next-line no-console
     console.log(
-      `content-sync done: synced=${synced} skipped=${skipped} reconciled=${reconciled} deptLinks=${deptLinks}`,
+      `content-sync done: synced=${synced} skipped=${skipped} reconciled=${reconciled} deptLinks=${deptLinks} seasons=${seasons} admissionGroups=${admissionGroups}`,
     );
 
     if (errors.length > 0) {

@@ -51,7 +51,7 @@
 ## D9. 提醒通路
 
 - **決策**：先做 Email（Resend）；LINE 後期。
-- **理由**：⚠️ LINE Notify 已於 2025-03-31 終止，改用 LINE Messaging API（官方帳號）成本較高，延後。
+- **理由**：LINE Notify 已於 2025-03-31 終止，改用 LINE Messaging API（官方帳號）成本較高，延後。
 - **狀態**：待最終確認。
 
 ## D10. 版號：單一產品版號

@@ -21,43 +21,50 @@ export class AdmissionsService {
       rounds: g.rounds.map((r) => ({
         year: r.year,
         admissionType: r.admissionType,
+        admissionCode: r.admissionCode,
+        applicantType: r.applicantType,
         quota: r.quota,
         applicants: r.applicants,
         admitted: r.admitted,
+        resultBatch: r.resultBatch,
+        methods: r.methods,
+        calculator: r.calculator,
+        writtenWeight: r.writtenWeight,
+        interviewWeight: r.interviewWeight,
+        interviewAt: r.interviewAt ? r.interviewAt.toISOString() : null,
+        tiebreak: r.tiebreak,
         sourceUrl: r.sourceUrl,
-        events: r.events.map((e) => ({
-          event: e.event,
-          at: e.at.toISOString(),
-          location: e.location,
-        })),
-        subjects: r.subjects.map((s) => ({
-          slug: s.subject.slug,
-          name: s.subject.name,
-          note: s.note,
+        papers: r.papers.map((p) => ({
+          name: p.name,
+          section: p.section,
+          weight: p.weight,
+          note: p.note,
+          subjects: p.subjects.map((link) => ({
+            id: link.subject.id,
+            slug: link.subject.slug,
+            name: link.subject.name,
+          })),
         })),
       })),
     }));
   }
 
-  // 行事曆:某招生季(年)的事件,攤平含校/系/組與時間。
+  // 行事曆:某招生季(年)的校級事件,攤平含校與時間。
   async getSchedule(filters: {
     year: number;
     school?: string;
     event?: AdmissionEvent;
   }): Promise<AdmissionScheduleItem[]> {
     const events = await this.repo.findEvents(filters);
-    return events.map((e) => {
-      const dept = e.round.group.department;
-      return {
-        school: { slug: dept.school.slug, name: dept.school.name },
-        department: { slug: dept.slug, name: dept.name },
-        groupCode: e.round.group.code,
-        year: e.round.year,
-        admissionType: e.round.admissionType,
-        event: e.event,
-        at: e.at.toISOString(),
-        location: e.location,
-      };
-    });
+    return events.map((e) => ({
+      school: { slug: e.season.school.slug, name: e.season.school.name },
+      year: e.season.year,
+      admissionType: e.season.admissionType,
+      event: e.event,
+      at: e.at.toISOString(),
+      endAt: e.endAt ? e.endAt.toISOString() : null,
+      location: e.location,
+      sequence: e.sequence,
+    }));
   }
 }

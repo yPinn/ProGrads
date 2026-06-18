@@ -1,27 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import type { AdmissionType, ExamDetail, ExamSummary } from "@prograds/shared";
+import { mapSchool, uniqueDepartments } from "../../common/mappers.js";
 import { ExamsRepository } from "./exams.repository.js";
-
-interface DeptRow {
-  id: string;
-  slug: string;
-  name: string;
-  schoolId: string;
-  trackId: string | null;
-}
-
-function mapDept(d: DeptRow) {
-  return { id: d.id, slug: d.slug, name: d.name, schoolId: d.schoolId, trackId: d.trackId };
-}
-
-// Unique departments across a set of {department} link rows (preserves first-seen order).
-function uniqueDepts(links: { department: DeptRow }[]): ReturnType<typeof mapDept>[] {
-  const seen = new Map<string, ReturnType<typeof mapDept>>();
-  for (const { department } of links) {
-    if (!seen.has(department.id)) seen.set(department.id, mapDept(department));
-  }
-  return [...seen.values()];
-}
 
 @Injectable()
 export class ExamsService {
@@ -38,8 +18,8 @@ export class ExamsService {
       id: e.id,
       year: e.year,
       admissionType: e.admissionType,
-      school: { id: e.school.id, slug: e.school.slug, name: e.school.name },
-      departments: uniqueDepts(e.examSubjects.flatMap((es) => es.departments)),
+      school: mapSchool(e.school),
+      departments: uniqueDepartments(e.examSubjects.flatMap((es) => es.departments)),
     }));
   }
 
@@ -52,8 +32,8 @@ export class ExamsService {
       id: exam.id,
       year: exam.year,
       admissionType: exam.admissionType,
-      school: { id: exam.school.id, slug: exam.school.slug, name: exam.school.name },
-      departments: uniqueDepts(exam.examSubjects.flatMap((es) => es.departments)),
+      school: mapSchool(exam.school),
+      departments: uniqueDepartments(exam.examSubjects.flatMap((es) => es.departments)),
       examSubjects: exam.examSubjects.map((es) => ({
         id: es.id,
         slug: es.slug,
@@ -65,7 +45,7 @@ export class ExamsService {
           slug: link.subject.slug,
           name: link.subject.name,
         })),
-        departments: uniqueDepts(es.departments),
+        departments: uniqueDepartments(es.departments),
       })),
     };
   }

@@ -44,3 +44,7 @@ export const AdmissionEvent = z.enum([
   "enrollment",
 ]);
 export type AdmissionEvent = z.infer<typeof AdmissionEvent>;
+
+// Mirrors the DB ExamMethod enum (schema.prisma); keep in sync. 筆試 / 審查 / 口試.
+export const ExamMethod = z.enum(["written", "review", "interview"]);
+export type ExamMethod = z.infer<typeof ExamMethod>;
