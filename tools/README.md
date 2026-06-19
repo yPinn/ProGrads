@@ -4,7 +4,7 @@ TypeScript + tsx 執行的 workspace 套件。流程見
 [docs/03-content-pipeline.md](../docs/03-content-pipeline.md) 與
 [docs/04-ai-pipeline.md](../docs/04-ai-pipeline.md)。
 
-- **`content-sync`**（`@prograds/content-sync`）：`ProGrads-content` → Postgres 同步（gray-matter + Zod 驗證 + 冪等 upsert + 合科卷 reconcile）。
+- **`content-sync`**（`@prograds/content-sync`）：`ProGrads-content` → Postgres 同步（gray-matter + Zod 驗證 + 冪等 upsert + 合科卷 reconcile + 招生 schedule/departments importer）。
   執行：`pnpm --filter @prograds/content-sync sync`。
 - **`ai-pipeline`**（`@prograds/ai-pipeline`）：列出缺少標準解答的題目，批次離線生成解答。
   執行：`pnpm --filter @prograds/ai-pipeline list-pending`。

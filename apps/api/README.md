@@ -18,7 +18,7 @@ pnpm --filter @prograds/api test      # Vitest
 
 - ESM + tsc（NodeNext）以正確發出 decorator metadata（DI 所需）；相對 import 帶 `.js`。
 - 預設埠 **8088**（`PORT`）；全域 prefix **`/api/v1`**（D10 API 版本）；`GET /api/v1/health`；Swagger UI 於 **`/api/v1/docs`**。
-- 已接：PrismaModule（`@prisma/adapter-pg`）、env 驗證（Zod，啟動即驗）、pino 結構化日誌、`@fastify/helmet`、全域 `ZodValidationPipe`（nestjs-zod）、全域 `HttpExceptionFilter`（統一錯誤信封）。
-- 已實作模組：`taxonomy`（categories/tracks/subjects）、`schools`（schools/departments）、`exams`（含合科卷）。DTO 由 `@prograds/shared` 的 Zod 契約生成。
-- 規劃中：`questions / explanations / schedules / stats / ai / users`。
-- **下一步**：`questions` 讀取 API（資料由 `tools/content-sync` 同步入庫）。
+- 已接：PrismaModule（`@prisma/adapter-pg`）、env 驗證（Zod，啟動即驗）、pino 結構化日誌、`@fastify/helmet`、CORS（`WEB_BASE_URL` 來源）、全域 `ZodValidationPipe`（nestjs-zod）、全域 `HttpExceptionFilter`（統一錯誤信封）。
+- 已實作模組：`taxonomy`（categories/tracks/subjects）、`schools`（schools/departments）、`exams`（含合科卷）、`questions`（含 choices）、`admissions`（admissions/schedules）。DTO 由 `@prograds/shared` 的 Zod 契約生成。
+- 規劃中：`explanations / stats / ai / users`。
+- **下一步**：`ai` 解析 API、認證（`users`）。

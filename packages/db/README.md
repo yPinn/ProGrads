@@ -15,7 +15,7 @@ PostgreSQL + **Prisma 7**，供 `apps/api` 與 `tools/` 共用。資料模型見
 pnpm --filter @prograds/db db:generate   # 產生 client（= build）
 pnpm --filter @prograds/db db:validate   # 驗證 schema
 pnpm --filter @prograds/db db:migrate    # 建/套 migration（互動，需 DB）
-pnpm --filter @prograds/db db:seed       # 參照資料（分類/學校/系所 + 招生組別）
+pnpm --filter @prograds/db db:seed       # 參照資料（分類/學校/系所；招生組別已改為 content-derived）
 ```
 
 > 內容資料（questions/exams/explanations…）由 `tools/content-sync` 從私有 ProGrads-content repo 同步，**不進 seed**（見 [docs/03](../../docs/03-content-pipeline.md)）。

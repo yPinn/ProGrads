@@ -53,7 +53,7 @@ pnpm --filter @prograds/web dev           # 前端（http://localhost:3000）
 
 工作區指令：`pnpm dev`（各 app）、`pnpm lint` / `lint:fix`、`pnpm format` / `format:check`、`pnpm fix`、`pnpm typecheck`、`pnpm test`。
 
-> 進度：`apps/web` 已 scaffold；`packages/db`（Prisma）+ `apps/api`（taxonomy / schools / exams 讀取 API）+ `tools/content-sync`（content → DB 同步）已就緒。下一步：questions 讀取 API、AI pipeline。
+> 進度：`apps/web` 骨架 + 招生行事曆 / 考古題瀏覽頁已就緒；`packages/db`（Prisma）+ `apps/api`（taxonomy / schools / exams / questions / admissions / schedules 讀取 API）+ `tools/content-sync`（content → DB 同步）已就緒。下一步：AI pipeline、內容渲染（KaTeX/Shiki）。
 
 ## 授權
 

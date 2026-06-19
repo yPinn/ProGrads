@@ -34,6 +34,7 @@
 - JWT 放 httpOnly cookie，網域設父網域（`*.domain`）以跨 `app.` / `api.` 子網域。
 - 公開內容端點免登入；做題記錄 / 提醒訂閱 / AI 追問需登入。
 - 限流：`@nestjs/throttler` + CF 邊緣雙層。
+- CORS：API 僅允許 `WEB_BASE_URL` 來源、`credentials: true`（供 cookie 跨子網域）；dev fallback `http://localhost:3000`。
 
 ## 邊界驗證
 
@@ -41,4 +42,4 @@
 
 ## 文件
 
-`@nestjs/swagger` 自動產生 OpenAPI（`/api/docs`），供貢獻者與前端型別生成使用。
+`@nestjs/swagger` 自動產生 OpenAPI（`/api/v1/docs`，JSON 於 `/api/v1/docs-json`），供貢獻者與前端型別生成使用。

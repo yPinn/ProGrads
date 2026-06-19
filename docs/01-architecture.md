@@ -82,7 +82,7 @@ apps/api/src/
 
 ### modules 藍圖
 
-對齊資料層，逐一照上述範本擴充（已做：`taxonomy`）：
+對齊資料層，逐一照上述範本擴充（已做：`taxonomy / schools / exams / questions / admissions`）：
 
 ```text
 modules/{taxonomy, questions, explanations, schedules, stats, ai, users}
