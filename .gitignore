@@ -45,3 +45,4 @@ Thumbs.db
 
 # AI tool config (personal, not project)
 .claude/
+tasks/
