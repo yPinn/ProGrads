@@ -119,7 +119,7 @@ department (系所, 穩定)
 ## 列舉（放 packages/shared，Zod）
 
 - `license_status`：`national_exam | school_official | unknown`
-- `admission_type`：`考試入學 | 推甄 | 在職專班`
+- `admission_type`：`exam | recommended | in_service`（考試入學 / 推甄 / 在職專班）
 - `question_type`：`mc | essay | calc | proof | cloze | listening`
 - `answer_type`：`single_choice | multi_choice | numeric | essay | proof`
 - `review_status`：`ai_generated | human_verified | flagged`

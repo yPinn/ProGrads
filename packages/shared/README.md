@@ -4,8 +4,8 @@ Zod 為單一事實來源，前後端 + 內容 frontmatter 共用。純 TypeScri
 
 - `src/enums.ts`：domain 列舉（對應 `prisma/schema.prisma` 的 enums），同時匯出 Zod schema 與 `z.infer` 型別。
 - `src/api.ts`：統一回應/錯誤信封（`data` / `error`、`Meta`、`ErrorCode`）。
-- `src/taxonomy.ts`、`src/schools.ts`、`src/exams.ts`：各模組 request/response 契約（驅動 DTO + Swagger）。
-- `src/content.ts`：題目 frontmatter schema（content-sync 用；含 license 合規閘門）。
+- `src/taxonomy.ts`、`src/schools.ts`、`src/exams.ts`、`src/questions.ts`、`src/admissions.ts`：各模組 request/response 契約（驅動 DTO + Swagger）。
+- `src/content.ts`、`src/admission-content.ts`：題目與招生 frontmatter/yml schema（content-sync 用；含 license 合規閘門）。
 
 ```bash
 pnpm --filter @prograds/shared build     # tsc -> dist

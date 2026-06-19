@@ -18,6 +18,13 @@ async function bootstrap(): Promise<void> {
   app.useGlobalPipes(new ZodValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
 
+  // CORS for the cross-origin web app. Its origin is WEB_BASE_URL (dev :3000; prod app.<domain>).
+  // credentials:true so the httpOnly auth cookie can flow once auth lands.
+  app.enableCors({
+    origin: process.env.WEB_BASE_URL ?? "http://localhost:3000",
+    credentials: true,
+  });
+
   // Tags declared here in logical (domain) order with descriptions; controller @ApiTags
   // values must match these slugs (all lowercase plural). See docs/05-api-conventions.md.
   const config = new DocumentBuilder()
