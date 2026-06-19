@@ -21,7 +21,7 @@ const { data, isPending, isError, error, refetch } = useSchedules(
   <UContainer class="py-10">
     <div class="mb-6 flex items-center justify-between gap-4">
       <h1 class="text-2xl font-bold">招生行事曆</h1>
-      <USelect v-model="year" :items="yearOptions" class="w-36" />
+      <USelect v-model="year" :items="yearOptions" aria-label="學年" class="w-36" />
     </div>
 
     <div v-if="isPending" class="space-y-3">

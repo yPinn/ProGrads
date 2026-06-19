@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useQuestion } from "~/composables/useQuestion";
+import { ApiError } from "~/utils/api-error";
 import { QUESTION_TYPE_LABELS, REVIEW_STATUS_LABELS } from "~/utils/question-labels";
 import { ADMISSION_TYPE_LABELS } from "~/utils/admission-labels";
 
@@ -9,6 +10,14 @@ const route = useRoute();
 const externalId = computed(() => String(route.params.externalId));
 
 const { data: q, isPending, isError, error, refetch } = useQuestion(externalId);
+
+// A missing question is a real 404 page (SEO/UX), not an inline retry banner;
+// other failures (network/5xx) keep the retryable ErrorState below.
+watch(error, (e) => {
+  if (e instanceof ApiError && e.code === "NOT_FOUND") {
+    showError({ status: 404, statusText: "找不到題目" });
+  }
+});
 
 useSeoMeta({
   title: () =>
