@@ -1,4 +1,4 @@
-import type { AdmissionEvent, AdmissionType } from "@prograds/shared";
+import type { AdmissionEvent, AdmissionType, ExamMethod } from "@prograds/shared";
 
 // zh-TW display labels for admission enums. Moves to i18n message files in Phase 1.
 export const ADMISSION_EVENT_LABELS: Record<AdmissionEvent, string> = {
@@ -18,4 +18,10 @@ export const ADMISSION_TYPE_LABELS: Record<AdmissionType, string> = {
   exam: "考試",
   recommended: "推甄",
   in_service: "在職專班",
+};
+
+export const ADMISSION_METHOD_LABELS: Record<ExamMethod, string> = {
+  written: "筆試",
+  review: "審查",
+  interview: "口試",
 };

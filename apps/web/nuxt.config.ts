@@ -26,6 +26,7 @@ export default defineNuxtConfig({
     // API-driven pages render client-side (edge can't reach the origin DB at build time).
     // SEO prerender of question/answer pages comes with the content pipeline (Phase 2).
     "/schedules": { ssr: false },
+    "/admissions": { ssr: false },
     "/questions/**": { ssr: false },
   },
   // Formatting is handled by Prettier.

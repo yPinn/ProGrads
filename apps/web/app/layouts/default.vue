@@ -5,6 +5,7 @@
         <NuxtLink to="/" class="font-semibold">ProGrads</NuxtLink>
         <nav class="text-muted flex gap-4 text-sm">
           <NuxtLink to="/questions" class="hover:text-default">考古題庫</NuxtLink>
+          <NuxtLink to="/admissions" class="hover:text-default">報名情報</NuxtLink>
           <NuxtLink to="/schedules" class="hover:text-default">招生行事曆</NuxtLink>
         </nav>
       </UContainer>

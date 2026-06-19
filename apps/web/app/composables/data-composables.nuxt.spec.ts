@@ -4,6 +4,7 @@ import { defineComponent, h } from "vue";
 import { useSchedules } from "./useSchedules";
 import { useQuestions } from "./useQuestions";
 import { useQuestion } from "./useQuestion";
+import { useAdmissions } from "./useAdmissions";
 
 // Run a composable inside the real Nuxt app (so $api + QueryClient are wired) and expose
 // its result. Requests hit registerEndpoint() mocks because apiBaseUrl is "" in tests.
@@ -73,6 +74,42 @@ describe("useQuestions", () => {
       items: [questionSummary],
       meta: { page: 1, pageSize: 20, total: 1 },
     });
+  });
+});
+
+const admissionGroup = {
+  id: "g1",
+  code: "a",
+  name: "甲組",
+  displayOrder: 0,
+  rounds: [
+    {
+      year: 2025,
+      admissionType: "exam",
+      admissionCode: "8611",
+      applicantType: null,
+      quota: 30,
+      applicants: 120,
+      admitted: 35,
+      resultBatch: null,
+      methods: ["written"],
+      calculator: null,
+      writtenWeight: null,
+      interviewWeight: null,
+      interviewAt: null,
+      tiebreak: [],
+      sourceUrl: null,
+      papers: [{ name: "計算機數學", section: null, weight: null, note: null, subjects: [] }],
+    },
+  ],
+};
+
+describe("useAdmissions", () => {
+  it("fetches admission groups for a school + dept", async () => {
+    registerEndpoint("/admissions", () => ({ data: [admissionGroup] }));
+    const { result } = await runComposable(() => useAdmissions({ school: "ntu", dept: "csie" }));
+    await vi.waitFor(() => expect(result.isSuccess.value).toBe(true));
+    expect(result.data.value).toEqual([admissionGroup]);
   });
 });
 
