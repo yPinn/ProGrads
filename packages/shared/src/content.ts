@@ -16,6 +16,7 @@ export const QuestionFrontmatter = z.object({
   subjects: z.array(z.string().min(1)).min(1), // granular practice tags (question_subject), by slug
   departments: z.array(z.string().min(1)).min(1), // 考此卷的系所 slugs → ExamSubject↔Department M:N
   question_type: QuestionType,
+  points: z.number().positive().optional(), // 該題配分 (題幹標示, 如 5pts→5); 未標示或均一配分留空
   source_url: z.union([z.string().url(), z.literal("")]),
   license_status: ContentLicenseStatus,
   knowledge_points: z.array(z.string().min(1)).default([]), // parsed; not yet persisted (phase 2)

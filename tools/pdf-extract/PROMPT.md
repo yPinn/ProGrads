@@ -47,6 +47,9 @@
 - `source_url` 必填，用戶補上官方下載頁 URL 後才算完成
 - PDF 掃描件如有旋轉問題，請先修正 PDF 再轉圖片
 - `[?]` 標記的位置需人工修正後再執行 sync
+- 密集表格／程式碼／圖示辨識不清時，用 `crop` 高解析切割單一區域再讀：
+  `pnpm --filter @prograds/pdf-extract crop <pdf> <out.png> <page> <yTop> <yBot> [xL] [xR] [scale]`
+  （座標為頁面比例 0–1，與頁面尺寸無關；單張 PNG 寬度建議 ≤1900px）
 - `review_status` 萃取時留預設值 `ai_generated`；人工驗證後才改 `human_verified`
 
 ---
@@ -69,6 +72,7 @@ question_id: {school}-{dept}-{year}[-{group}]-{exam-subject-slug}-q{NN}
 exam_subject: {卷名中文顯示名}
 subjects: [{slug}]
 question_type: mc
+points: {配分數字, 未標示則省略此行}
 source_url: ""
 license_status: school_official
 group: ""
@@ -97,6 +101,7 @@ A
 | ------------------ | ---------------------------------------------------------------------------------- |
 | `question_id`      | `{school}-{dept}-{year}[-{group}]-{exam-subject-slug}-q01`（子題 `q01a` / `q01b`） |
 | `question_type`    | `mc` 選擇題 / `essay` 問答申論 / `calc` 計算 / `proof` 推導證明                    |
+| `points`           | 題幹標示的配分 (如 `(5pts)`→`5`、`(10 points)`→`10`);未標示或全卷均一則省略此行    |
 | `subjects`         | 確定的 slug 才填，不確定留 `[]`                                                    |
 | `knowledge_points` | 中文短語，≤5 個                                                                    |
 | `license_status`   | `school_official`（預設）；政府統一考試用 `national_exam`                          |
