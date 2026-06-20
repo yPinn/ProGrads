@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "to-images": "tsx src/to-images.ts",
+    "crop": "tsx src/crop.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit"
