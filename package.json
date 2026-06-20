@@ -18,6 +18,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "fix": "prettier --write . && pnpm run lint:fix",
+    "content": "prettier --write ../ProGrads-content && markdownlint-cli2 --fix \"../ProGrads-content/**/*.md\"",
+    "content:check": "prettier --check ../ProGrads-content && markdownlint-cli2 \"../ProGrads-content/**/*.md\"",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "clean": "turbo run clean && rimraf node_modules",
