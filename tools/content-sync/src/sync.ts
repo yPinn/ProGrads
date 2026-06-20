@@ -85,6 +85,8 @@ export async function syncFile(
   const standardAnswer = sections.get("標準解答") ?? "";
   if (!questionMd) throw new Error(`missing "## 題目" section: ${relPath}`);
   const knowledgeExtension = sections.get("知識點延伸") ?? null;
+  // 題組共用篇章(閱讀/克漏字): 只存於題組首題, 與該題自身題幹(## 題目)分離。
+  const passage = sections.get("題組篇章") ?? null;
 
   // MC: parse choices + answer; derive answerType dynamically.
   let answerType: "single_choice" | "multi_choice" | "numeric" | "essay" | "proof";
@@ -108,6 +110,8 @@ export async function syncFile(
     sourceUrl: fm.source_url,
     licenseStatus: fm.license_status,
     knowledgePoints: fm.knowledge_points,
+    ...(fm.group ? { group: fm.group } : {}),
+    ...(passage ? { passage } : {}),
     ...(knowledgeExtension ? { knowledgeExtension } : {}),
   };
 

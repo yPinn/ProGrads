@@ -40,6 +40,29 @@ export const QuestionSummarySchema = z.object({
 });
 export type QuestionSummary = z.infer<typeof QuestionSummarySchema>;
 
+// Paper-grouped view (考卷為單位): one entry per ExamSubject with its question list,
+// so the 題庫 can list papers and offer an in-paper 題號 selector.
+export const PaperQuestionRefSchema = z.object({
+  externalId: z.string().describe("題目對外唯一代碼"),
+  number: z.string().describe("題號"),
+  type: QuestionType,
+  group: z.string().nullable().describe("題組 slug(閱讀/克漏字共用篇章);非題組為 null"),
+});
+export type PaperQuestionRef = z.infer<typeof PaperQuestionRefSchema>;
+
+export const PaperSummarySchema = z.object({
+  examSubject: z.object({
+    id: z.string(),
+    slug: z.string(),
+    name: z.string(),
+    departments: z.array(DepartmentSchema).describe("考此卷的系所;共用卷為多系所"),
+  }),
+  exam: QuestionExamRefSchema.describe("考卷的精簡資訊(校×年×入學管道)"),
+  subjects: z.array(SubjectSchema).describe("該卷涵蓋考科(合科卷為多科)"),
+  questions: z.array(PaperQuestionRefSchema).describe("該卷題目(依題序);供題號選擇"),
+});
+export type PaperSummary = z.infer<typeof PaperSummarySchema>;
+
 // Cached standard answer (Tier2), shaped by answer_type.
 export const ExplanationSchema = z.object({
   standardAnswer: z.string().describe("標準答案(依 answerType 呈現)"),
@@ -73,6 +96,12 @@ export const QuestionDetailSchema = QuestionSummarySchema.extend({
     })
     .describe("題目所屬卷別(含合科卷組成與採用系所)"),
   explanation: ExplanationSchema.nullable().describe("快取的標準解析;尚未產生為 null"),
+  // 題組(閱讀/克漏字): 同篇 passage 的題目共用一個 group slug; 篇章存於題組首題。
+  group: z.string().nullable().describe("題組 slug;非題組為 null"),
+  groupPassageMd: z
+    .string()
+    .nullable()
+    .describe("題組共用篇章(Markdown,取自題組首題);非題組為 null"),
 });
 export type QuestionDetail = z.infer<typeof QuestionDetailSchema>;
 
@@ -96,4 +125,5 @@ export type QuestionQuery = z.infer<typeof QuestionQuerySchema>;
 
 // Response envelopes.
 export const QuestionsResponseSchema = paginatedResponse(QuestionSummarySchema);
+export const PapersResponseSchema = paginatedResponse(PaperSummarySchema);
 export const QuestionResponseSchema = dataResponse(QuestionDetailSchema);
