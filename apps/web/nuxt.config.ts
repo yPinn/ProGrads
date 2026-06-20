@@ -12,7 +12,13 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "@nuxt/eslint",
   ],
-  css: ["~/assets/css/main.css"],
+  css: ["~/assets/css/main.css", "katex/dist/katex.min.css"],
+  // Runtime MDC (<MDC :value>) renders DB-sourced Markdown; add math support so `$…$`
+  // (used heavily by DSA/math papers) renders via KaTeX. English papers need only base prose.
+  mdc: {
+    remarkPlugins: { "remark-math": {} },
+    rehypePlugins: { "rehype-katex": {} },
+  },
   // Public runtime config; override per-env via NUXT_PUBLIC_* (see docs/01-architecture.md env layers).
   runtimeConfig: {
     public: {

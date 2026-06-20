@@ -50,8 +50,17 @@ useSeoMeta({
         </UBadge>
       </div>
 
-      <!-- Raw markdown for now; rich math/code rendering (KaTeX/Shiki via MDC) arrives in Phase 2. -->
-      <div class="border-default rounded border p-4 whitespace-pre-wrap">{{ q.contentMd }}</div>
+      <!-- 題組(閱讀/克漏字)共用篇章:存於題組首題的 metadata.passage,組內每題皆呈現。 -->
+      <section v-if="q.groupPassageMd" class="border-default bg-elevated mb-3 rounded border p-4">
+        <h2 class="text-muted mb-2 text-xs font-semibold">題組共用篇章</h2>
+        <MDC :value="q.groupPassageMd" class="prose prose-sm dark:prose-invert max-w-none" />
+      </section>
+
+      <!-- contentMd 經 MDC 渲染(粗體/引用/清單/程式碼);數學式 KaTeX 待後續。 -->
+      <MDC
+        :value="q.contentMd"
+        class="border-default prose dark:prose-invert max-w-none rounded border p-4"
+      />
 
       <ul v-if="q.choices.length" class="mt-4 space-y-2">
         <li
@@ -61,7 +70,11 @@ useSeoMeta({
           :class="c.isCorrect ? 'text-primary font-medium' : ''"
         >
           <span class="shrink-0">({{ c.label }})</span>
-          <span class="whitespace-pre-wrap">{{ c.contentMd }}</span>
+          <MDC
+            :value="c.contentMd"
+            unwrap="p"
+            class="prose prose-sm dark:prose-invert max-w-none"
+          />
         </li>
       </ul>
 
@@ -70,7 +83,10 @@ useSeoMeta({
           <h2 class="font-semibold">標準解析</h2>
           <UBadge variant="subtle">{{ REVIEW_STATUS_LABELS[q.explanation.reviewStatus] }}</UBadge>
         </div>
-        <div class="whitespace-pre-wrap">{{ q.explanation.standardAnswer }}</div>
+        <MDC
+          :value="q.explanation.standardAnswer"
+          class="prose prose-sm dark:prose-invert max-w-none"
+        />
         <p class="text-muted mt-3 text-xs">AI 生成解析,僅供參考。</p>
       </section>
     </article>
