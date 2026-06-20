@@ -3,7 +3,7 @@ import { ref, computed, watch } from "vue";
 import { useQuestionPapers } from "~/composables/useQuestionPapers";
 import { QUESTION_TYPE_LABELS } from "~/utils/question-labels";
 import { ADMISSION_TYPE_LABELS } from "~/utils/admission-labels";
-import type { QuestionType } from "@prograds/shared";
+import type { PaperQuestionRef, QuestionType } from "@prograds/shared";
 
 useSeoMeta({
   title: "考古題庫",
@@ -41,6 +41,21 @@ const typeOptions = [
     value,
   })),
 ];
+
+// Cluster consecutive questions sharing a 題組 (passage/cloze set) so the 題號 selector can
+// visually bracket them. Questions arrive in paper order, so a single linear pass suffices.
+function groupRuns(
+  questions: PaperQuestionRef[],
+): { group: string | null; items: PaperQuestionRef[] }[] {
+  const runs: { group: string | null; items: PaperQuestionRef[] }[] = [];
+  for (const q of questions) {
+    const g = q.group ?? null;
+    const last = runs[runs.length - 1];
+    if (last && last.group === g) last.items.push(q);
+    else runs.push({ group: g, items: [q] });
+  }
+  return runs;
+}
 </script>
 
 <template>
@@ -95,18 +110,33 @@ const typeOptions = [
             </UBadge>
           </div>
 
-          <div class="flex flex-wrap gap-1.5">
-            <UButton
-              v-for="qq in p.questions"
-              :key="qq.externalId"
-              :to="`/questions/${qq.externalId}`"
-              color="neutral"
-              variant="soft"
-              size="xs"
-              :aria-label="`第 ${qq.number} 題(${QUESTION_TYPE_LABELS[qq.type]})`"
+          <!-- 題號選擇器:同題組(閱讀/克漏字共用篇章)的題號以虛線框 + 「題組」標示群聚。 -->
+          <div class="flex flex-wrap items-start gap-2">
+            <div
+              v-for="(run, i) in groupRuns(p.questions)"
+              :key="i"
+              class="flex flex-wrap items-center gap-1.5"
+              :class="
+                run.group
+                  ? 'border-primary/30 bg-primary/5 rounded-md border border-dashed px-2 py-1.5'
+                  : ''
+              "
             >
-              {{ qq.number }}
-            </UButton>
+              <UBadge v-if="run.group" color="primary" variant="soft" size="xs" :title="run.group">
+                題組
+              </UBadge>
+              <UButton
+                v-for="qq in run.items"
+                :key="qq.externalId"
+                :to="`/questions/${qq.externalId}`"
+                color="neutral"
+                variant="soft"
+                size="xs"
+                :aria-label="`第 ${qq.number} 題(${QUESTION_TYPE_LABELS[qq.type]})`"
+              >
+                {{ qq.number }}
+              </UButton>
+            </div>
           </div>
         </li>
       </ul>

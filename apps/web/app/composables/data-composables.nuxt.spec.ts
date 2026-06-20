@@ -3,6 +3,7 @@ import { mountSuspended, registerEndpoint } from "@nuxt/test-utils/runtime";
 import { defineComponent, h } from "vue";
 import { useSchedules } from "./useSchedules";
 import { useQuestions } from "./useQuestions";
+import { useQuestionPapers } from "./useQuestionPapers";
 import { useQuestion } from "./useQuestion";
 import { useAdmissions } from "./useAdmissions";
 
@@ -104,6 +105,28 @@ const admissionGroup = {
   ],
 };
 
+const paperSummary = {
+  examSubject: questionSummary.examSubject,
+  exam: questionSummary.exam,
+  subjects: questionSummary.subjects,
+  questions: [{ externalId: "q-1", number: "1", type: "mc", group: null }],
+};
+
+describe("useQuestionPapers", () => {
+  it("returns papers and pagination meta", async () => {
+    registerEndpoint("/questions/papers", () => ({
+      data: [paperSummary],
+      meta: { page: 1, pageSize: 20, total: 1 },
+    }));
+    const { result } = await runComposable(() => useQuestionPapers({ page: 1, pageSize: 20 }));
+    await vi.waitFor(() => expect(result.isSuccess.value).toBe(true));
+    expect(result.data.value).toEqual({
+      items: [paperSummary],
+      meta: { page: 1, pageSize: 20, total: 1 },
+    });
+  });
+});
+
 describe("useAdmissions", () => {
   it("fetches admission groups for a school + dept", async () => {
     registerEndpoint("/admissions", () => ({ data: [admissionGroup] }));
@@ -124,6 +147,8 @@ describe("useQuestion", () => {
         choices: [],
         examSubject: { ...questionSummary.examSubject, subjects: questionSummary.subjects },
         explanation: null,
+        group: null,
+        groupPassageMd: null,
       },
     }));
     const { result } = await runComposable(() => useQuestion("q-1"));

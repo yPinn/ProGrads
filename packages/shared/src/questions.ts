@@ -46,6 +46,7 @@ export const PaperQuestionRefSchema = z.object({
   externalId: z.string().describe("題目對外唯一代碼"),
   number: z.string().describe("題號"),
   type: QuestionType,
+  group: z.string().nullable().describe("題組 slug(閱讀/克漏字共用篇章);非題組為 null"),
 });
 export type PaperQuestionRef = z.infer<typeof PaperQuestionRefSchema>;
 

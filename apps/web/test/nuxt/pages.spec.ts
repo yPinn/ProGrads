@@ -8,11 +8,7 @@ import IndexPage from "~/pages/index.vue";
 // is shared. To stay independent, each page is exercised by a single test with its own
 // query key: schedules covers the empty branch, questions covers the data branch.
 
-const questionSummary = {
-  externalId: "q-1",
-  number: "1",
-  type: "mc",
-  subjects: [{ id: "s1", slug: "algorithms", name: "演算法" }],
+const paperSummary = {
   examSubject: {
     id: "es1",
     slug: "cs",
@@ -27,11 +23,13 @@ const questionSummary = {
     admissionType: "exam",
     school: { id: "sc1", slug: "ntu", name: "臺灣大學" },
   },
+  subjects: [{ id: "s1", slug: "algorithms", name: "演算法" }],
+  questions: [{ externalId: "q-1", number: "1", type: "mc", group: null }],
 };
 
 registerEndpoint("/schedules", () => ({ data: [] }));
-registerEndpoint("/questions", () => ({
-  data: [questionSummary],
+registerEndpoint("/questions/papers", () => ({
+  data: [paperSummary],
   meta: { page: 1, pageSize: 20, total: 1 },
 }));
 
@@ -43,11 +41,12 @@ describe("schedules page", () => {
 });
 
 describe("questions page", () => {
-  it("renders question rows from the API", async () => {
+  it("renders paper cards with an in-paper 題號 selector from the API", async () => {
     const wrapper = await mountSuspended(QuestionsPage);
     await vi.waitFor(() => {
+      // Paper card shows the 卷名 + 考科 badge; questions render as 題號 buttons.
       expect(wrapper.text()).toContain("計算機概論");
-      expect(wrapper.text()).toContain("選擇");
+      expect(wrapper.text()).toContain("演算法");
     });
   });
 });

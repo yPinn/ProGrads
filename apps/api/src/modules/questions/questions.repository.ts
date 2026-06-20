@@ -91,7 +91,7 @@ export class QuestionsRepository {
           departments: { include: { department: true } },
           exam: { select: { id: true, year: true, admissionType: true, school: true } },
           questions: {
-            select: { externalId: true, number: true, type: true },
+            select: { externalId: true, number: true, type: true, metadata: true },
             orderBy: [{ order: "asc" }, { externalId: "asc" }],
           },
         },

@@ -78,11 +78,15 @@ export class QuestionsService {
         school: mapSchool(es.exam.school),
       },
       subjects: mapSubjects(es.subjects),
-      questions: es.questions.map((q) => ({
-        externalId: q.externalId,
-        number: q.number,
-        type: q.type,
-      })),
+      questions: es.questions.map((q) => {
+        const m = (q.metadata ?? null) as { group?: unknown } | null;
+        return {
+          externalId: q.externalId,
+          number: q.number,
+          type: q.type,
+          group: m && typeof m.group === "string" ? m.group : null,
+        };
+      }),
     }));
     return { data, meta: { page, pageSize, total } };
   }
