@@ -19,6 +19,9 @@ export const QuestionFrontmatter = z.object({
   source_url: z.union([z.string().url(), z.literal("")]),
   license_status: ContentLicenseStatus,
   knowledge_points: z.array(z.string().min(1)).default([]), // parsed; not yet persisted (phase 2)
+  // 題組 slug: 閱讀/克漏字等共用同一篇 passage 的題目填相同值 (如 passage-a / cloze-x);
+  // 篇章只存於題組「首題」的 ## 題目, 其餘題目僅放各自題幹, 前端依 group 聚合呈現。
+  group: z.string().min(1).optional(),
   // --- answer (Tier2) metadata ---
   model_used: z.string().optional(),
   confidence: Confidence.optional(),
