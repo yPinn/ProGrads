@@ -155,6 +155,7 @@ export async function syncFile(
       number: path.number,
       order: path.order,
       type: fm.question_type,
+      points: fm.points ?? null,
       contentMd: questionMd,
       metadata: questionMeta,
     };
