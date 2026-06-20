@@ -70,6 +70,54 @@ export class QuestionsRepository {
     return { rows, total };
   }
 
+  // Paper-grouped listing (考卷為單位): ExamSubjects matching the filters, each with its
+  // ordered question refs for an in-paper 題號 selector. Paginated at the paper level.
+  async findPapers(f: QuestionFilters, page: number, pageSize: number) {
+    const examWhere = {
+      ...(f.school ? { school: { slug: f.school } } : {}),
+      ...(f.year !== undefined ? { year: f.year } : {}),
+    };
+    const where = {
+      ...(f.track ? { departments: { some: { department: { track: { slug: f.track } } } } } : {}),
+      ...(f.subject ? { subjects: { some: { subject: { slug: f.subject } } } } : {}),
+      ...(f.type ? { questions: { some: { type: f.type } } } : {}),
+      ...(Object.keys(examWhere).length > 0 ? { exam: examWhere } : {}),
+    };
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.examSubject.findMany({
+        where,
+        include: {
+          subjects: { include: { subject: true } },
+          departments: { include: { department: true } },
+          exam: { select: { id: true, year: true, admissionType: true, school: true } },
+          questions: {
+            select: { externalId: true, number: true, type: true },
+            orderBy: [{ order: "asc" }, { externalId: "asc" }],
+          },
+        },
+        orderBy: [
+          { exam: { year: "desc" } },
+          { exam: { school: { slug: "asc" } } },
+          { slug: "asc" },
+        ],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.prisma.examSubject.count({ where }),
+    ]);
+    return { rows, total };
+  }
+
+  // The "lead" of a 題組: lowest-order question in the same paper sharing this group slug.
+  // The shared passage lives in its contentMd (see content pipeline convention).
+  findGroupLead(examSubjectId: string, group: string) {
+    return this.prisma.question.findFirst({
+      where: { examSubjectId, metadata: { path: ["group"], equals: group } },
+      orderBy: [{ order: "asc" }, { externalId: "asc" }],
+      select: { externalId: true, metadata: true },
+    });
+  }
+
   findByExternalId(externalId: string) {
     return this.prisma.question.findUnique({
       where: { externalId },

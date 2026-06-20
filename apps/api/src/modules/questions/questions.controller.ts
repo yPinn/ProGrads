@@ -1,9 +1,13 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
-import type { Meta, QuestionDetail, QuestionSummary } from "@prograds/shared";
+import type { Meta, PaperSummary, QuestionDetail, QuestionSummary } from "@prograds/shared";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiBadRequest, ApiNotFound } from "../../common/api-error-responses.js";
 import { QuestionQueryDto } from "./dto/question-query.dto.js";
-import { QuestionResponseDto, QuestionsResponseDto } from "./dto/questions-response.dto.js";
+import {
+  PapersResponseDto,
+  QuestionResponseDto,
+  QuestionsResponseDto,
+} from "./dto/questions-response.dto.js";
 import { QuestionsService } from "./questions.service.js";
 
 @ApiTags("questions")
@@ -21,6 +25,28 @@ export class QuestionsController {
   @ApiBadRequest()
   async list(@Query() query: QuestionQueryDto): Promise<{ data: QuestionSummary[]; meta: Meta }> {
     return this.service.getQuestions(
+      {
+        subject: query.subject,
+        track: query.track,
+        school: query.school,
+        year: query.year,
+        type: query.type,
+      },
+      query.page,
+      query.pageSize,
+    );
+  }
+
+  @Get("papers")
+  @ApiOperation({
+    summary: "以考卷為單位列出題庫",
+    description:
+      "考卷視圖:每筆為一張卷(ExamSubject)並附其題目清單(供題號選擇)。沿用 `subject`/`track`/`school`/`year`/`type` 過濾,並以 `page`/`pageSize` 於**卷層級**分頁。",
+  })
+  @ApiOkResponse({ type: PapersResponseDto })
+  @ApiBadRequest()
+  async papers(@Query() query: QuestionQueryDto): Promise<{ data: PaperSummary[]; meta: Meta }> {
+    return this.service.getPapers(
       {
         subject: query.subject,
         track: query.track,
