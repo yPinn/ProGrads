@@ -20,6 +20,8 @@
     "fix": "prettier --write . && pnpm run lint:fix",
     "content": "prettier --write ../ProGrads-content && markdownlint-cli2 --fix \"../ProGrads-content/**/*.md\"",
     "content:check": "prettier --check ../ProGrads-content && markdownlint-cli2 \"../ProGrads-content/**/*.md\"",
+    "sync": "pnpm --filter @prograds/content-sync sync",
+    "db:refresh": "pnpm --filter @prograds/db db:deploy && pnpm --filter @prograds/db db:seed && pnpm run sync",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "clean": "turbo run clean && rimraf node_modules",
