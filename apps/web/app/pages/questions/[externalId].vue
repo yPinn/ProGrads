@@ -26,7 +26,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <UContainer class="py-10">
+  <UContainer class="py-12 md:py-16">
     <NuxtLink to="/questions" class="text-muted hover:text-default text-sm">← 回題庫</NuxtLink>
 
     <div v-if="isPending" class="mt-6 space-y-3">
@@ -38,7 +38,9 @@ useSeoMeta({
 
     <article v-else-if="q" class="mt-4">
       <header class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1">
-        <h1 class="text-xl font-bold">{{ q.exam.school.name }} {{ q.exam.year }}</h1>
+        <h1 class="font-serif text-2xl tracking-tight">
+          {{ q.exam.school.name }} {{ q.exam.year }}
+        </h1>
         <UBadge variant="subtle">{{ QUESTION_TYPE_LABELS[q.type] }}</UBadge>
         <span class="text-muted text-sm">{{ q.examSubject.name }} · 第 {{ q.number }} 題</span>
         <span class="text-muted text-sm">{{ ADMISSION_TYPE_LABELS[q.exam.admissionType] }}</span>
@@ -51,15 +53,22 @@ useSeoMeta({
       </div>
 
       <!-- 題組(閱讀/克漏字)共用篇章:存於題組首題的 metadata.passage,組內每題皆呈現。 -->
-      <section v-if="q.groupPassageMd" class="border-default bg-elevated mb-3 rounded border p-4">
+      <section
+        v-if="q.groupPassageMd"
+        class="border-default bg-elevated mb-3 rounded-(--ui-radius) border p-5"
+      >
         <h2 class="text-muted mb-2 text-xs font-semibold">題組共用篇章</h2>
-        <MDC :value="q.groupPassageMd" class="prose prose-sm dark:prose-invert max-w-none" />
+        <!-- Reading surface → Ming serif (font-serif); prose code/pre keep --font-mono. -->
+        <MDC
+          :value="q.groupPassageMd"
+          class="font-serif prose prose-sm dark:prose-invert max-w-none"
+        />
       </section>
 
       <!-- contentMd 經 MDC 渲染(粗體/引用/清單/程式碼);數學式 KaTeX 待後續。 -->
       <MDC
         :value="q.contentMd"
-        class="border-default prose dark:prose-invert max-w-none rounded border p-4"
+        class="border-default font-serif prose dark:prose-invert max-w-none rounded-(--ui-radius) border p-5"
       />
 
       <ul v-if="q.choices.length" class="mt-4 space-y-2">
@@ -78,14 +87,14 @@ useSeoMeta({
         </li>
       </ul>
 
-      <section v-if="q.explanation" class="bg-elevated mt-6 rounded p-4">
+      <section v-if="q.explanation" class="bg-elevated mt-6 rounded-(--ui-radius) p-5">
         <div class="mb-2 flex items-center gap-2">
-          <h2 class="font-semibold">標準解析</h2>
+          <h2 class="font-serif text-lg tracking-tight">標準解析</h2>
           <UBadge variant="subtle">{{ REVIEW_STATUS_LABELS[q.explanation.reviewStatus] }}</UBadge>
         </div>
         <MDC
           :value="q.explanation.standardAnswer"
-          class="prose prose-sm dark:prose-invert max-w-none"
+          class="font-serif prose prose-sm dark:prose-invert max-w-none"
         />
         <p class="text-muted mt-3 text-xs">AI 生成解析,僅供參考。</p>
       </section>

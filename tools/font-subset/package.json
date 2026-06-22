@@ -1,0 +1,12 @@
+{
+  "name": "@prograds/font-subset",
+  "private": true,
+  "type": "module",
+  "description": "Subset GenWanMin2 TW (headings serif) into chunked woff2 for self-hosting.",
+  "scripts": {
+    "build": "node src/subset.mjs"
+  },
+  "devDependencies": {
+    "cn-font-split": "^7.4.3"
+  }
+}

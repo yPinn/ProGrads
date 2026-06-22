@@ -29,6 +29,10 @@ export class TaxonomyRepository {
     });
   }
 
+  findSubjects() {
+    return this.prisma.subject.findMany({ orderBy: { slug: "asc" } });
+  }
+
   findSubjectBySlug(slug: string) {
     return this.prisma.subject.findUnique({ where: { slug } });
   }

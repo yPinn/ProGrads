@@ -1,2 +1,35 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+/* Editorial Minimal — role-based type system (each family has one job; any given
+   surface shows only 1-2). Inter + Fira Code are auto self-hosted by @nuxt/fonts;
+   GenWanMin2 TW is a self-hosted subset (tools/font-subset, linked in nuxt.config). */
+@theme {
+  /* Workhorse: UI chrome, body, dense tables/data. Latin/digits via Inter, CJK via Noto Sans TC. */
+  --font-sans: "Inter", "Noto Sans TC", ui-sans-serif, system-ui, sans-serif;
+  /* Identity accent: display headings + long-form reading (題幹/passage). Latin via GenWan itself. */
+  --font-serif: "GenWanMin2 TW", ui-serif, Georgia, serif;
+  /* Code blocks (CS papers). CJK comments fall back to Noto Sans TC. */
+  --font-mono: "Fira Code", "Noto Sans TC", ui-monospace, "Courier New", monospace;
+}
+
+:root {
+  /* Sharper corners than Nuxt UI's 0.25rem default. */
+  --ui-radius: 0.375rem;
+}
+
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Hide scrollbars globally (scrolling still works). */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* legacy Edge/IE */
+  }
+  *::-webkit-scrollbar {
+    display: none; /* Chromium/Safari */
+  }
+}

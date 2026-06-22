@@ -1,0 +1,10 @@
+# Source font binaries are large (~84MB zip / ~22MB OTF each) — never commit.
+# Re-download from the release when re-subsetting (see README).
+*.zip
+*.otf
+*.ttc
+*.ttf
+node_modules/
+package-lock.json
+dist/
+src/otf/

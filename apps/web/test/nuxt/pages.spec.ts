@@ -54,7 +54,7 @@ describe("questions page", () => {
 describe("index page", () => {
   it("renders the landing heading and tagline", async () => {
     const wrapper = await mountSuspended(IndexPage);
-    expect(wrapper.text()).toContain("ProGrads");
     expect(wrapper.text()).toContain("研究所備考作戰中心");
+    expect(wrapper.text()).toContain("一處整合考古題庫");
   });
 });

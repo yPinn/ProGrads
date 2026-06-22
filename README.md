@@ -47,11 +47,13 @@ docker compose up -d postgres             # 本機 Postgres（host 5433，僅綁
 cp packages/db/.env.example packages/db/.env   # 設 DATABASE_URL
 pnpm --filter @prograds/db db:migrate     # 套用 migration（建表）
 pnpm --filter @prograds/db db:seed        # 灌參照資料（分類/學校/系所）
+cp tools/content-sync/.env.example tools/content-sync/.env  # 設 DATABASE_URL + CONTENT_DIR（指向 ProGrads-content）
+pnpm sync                                 # 同步內容（考古題/招生）content → DB；需先 seed
 pnpm --filter @prograds/api dev           # 後端 API（http://localhost:8088/api/v1，docs 於 /api/v1/docs）
 pnpm --filter @prograds/web dev           # 前端（http://localhost:3000）
 ```
 
-工作區指令：`pnpm dev`（各 app）、`pnpm lint` / `lint:fix`、`pnpm format` / `format:check`、`pnpm fix`、`pnpm typecheck`、`pnpm test`。
+工作區指令：`pnpm dev`（各 app）、`pnpm lint` / `lint:fix`、`pnpm format` / `format:check`、`pnpm fix`、`pnpm typecheck`、`pnpm test`、`pnpm sync`（內容 → DB）、`pnpm db:refresh`（一鍵 `migrate deploy → seed → sync`，空庫/重置用）。
 
 > 進度：`apps/web` 骨架 + 招生行事曆 / 考古題瀏覽頁已就緒；`packages/db`（Prisma）+ `apps/api`（taxonomy / schools / exams / questions / admissions / schedules 讀取 API）+ `tools/content-sync`（content → DB 同步）已就緒。下一步：AI pipeline、內容渲染（KaTeX/Shiki）。
 
