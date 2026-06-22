@@ -40,6 +40,11 @@ export class TaxonomyService {
     };
   }
 
+  async getSubjects(): Promise<Subject[]> {
+    const rows = await this.repo.findSubjects();
+    return rows.map((s) => ({ id: s.id, slug: s.slug, name: s.name }));
+  }
+
   async getSubject(slug: string): Promise<Subject> {
     const subject = await this.repo.findSubjectBySlug(slug);
     if (!subject) {

@@ -146,11 +146,12 @@ export async function seedSchools(
 ): Promise<SchoolsSeedResult> {
   let departmentCount = 0;
 
-  for (const school of SCHOOLS) {
+  // Array index is the curated display rank (四大 → 政大 → 四中 → 二科 → 其他).
+  for (const [index, school] of SCHOOLS.entries()) {
     const row = await prisma.school.upsert({
       where: { slug: school.slug },
-      update: { name: school.name },
-      create: { slug: school.slug, name: school.name },
+      update: { name: school.name, displayOrder: index },
+      create: { slug: school.slug, name: school.name, displayOrder: index },
     });
     for (const dept of school.departments) {
       const trackId = trackIdBySlug.get(dept.track);

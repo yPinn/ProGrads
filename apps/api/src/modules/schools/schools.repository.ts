@@ -7,7 +7,8 @@ export class SchoolsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   findSchools() {
-    return this.prisma.school.findMany({ orderBy: { slug: "asc" } });
+    // Curated display rank first (see School.displayOrder seed), slug as a stable tiebreak.
+    return this.prisma.school.findMany({ orderBy: [{ displayOrder: "asc" }, { slug: "asc" }] });
   }
 
   findSchoolBySlug(slug: string) {

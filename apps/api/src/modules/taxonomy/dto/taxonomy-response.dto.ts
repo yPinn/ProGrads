@@ -1,6 +1,7 @@
 import {
   CategoriesResponseSchema,
   SubjectResponseSchema,
+  SubjectsResponseSchema,
   TrackResponseSchema,
   TracksResponseSchema,
 } from "@prograds/shared";
@@ -11,3 +12,4 @@ export class CategoriesResponseDto extends createZodDto(CategoriesResponseSchema
 export class TracksResponseDto extends createZodDto(TracksResponseSchema) {}
 export class TrackResponseDto extends createZodDto(TrackResponseSchema) {}
 export class SubjectResponseDto extends createZodDto(SubjectResponseSchema) {}
+export class SubjectsResponseDto extends createZodDto(SubjectsResponseSchema) {}

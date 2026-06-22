@@ -43,3 +43,4 @@ export const CategoriesResponseSchema = dataResponse(z.array(CategorySchema));
 export const TracksResponseSchema = dataResponse(z.array(TrackSchema));
 export const TrackResponseSchema = dataResponse(TrackWithSubjectsSchema);
 export const SubjectResponseSchema = dataResponse(SubjectSchema);
+export const SubjectsResponseSchema = dataResponse(z.array(SubjectSchema));

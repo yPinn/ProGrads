@@ -149,6 +149,8 @@ model School {
   id          String              @id @default(cuid())
   slug        String              @unique
   name        String
+  // Curated display rank (4大 > 政大 > 4中 > 2科 > others); seeded from the seed array order.
+  displayOrder Int                @default(0)
   departments Department[]
   exams       Exam[]
   schedules   AdmissionSchedule[]
