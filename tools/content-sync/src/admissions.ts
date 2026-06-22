@@ -204,6 +204,7 @@ export async function syncDepartments(
         methods: g.methods ?? [],
         calculator: g.calculator ?? null,
         writtenWeight: g.exam?.written ?? null,
+        reviewWeight: g.exam?.review ?? null,
         interviewWeight: g.exam?.interview ?? null,
         interviewAt: g.interview_at ? toDate(g.interview_at) : null,
         tiebreak: g.tiebreak ?? [],

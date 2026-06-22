@@ -30,6 +30,7 @@ export const AdmissionRoundSchema = z.object({
   methods: z.array(ExamMethod).describe("採計方式:筆試/審查/口試"),
   calculator: z.boolean().nullable().describe("可否使用計算機;未知為 null"),
   writtenWeight: z.number().int().nullable().describe("筆試佔分 %;無則 null"),
+  reviewWeight: z.number().int().nullable().describe("資料審查佔分 %;無則 null"),
   interviewWeight: z.number().int().nullable().describe("面試佔分 %;無則 null"),
   interviewAt: z.string().datetime({ offset: true }).nullable().describe("該組面試時間;無則 null"),
   tiebreak: z.array(z.string()).describe("同分參酌順序(科目顯示名)"),

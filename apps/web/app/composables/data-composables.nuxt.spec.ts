@@ -96,6 +96,7 @@ const admissionGroup = {
       methods: ["written"],
       calculator: null,
       writtenWeight: null,
+      reviewWeight: null,
       interviewWeight: null,
       interviewAt: null,
       tiebreak: [],

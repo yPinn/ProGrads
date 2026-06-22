@@ -30,6 +30,7 @@ export class AdmissionsService {
         methods: r.methods,
         calculator: r.calculator,
         writtenWeight: r.writtenWeight,
+        reviewWeight: r.reviewWeight,
         interviewWeight: r.interviewWeight,
         interviewAt: r.interviewAt ? r.interviewAt.toISOString() : null,
         tiebreak: r.tiebreak,
