@@ -108,7 +108,7 @@ department (系所, 穩定)
 - **raw 參照**：`ExamSubject` 連到 `Asset`（Tier0）；下載權限由 `license_status` gate。
 - **整卷答案匯出快取**：整卷答案不另存實體，由 index（`Question.order`）即時組合，產生後做內容定址快取（見 03）。
 
-**招生增量（schema 已落地 migration `admission_season_papers`；content 到 DB 的 importer 待實作，見 [03](03-content-pipeline.md) §招生資料 落地狀態）**——三層擁有者 ①季 → ②時間表 → ③組：
+**招生增量（schema 已落地 migration `admission_season_papers`；content 到 DB 的 importer 已實作，見 [03](03-content-pipeline.md) §招生資料落地狀態）**——三層擁有者 ①季 → ②時間表 → ③組：
 
 - **①季**：新欄/實體——`application_fee` + 減免、`announced_at`（公告日＝簡章新鮮度錨點）、新鮮度狀態（`not_published/published/superseded`）、放榜 `batch`/`sequence`（多梯次）。
 - **②`exam_timetable`（新實體，校級）**：subject × 節次 × `at`(時分) × `calculator_allowed` × 考場。**考試時間掛科目/節次（校級共用），非掛組**——筆試時間表全校共用，系所明細頁只有佔分%。

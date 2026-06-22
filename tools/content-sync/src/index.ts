@@ -4,6 +4,7 @@ import path from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prograds/db";
 import { syncDepartments, syncSchedule } from "./admissions.js";
+import { pruneSyncedContent } from "./prune.js";
 import {
   Resolver,
   reconcileExamSubjectDepartments,
@@ -32,6 +33,7 @@ function listFiles(root: string, subdir: string, ext: string): string[] {
 }
 
 async function main(): Promise<void> {
+  const prune = process.argv.includes("--prune");
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error("DATABASE_URL is not configured");
@@ -105,10 +107,23 @@ async function main(): Promise<void> {
 
     const reconciled = await reconcileExamSubjects(prisma, touched);
     const deptLinks = await reconcileExamSubjectDepartments(prisma, deptsByExamSubject);
+    const pruned = prune
+      ? await pruneSyncedContent(prisma, {
+          questionFiles: new Set(files),
+          scheduleFiles: new Set(scheduleFiles),
+          departmentFiles: new Set(departmentFiles),
+        })
+      : null;
     // eslint-disable-next-line no-console
     console.log(
       `content-sync done: synced=${synced} skipped=${skipped} reconciled=${reconciled} deptLinks=${deptLinks} seasons=${seasons} admissionGroups=${admissionGroups}`,
     );
+    if (pruned) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `content-sync prune: questions=${pruned.questions} examSubjects=${pruned.examSubjects} exams=${pruned.exams} seasons=${pruned.seasons} rounds=${pruned.rounds} groups=${pruned.groups}`,
+      );
+    }
 
     if (errors.length > 0) {
       console.error(`content-sync errors (${errors.length}):`);

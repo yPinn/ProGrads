@@ -107,6 +107,7 @@ export async function syncFile(
   }
 
   const questionMeta = {
+    sourcePath: relPath,
     sourceUrl: fm.source_url,
     licenseStatus: fm.license_status,
     knowledgePoints: fm.knowledge_points,
