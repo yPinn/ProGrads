@@ -1,46 +1,62 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { useQuestionPapers } from "~/composables/useQuestionPapers";
+import { useSubjects } from "~/composables/useSubjects";
+import { useSchools } from "~/composables/useSchools";
 import { QUESTION_TYPE_LABELS } from "~/utils/question-labels";
 import { ADMISSION_TYPE_LABELS } from "~/utils/admission-labels";
-import type { PaperQuestionRef, QuestionType } from "@prograds/shared";
+import { toSelectItems } from "~/utils/select";
+import type { PaperQuestionRef } from "@prograds/shared";
 
 useSeoMeta({
   title: "考古題庫",
   description: "跨校練單科:依考科、學校、年度、題型檢索研究所歷屆考題。",
 });
 
-// "all" sentinel: USelect (reka-ui) forbids an empty-string option value.
-const subject = ref("");
-const school = ref("");
-const year = ref<number | "">("");
-const type = ref<QuestionType | "all">("all");
+// "all" sentinel: reka-ui forbids an empty-string option value, so a filter's
+// "no filter" state uses an explicit "all" item, mapped back to undefined in the query.
+const subject = ref<string>("all");
+const school = ref<string>("all");
+const year = ref<number | "all">("all");
 const page = ref(1);
 const pageSize = 20;
 
+// Year dropdown: recent exam years, newest first ("all" = no filter).
+const currentYear = new Date().getFullYear();
+const yearOptions = [
+  { label: "全部年度", value: "all" as const },
+  ...Array.from({ length: 12 }, (_, i) => ({
+    label: `${currentYear - i}`,
+    value: currentYear - i,
+  })),
+];
+
+// 考科 (subjects) + 學校 (schools, server-ordered 四大→政治→四中→…) for the filter selects.
+const { data: subjects, isLoading: subjectsLoading } = useSubjects();
+const { data: schools, isLoading: schoolsLoading } = useSchools();
+const subjectItems = computed(() => [
+  { label: "全部考科", value: "all" },
+  ...toSelectItems(subjects.value),
+]);
+const schoolItems = computed(() => [
+  { label: "全部學校", value: "all" },
+  ...toSelectItems(schools.value),
+]);
+
 // Any filter change resets to the first page.
-watch([subject, school, year, type], () => {
+watch([subject, school, year], () => {
   page.value = 1;
 });
 
 const query = computed(() => ({
-  subject: subject.value || undefined,
-  school: school.value || undefined,
-  year: year.value === "" ? undefined : year.value,
-  type: type.value === "all" ? undefined : type.value,
+  subject: subject.value === "all" ? undefined : subject.value,
+  school: school.value === "all" ? undefined : school.value,
+  year: year.value === "all" ? undefined : year.value,
   page: page.value,
   pageSize,
 }));
 
 const { data, isPending, isError, error, refetch, isPlaceholderData } = useQuestionPapers(query);
-
-const typeOptions = [
-  { label: "全部題型", value: "all" as const },
-  ...(Object.entries(QUESTION_TYPE_LABELS) as [QuestionType, string][]).map(([value, label]) => ({
-    label,
-    value,
-  })),
-];
 
 // Cluster consecutive questions sharing a 題組 (passage/cloze set) so the 題號 selector can
 // visually bracket them. Questions arrive in paper order, so a single linear pass suffices.
@@ -59,25 +75,33 @@ function groupRuns(
 </script>
 
 <template>
-  <UContainer class="py-10">
-    <h1 class="mb-6 text-2xl font-bold">考古題庫</h1>
+  <UContainer class="py-12 md:py-16">
+    <PageHeader
+      eyebrow="Question Bank · 考古題庫"
+      title="考古題庫"
+      description="跨校練單科:依考科、學校、年度、題型檢索研究所歷屆考題。"
+    />
 
-    <div class="mb-6 flex flex-wrap gap-3">
-      <UInput
+    <div class="border-default mb-8 flex flex-wrap gap-3 rounded-(--ui-radius) border p-4">
+      <USelectMenu
         v-model="subject"
-        aria-label="考科 slug"
-        placeholder="考科 slug,如 algorithms"
+        :items="subjectItems"
+        value-key="value"
+        :loading="subjectsLoading"
+        aria-label="考科"
+        placeholder="全部考科"
         class="w-56"
       />
-      <UInput v-model="school" aria-label="學校 slug" placeholder="學校 slug,如 ntu" class="w-44" />
-      <UInput
-        v-model.number="year"
-        type="number"
-        aria-label="年度"
-        placeholder="年度"
-        class="w-28"
+      <USelectMenu
+        v-model="school"
+        :items="schoolItems"
+        value-key="value"
+        :loading="schoolsLoading"
+        aria-label="學校"
+        placeholder="全部學校"
+        class="w-44"
       />
-      <USelect v-model="type" :items="typeOptions" aria-label="題型" class="w-36" />
+      <USelect v-model="year" :items="yearOptions" aria-label="年度" class="w-32" />
     </div>
 
     <div v-if="isPending" class="space-y-3">
@@ -86,9 +110,7 @@ function groupRuns(
 
     <ErrorState v-else-if="isError" :error="error" @retry="refetch" />
 
-    <div v-else-if="!data || data.items.length === 0" class="text-muted py-16 text-center">
-      查無符合條件的考卷。
-    </div>
+    <EmptyState v-else-if="!data || data.items.length === 0">查無符合條件的考卷。</EmptyState>
 
     <template v-else>
       <!-- 以考卷為單位:每張卷一張卡,內含題號選擇器(點題號進該題)。 -->
@@ -96,10 +118,12 @@ function groupRuns(
         <li
           v-for="p in data.items"
           :key="p.examSubject.id"
-          class="border-default rounded-lg border p-4"
+          class="border-default hover:border-default/80 rounded-(--ui-radius) border p-5 transition-colors"
         >
           <div class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span class="font-semibold">{{ p.exam.school.name }} {{ p.exam.year }}</span>
+            <span class="font-serif text-base tracking-tight"
+              >{{ p.exam.school.name }} {{ p.exam.year }}</span
+            >
             <span class="text-muted text-sm">{{ p.examSubject.name }}</span>
             <span class="text-muted text-sm"
               >· {{ ADMISSION_TYPE_LABELS[p.exam.admissionType] }}</span
