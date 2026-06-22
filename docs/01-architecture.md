@@ -113,7 +113,7 @@ pnpm workspaces + Turborepo。結構：`apps/web`(Nuxt)、`apps/api`(Nest)、`pa
 ### 前端（Nuxt）
 
 Nuxt 3/4；UI Nuxt UI + Tailwind；狀態 Pinia；動態取資料 TanStack Query (Vue)；表單 VeeValidate + Zod；
-內容渲染 Nuxt Content + KaTeX + Shiki；圖表 vue-echarts；行事曆 Schedule-X；表格 TanStack Table；
+內容由 API 驅動，Markdown 題幹/解析以 Nuxt MDC + KaTeX + Shiki 渲染；圖表 vue-echarts；行事曆 Schedule-X；表格 TanStack Table；
 SEO `@nuxtjs/seo`；i18n `@nuxtjs/i18n`；`@nuxt/image`、`@nuxt/icon`。
 
 ### 後端（NestJS）

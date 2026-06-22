@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   telemetry: false,
   modules: [
     "@nuxt/ui",
-    "@nuxt/content",
+    "@nuxtjs/mdc",
     "@nuxt/image",
     "@nuxtjs/seo",
     "@nuxtjs/i18n",

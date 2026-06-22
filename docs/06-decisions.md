@@ -86,10 +86,11 @@
 - **理由**：整合套件（`@vee-validate/zod`、後端 `nestjs-zod`）peer 仍要求 Zod 3；v4 會破壞「Zod 共用契約」。
 - **取捨**：暫不上 Zod 4，待整合套件全面支援再評估升級。
 
-## D14. Nuxt Content 內容索引（SQLite）≠ 應用 DB
+## D14. 前端內容渲染不使用 Nuxt Content 索引
 
-- **決策**：保留 `@nuxt/content`；其內部以 SQLite（`better-sqlite3`）建內容索引供 build 時 prerender。
-- **釐清**：此 SQLite 僅為前端內容渲染索引（build 產物，CF runtime 不需要），**與應用資料庫 PostgreSQL 無關**——Postgres 仍是唯一應用 DB（後端，Prisma）。
+- **決策**：移除直接 `@nuxt/content` 與 `content.config.ts`，前端內容來源統一走 API；Markdown 題幹/解析只保留 `@nuxtjs/mdc` 渲染。
+- **理由**：目前沒有使用 Nuxt Content collection；保留 Content 會讓 Cloudflare Pages build/typecheck 出現不必要的 D1/storage 設定疑慮。
+- **釐清**：PostgreSQL 仍是唯一應用 DB（後端，Prisma）；前端不維護額外內容索引。
 - **附帶**：`ogImage` 暫停用（需原生 renderer，日後啟用）。
 
 ## D15. Toolchain：Node 24 LTS + pnpm 10

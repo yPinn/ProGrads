@@ -18,13 +18,13 @@
 
 ## 技術棧
 
-| 層       | 選用                                                      |
-| -------- | --------------------------------------------------------- |
-| 前端     | Nuxt（Cloudflare Pages，內容頁 prerender）                |
-| 後端     | NestJS（Fastify adapter，自有 server）                    |
-| DB / ORM | PostgreSQL（localhost）+ Prisma                           |
-| AI       | Claude（離線標準解答）+ Groq（線上 grounded 擴充）        |
-| 共用     | TypeScript strict、Zod 契約、monorepo（pnpm + Turborepo） |
+| 層       | 選用                                                             |
+| -------- | ---------------------------------------------------------------- |
+| 前端     | Nuxt（Cloudflare Pages，API-driven 頁面 CSR；MDC 渲染 Markdown） |
+| 後端     | NestJS（Fastify adapter，自有 server）                           |
+| DB / ORM | PostgreSQL（localhost）+ Prisma                                  |
+| AI       | Claude（離線標準解答）+ Groq（線上 grounded 擴充）               |
+| 共用     | TypeScript strict、Zod 契約、monorepo（pnpm + Turborepo）        |
 
 ## 專案結構
 
@@ -49,6 +49,7 @@ pnpm --filter @prograds/db db:migrate     # 套用 migration（建表）
 pnpm --filter @prograds/db db:seed        # 灌參照資料（分類/學校/系所）
 cp tools/content-sync/.env.example tools/content-sync/.env  # 設 DATABASE_URL + CONTENT_DIR（指向 ProGrads-content）
 pnpm sync                                 # 同步內容（考古題/招生）content → DB；需先 seed
+pnpm sync:prune                           # 額外刪除已從 content repo 移除且帶 sourcePath 的同步資料
 pnpm --filter @prograds/api dev           # 後端 API（http://localhost:8088/api/v1，docs 於 /api/v1/docs）
 pnpm --filter @prograds/web dev           # 前端（http://localhost:3000）
 ```
