@@ -33,7 +33,7 @@ function toDate(value: string): Date {
 
 // admissions/<year>/<school>/[<season>/]<file>; year/school are cross-checked against the
 // file body, admission_type comes from the optional season segment (default exam).
-function parseAdmissionsPath(relPath: string): {
+export function parseAdmissionsPath(relPath: string): {
   year: number;
   school: string;
   admissionType: AdmissionType;
@@ -55,6 +55,18 @@ function parseAdmissionsPath(relPath: string): {
   return { year, school, admissionType };
 }
 
+export function validateAdmissionTypeMatchesPath(
+  pathRef: { admissionType: AdmissionType },
+  admissionType: AdmissionType,
+  relPath: string,
+): void {
+  if (pathRef.admissionType !== admissionType) {
+    throw new Error(
+      `admission_type mismatch in ${relPath}: body "${admissionType}" != path-derived "${pathRef.admissionType}"`,
+    );
+  }
+}
+
 // Parse, validate, resolve and upsert one schedule.yml: the school-level admission season
 // (fees / status / announcement) plus its flat event calendar and exam-period timetable.
 // Children have no natural key, so they are replaced wholesale, mirroring the question sync.
@@ -72,6 +84,7 @@ export async function syncSchedule(
       `schedule.yml mismatch in ${relPath}: body (${yml.school}, ${yml.year}) != path (${pathRef.school}, ${pathRef.year})`,
     );
   }
+  validateAdmissionTypeMatchesPath(pathRef, yml.admission_type, relPath);
 
   const school = await resolver.school(yml.school);
 
@@ -95,6 +108,7 @@ export async function syncSchedule(
       interviewFee: yml.fees?.interview ?? null,
       feeWaiver: yml.fees?.waiver ?? [],
       sourceUrl: yml.source_url ?? null,
+      metadata: { ...(yml.metadata ?? {}), sourcePath: relPath },
     };
     const season = await tx.admissionSeason.upsert({
       where: {
@@ -193,17 +207,23 @@ export async function syncDepartments(
         interviewWeight: g.exam?.interview ?? null,
         interviewAt: g.interview_at ? toDate(g.interview_at) : null,
         tiebreak: g.tiebreak ?? [],
+        metadata: { ...(g.metadata ?? {}), sourcePath: relPath },
       };
 
       await prisma.$transaction(async (tx) => {
         const group = await tx.admissionGroup.upsert({
           where: { departmentId_code: { departmentId: department.id, code: g.code } },
-          update: { name: g.name ?? "", displayOrder: index },
+          update: {
+            name: g.name ?? "",
+            displayOrder: index,
+            metadata: { ...(g.metadata ?? {}), sourcePath: relPath },
+          },
           create: {
             departmentId: department.id,
             code: g.code,
             name: g.name ?? "",
             displayOrder: index,
+            metadata: { ...(g.metadata ?? {}), sourcePath: relPath },
           },
         });
         const round = await tx.admissionRound.upsert({
