@@ -112,7 +112,7 @@ department (系所, 穩定)
 
 - **①季**：新欄/實體——`application_fee` + 減免、`announced_at`（公告日＝簡章新鮮度錨點）、新鮮度狀態（`not_published/published/superseded`）、放榜 `batch`/`sequence`（多梯次）。
 - **②`exam_timetable`（新實體，校級）**：subject × 節次 × `at`(時分) × `calculator_allowed` × 考場。**考試時間掛科目/節次（校級共用），非掛組**——筆試時間表全校共用，系所明細頁只有佔分%。
-- **③`AdmissionRound` / `AdmissionRoundSubject` 擴欄**：`code`(官方招生代碼,如 2131/1000)、考科 `weight`(%) + 筆試/面試別、面試 `at`、`身分別`(一般/在職/外籍/低收)、同分參酌順序、特定報考資格、指定參考用書、放榜梯次。
+- **③`AdmissionRound` / `AdmissionRoundSubject` 擴欄**：`code`(官方招生代碼,如 2131/1000)、考科 `weight`(%) + 筆試/審查/面試別、面試 `at`、`身分別`(一般/在職/外籍/低收)、同分參酌順序、特定報考資格、指定參考用書、放榜梯次。
 - `AdmissionEvent` 新增 `enrollment`（報到）。
 - **聯招（台聯大）**：一卷被多 (校,系,組) 共用，打破 `Exam` 1:校系組 → 招生聯盟實體，列為獨立後續 spike（見 03 §聯招）。
 
