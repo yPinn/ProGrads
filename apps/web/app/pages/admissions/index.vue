@@ -144,11 +144,17 @@ const ratio = (r: AdmissionRound) =>
 
       <template v-else>
         <!-- Year slot: client-side filter over the already-loaded rounds. -->
-        <div class="border-default mb-6 flex flex-wrap gap-1 border-b">
+        <div
+          role="tablist"
+          aria-label="年度"
+          class="border-default mb-6 flex flex-wrap gap-1 border-b"
+        >
           <button
             v-for="t in yearTabs"
             :key="t.value"
             type="button"
+            role="tab"
+            :aria-selected="selectedYear === t.value"
             class="-mb-px border-b-2 px-3 py-2 text-sm tabular-nums transition-colors"
             :class="
               selectedYear === t.value
@@ -204,10 +210,10 @@ const ratio = (r: AdmissionRound) =>
             </p>
 
             <a
-              v-if="r.sourceUrl"
+              v-if="r.sourceUrl && /^https?:\/\//.test(r.sourceUrl)"
               :href="r.sourceUrl"
               target="_blank"
-              rel="noopener"
+              rel="noopener noreferrer"
               class="text-primary mt-1 inline-block text-sm"
             >
               簡章連結
