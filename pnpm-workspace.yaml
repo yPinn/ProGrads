@@ -2,3 +2,6 @@ packages:
   - "apps/*"
   - "packages/*"
   - "tools/*"
+  # Standalone npm tool with a heavy one-off native dep (cn-font-split); not part of
+  # the workspace install. Run on demand via `npm install` in the dir (see its README).
+  - "!tools/font-subset"
