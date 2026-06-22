@@ -192,6 +192,7 @@ const ratio = (r: AdmissionRound) =>
               採計:{{ r.methods.map((m) => ADMISSION_METHOD_LABELS[m]).join("、") || "—" }}
               <span v-if="r.calculator !== null">· 計算機 {{ r.calculator ? "可" : "不可" }}</span>
               <span v-if="r.writtenWeight !== null">· 筆試 {{ r.writtenWeight }}%</span>
+              <span v-if="r.reviewWeight !== null">· 審查 {{ r.reviewWeight }}%</span>
               <span v-if="r.interviewWeight !== null">· 面試 {{ r.interviewWeight }}%</span>
               <span v-if="r.interviewAt">· 面試 {{ formatDateTime(r.interviewAt) }}</span>
             </div>

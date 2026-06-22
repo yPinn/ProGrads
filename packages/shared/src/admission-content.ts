@@ -104,9 +104,13 @@ export const AdmissionGroupYml = z
     methods: z.array(ExamMethod).optional(),
     calculator: z.boolean().optional(),
     exam: z
-      .object({ written: z.number().optional(), interview: z.number().optional() })
+      .object({
+        written: z.number().optional(),
+        review: z.number().optional(),
+        interview: z.number().optional(),
+      })
       .strict()
-      .optional(), // 筆試/面試 佔分 %
+      .optional(), // 筆試/資料審查/面試 佔分 %
     interview_at: z.union([DateStr, DateTimeStr]).optional(),
     papers: z.array(AdmissionPaper).optional(),
     tiebreak: z.array(z.string()).optional(), // 同分參酌順序

@@ -12,6 +12,14 @@
             >招生行事曆</NuxtLink
           >
         </nav>
+        <!-- ClientOnly + fixed-size fallback: colour mode is only known on the client, so this
+             avoids a hydration mismatch / layout shift on the prerendered home page. -->
+        <ClientOnly>
+          <UColorModeButton class="ml-auto" />
+          <template #fallback>
+            <div class="ml-auto size-8" />
+          </template>
+        </ClientOnly>
       </UContainer>
     </header>
 

@@ -260,7 +260,7 @@ admissions/<year>/<school>/<season>/         # season: exam(預設可省) / recr
 
 - **①季（schedule.yml）**：簡章**新鮮度狀態**（`not_published/published/superseded`，避免拿舊資料當今年）＋`announced_at`（公告日，即新鮮度錨點）、報名起訖（**含時分**）、**報名費**（＋低收/中低收減免、口試費）、放榜**多梯次**日期、連結（`prospectus_url`/`rules_url`）。
 - **②時間表（schedule.yml）**：科目 × 節次 × 日期時間（可跨天）、可否用計算機、考場（地點/是否另設；CCU 依筆試/無筆試分流）。
-- **③組（departments.yml）**：**招生代碼**(官方,如 NCCU 2131／CCU 1000)、名額、**身分別**(一般/在職/外籍/低收)、特定報考資格、**考試項目**(筆試各科加權% + 面試%)、面試日期、同分參酌順序、放榜梯次、**指定參考用書**與其他規定（對備考高價值）、競爭數據（報名人數/錄取→競爭比）。
+- **③組（departments.yml）**：**招生代碼**(官方,如 NCCU 2131／CCU 1000)、名額、**身分別**(一般/在職/外籍/低收)、特定報考資格、**考試項目**(筆試各科加權% + 審查% + 面試%)、面試日期、同分參酌順序、放榜梯次、**指定參考用書**與其他規定（對備考高價值）、競爭數據（報名人數/錄取→競爭比）。
 
 ### schema 缺口（已落地 migration `admission_season_papers`，見 [02-data-model.md](02-data-model.md)）
 
@@ -268,7 +268,7 @@ admissions/<year>/<school>/<season>/         # season: exam(預設可省) / recr
 
 - **①季**：新實體 `AdmissionSeason`——`applicationFee`/`interviewFee` + `feeWaiver`、`announcedAt`（公告日）、`status`（`not_published/published/superseded`）；放榜梯次 `sequence` 落在 `AdmissionSeasonEvent`。
 - **②時間表**：新實體 `AdmissionExamSlot`（即設計中的 `exam_timetable`）——`date` × `period` × `startTime`/`endTime`，掛 `AdmissionSeason`（校級共用）；可否計算機改掛 `AdmissionRound.calculator`（組級事實）。
-- **③組**（擴 `AdmissionRound` + 新 `AdmissionRoundPaper`/`AdmissionRoundPaperSubject`）：`admissionCode`、`applicantType`(身分別)、`writtenWeight`/`interviewWeight`、`interviewAt`、`tiebreak`(同分參酌)、`resultBatch`、`methods`(筆試/審查/口試)；考科 `weight` 落在 `AdmissionRoundPaper`。
+- **③組**（擴 `AdmissionRound` + 新 `AdmissionRoundPaper`/`AdmissionRoundPaperSubject`）：`admissionCode`、`applicantType`(身分別)、`writtenWeight`/`reviewWeight`/`interviewWeight`、`interviewAt`、`tiebreak`(同分參酌)、`resultBatch`、`methods`(筆試/審查/口試)；考科 `weight` 落在 `AdmissionRoundPaper`。
 - `AdmissionEvent` 新增 `account_open`/`document_deadline`/`admit_card`/`shortlist`/`enrollment`；事件存到「時分」+ 區間（`AdmissionSeasonEvent.endAt?`）。
 
 ### 聯招（台聯大）— 核心大例外，先研究後實踐

@@ -75,6 +75,16 @@ const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
     departments: [
       { slug: "cs", name: "資訊科學系", track: "cs" }, // 資科系，官方英文 Computer Science
       { slug: "mis", name: "資訊管理學系", track: "info-mgmt" },
+      // 商學院 + 數理（招生情報涵蓋；track 取最近的既有分類）。
+      { slug: "math", name: "應用數學系", track: "math" },
+      { slug: "ib", name: "國際經營與貿易學系", track: "intl-business" },
+      { slug: "banking", name: "金融學系", track: "finance" },
+      { slug: "finance", name: "財務管理學系", track: "finance" },
+      { slug: "accounting", name: "會計學系", track: "business-admin" },
+      { slug: "stat", name: "統計學系", track: "stat" },
+      { slug: "mba", name: "企業管理研究所", track: "business-admin" },
+      { slug: "rmi", name: "風險管理與保險學系", track: "finance" },
+      { slug: "tiipm", name: "科技管理與智慧財產研究所", track: "ind-mgmt" },
     ],
   },
   // ── 四中（中央／中山／中興／中正）──────────────────────────

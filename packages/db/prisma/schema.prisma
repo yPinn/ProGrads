@@ -371,6 +371,7 @@ model AdmissionRound {
   methods          ExamMethod[] // 筆試/審查/口試
   calculator       Boolean? // 可用計算機
   writtenWeight    Int? // 筆試佔分 %
+  reviewWeight     Int? // 資料審查佔分 %
   interviewWeight  Int? // 面試佔分 %
   interviewAt      DateTime? // 該組面試日
   tiebreak         String[] // 同分參酌順序 (科目顯示名)
