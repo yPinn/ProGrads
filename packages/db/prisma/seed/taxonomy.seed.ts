@@ -90,6 +90,21 @@ const SUBJECTS: TrackSeed[] = [
   { slug: "commtheory", name: "通訊原理" },
   { slug: "commsys", name: "通訊系統" },
   { slug: "signals", name: "信號與系統" },
+  // 商管/數理 考科（nccu 商學院 + 應數）；stat/la/cs-intro/mis/english/calc 跨群共用
+  { slug: "econ", name: "經濟學" },
+  { slug: "fin-mgmt", name: "財務管理" },
+  { slug: "acct", name: "會計學" },
+  { slug: "cost-mgmt-acct", name: "成本與管理會計學" },
+  { slug: "auditing", name: "審計學" },
+  { slug: "tax-law", name: "稅務法規" },
+  { slug: "calc", name: "微積分" },
+  { slug: "math-stat", name: "數理統計學" },
+  { slug: "stat-method", name: "統計方法" },
+  { slug: "insurance-law", name: "保險法" },
+  { slug: "company-law", name: "公司法" },
+  { slug: "insurance", name: "保險學" },
+  { slug: "mgmt", name: "管理學" },
+  { slug: "mgmt-case", name: "管理個案分析" },
 ];
 
 // track slug → subject slugs (the global shared library; note ds/algo
