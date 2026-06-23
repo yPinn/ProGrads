@@ -19,19 +19,3 @@
 
 棧：**Nuxt（CF Pages）+ NestJS（Fastify adapter，自有 server）+ Prisma + PostgreSQL**，
 monorepo（pnpm + Turborepo）、TypeScript strict、Zod 貫穿全棧、純非營利開源。
-
-## 進度與下一步
-
-- 已完成：monorepo 骨架、tooling、CI、release、分支/環境策略。
-- 已完成：`apps/web`（Nuxt 4 + 前端套件）已 scaffold。
-- 已完成：`packages/db` Prisma 7 ER schema（雙軸模型 + 例外修正）已建立並驗證。
-- 已完成：`apps/api`：`taxonomy / schools / exams / questions / admissions / schedules` 讀取 API（Fastify、Zod 契約、Swagger、統一錯誤信封、CORS）。
-- 已完成：`tools/content-sync`：ProGrads-content → Postgres 同步（含合科卷 reconcile、MC 選擇題、招生 schedule/departments importer）。
-- 已完成：`tools/pdf-extract`、`tools/ai-pipeline`：PDF 萃取與離線解答生成工具。
-- 已完成：`apps/web`：招生行事曆 / 考古題瀏覽頁（資料層：shared 契約 + TanStack Query + `$api`）。
-- 下一步：AI pipeline 實際生成、認證、公開內容頁 SEO/prerender。
-
-## 待拍板
-
-- 提醒通路偏好（Email 先做 / 之後加 LINE）。
-- 資管所逐校考科組合待補。

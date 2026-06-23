@@ -21,5 +21,4 @@ pnpm --filter @prograds/api test      # Vitest
 - 必填 runtime env：`DATABASE_URL`、`WEB_BASE_URL`；選填含預設：`PORT`、`HOST`、`NODE_ENV`。CORS 只允許 `WEB_BASE_URL`。
 - 已接：PrismaModule（`@prisma/adapter-pg`）、env 驗證（Zod，啟動即驗）、pino 結構化日誌、`@fastify/helmet`、CORS（`WEB_BASE_URL` 來源）、全域 `ZodValidationPipe`（nestjs-zod）、全域 `HttpExceptionFilter`（統一錯誤信封）。
 - 已實作模組：`taxonomy`（categories/tracks/subjects）、`schools`（schools/departments）、`exams`（含合科卷）、`questions`（含 choices）、`admissions`（admissions/schedules）。DTO 由 `@prograds/shared` 的 Zod 契約生成。
-- 規劃中：`explanations / stats / ai / users`。
-- **下一步**：`ai` 解析 API、認證（`users`）。
+- 規劃中模組：`explanations / stats / ai / users`。

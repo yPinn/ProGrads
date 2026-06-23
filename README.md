@@ -94,8 +94,6 @@ content repo 與 DB 同步。
 | `pnpm content`       | 對 `../ProGrads-content` 跑 prettier + markdownlint 並寫入 |
 | `pnpm content:check` | 同上唯讀檢查                                               |
 
-> 進度：`apps/web` 骨架 + 招生行事曆 / 考古題瀏覽頁已就緒；`packages/db`（Prisma）+ `apps/api`（taxonomy / schools / exams / questions / admissions / schedules 讀取 API）+ `tools/content-sync`（content → DB 同步）已就緒。下一步：AI pipeline、內容渲染（KaTeX/Shiki）。
-
 ## 授權
 
 - **程式碼**：MIT（見 [LICENSE](LICENSE)）。
