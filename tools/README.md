@@ -11,6 +11,7 @@ TypeScript + tsx 執行的 workspace 套件。流程見
   工作流程與規格：[PROMPT.md](./ai-pipeline/PROMPT.md)。
 - **`pdf-extract`**（`@prograds/pdf-extract`）：PDF 考卷 → PNG 頁面圖片（供 AI 視覺萃取題目用）。
   執行：`pnpm --filter @prograds/pdf-extract to-images <pdf路徑> [output-dir]`。
+  輸出請放在 content repo 的 gitignored `images/raw/questions/...` 或 `images/raw/admissions/...`。
   工作流程與規格：[PROMPT.md](./pdf-extract/PROMPT.md)。
 
 ## 工具腳本標準
