@@ -6,6 +6,7 @@
   "scripts": {
     "sync": "tsx src/index.ts",
     "sync:prune": "tsx src/index.ts --prune",
+    "validate-admissions": "tsx src/validate-admissions.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
