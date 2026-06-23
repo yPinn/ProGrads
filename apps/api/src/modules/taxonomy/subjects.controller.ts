@@ -13,7 +13,7 @@ export class SubjectsController {
   @Get()
   @ApiOperation({
     summary: "列出考科",
-    description: "回傳全部考科(全域共用題庫,可跨所別 / 學校練習)。供題庫考科篩選下拉使用。",
+    description: "回傳全部考科（全域共用題庫，可跨所別 / 學校練習）。供題庫考科篩選下拉使用。",
   })
   @ApiOkResponse({ type: SubjectsResponseDto })
   async list(): Promise<{ data: Subject[] }> {

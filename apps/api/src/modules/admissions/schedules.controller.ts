@@ -15,7 +15,7 @@ export class SchedulesController {
   @ApiOperation({
     summary: "招生行事曆",
     description:
-      "攤平的招生事件清單(報名起訖/筆試/面試/放榜),供時程瀏覽與 deadline 提醒。`year` 必填(以招生季為單位);`school` / `event` 可選過濾。依時間排序。",
+      "攤平的招生事件清單（報名起訖 / 筆試 / 面試 / 放榜），供時程瀏覽與 deadline 提醒。`year` 必填（以招生季為單位）；`school` / `event` 可選過濾。依時間排序。",
   })
   @ApiOkResponse({ type: AdmissionScheduleResponseDto })
   @ApiBadRequest()

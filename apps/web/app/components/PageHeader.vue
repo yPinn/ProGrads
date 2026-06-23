@@ -5,13 +5,13 @@ defineProps<{ eyebrow?: string; title: string; description?: string }>();
 </script>
 
 <template>
-  <header class="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-    <div class="space-y-3">
-      <p v-if="eyebrow" class="text-muted text-xs font-medium tracking-[0.2em] uppercase">
+  <header class="mb-header flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+    <div class="space-y-control">
+      <p v-if="eyebrow" class="text-muted text-caption font-medium tracking-eyebrow uppercase">
         {{ eyebrow }}
       </p>
-      <h1 class="font-serif text-3xl tracking-tight md:text-4xl">{{ title }}</h1>
-      <p v-if="description" class="text-muted max-w-prose text-sm leading-relaxed">
+      <h1 class="font-serif text-title-lg tracking-tight">{{ title }}</h1>
+      <p v-if="description" class="text-muted text-small max-w-prose leading-relaxed">
         {{ description }}
       </p>
     </div>

@@ -15,7 +15,7 @@ export class AdmissionsController {
   @ApiOperation({
     summary: "取得系所招生情報",
     description:
-      "依 `school` + `dept` 取得該系所的招生組別,每組含逐年梯次(名額/考科/日程)。`year` 可選,過濾單一西元學年。報考單位 = 校×系所×組。",
+      "依 `school` + `dept` 取得該系所的招生組別，每組含逐年梯次（名額 / 考科 / 日程）。`year` 可選，過濾單一西元學年。報考單位 = 校 × 系所 × 組。",
   })
   @ApiOkResponse({ type: AdmissionsResponseDto })
   @ApiBadRequest()

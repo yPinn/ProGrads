@@ -41,7 +41,7 @@ export class QuestionsController {
   @ApiOperation({
     summary: "以考卷為單位列出題庫",
     description:
-      "考卷視圖:每筆為一張卷(ExamSubject)並附其題目清單(供題號選擇)。沿用 `subject`/`track`/`school`/`year`/`type` 過濾,並以 `page`/`pageSize` 於**卷層級**分頁。",
+      "考卷視圖：每筆為一張卷（ExamSubject）並附其題目清單（供題號選擇）。沿用 `subject` / `track` / `school` / `year` / `type` 過濾，並以 `page` / `pageSize` 於**卷層級**分頁。",
   })
   @ApiOkResponse({ type: PapersResponseDto })
   @ApiBadRequest()
