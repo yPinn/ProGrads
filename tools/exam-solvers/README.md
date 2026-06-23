@@ -40,6 +40,7 @@ family appears.
 # Run one case (prints the working, exits non-zero if it disagrees with the recorded answer):
 pnpm --filter @prograds/exam-solvers case src/cases/ntu-2026-co-os-q14.ts
 
+pnpm --filter @prograds/exam-solvers test
 pnpm --filter @prograds/exam-solvers typecheck
 pnpm --filter @prograds/exam-solvers lint
 ```
