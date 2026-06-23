@@ -73,14 +73,14 @@ pnpm --filter @prograds/web dev           # 前端（http://localhost:3000）
 
 CI 用 `lint` / `:check`，本機修用 `fix`。
 
-| 指令                | 用途                                            |
-| ------------------- | ----------------------------------------------- |
-| `pnpm lint`         | eslint + markdownlint + 各 app lint（唯讀檢查） |
-| `pnpm lint:fix`     | 同上並自動修復                                  |
-| `pnpm lint:md`      | 只跑 markdownlint（針對性手動執行）             |
-| `pnpm format`       | prettier 寫入整個 repo                          |
-| `pnpm format:check` | prettier 唯讀檢查                               |
-| `pnpm fix`          | 一鍵 `format` + `lint:fix`                      |
+| 指令                | 用途                                          |
+| ------------------- | --------------------------------------------- |
+| `pnpm lint`         | eslint + 各 workspace lint（唯讀檢查）        |
+| `pnpm lint:fix`     | eslint + markdownlint + 各 workspace 自動修復 |
+| `pnpm lint:md`      | 只跑 markdownlint（針對性手動執行）           |
+| `pnpm format`       | prettier 寫入整個 repo                        |
+| `pnpm format:check` | prettier 唯讀檢查                             |
+| `pnpm fix`          | 一鍵 `format` + `lint:fix`                    |
 
 #### 內容資料
 
