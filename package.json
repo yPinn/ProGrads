@@ -13,7 +13,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "eslint . && turbo run lint",
-    "lint:fix": "eslint . --fix && turbo run lint:fix",
+    "lint:fix": "eslint . --fix && markdownlint-cli2 --fix \"**/*.md\" && turbo run lint:fix",
     "lint:md": "markdownlint-cli2 \"**/*.md\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

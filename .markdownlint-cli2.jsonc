@@ -12,5 +12,6 @@
     "**/.output/**",
     "**/dist/**",
     "**/CHANGELOG.md",
+    "tasks/**", // local scratch planning notes (git-ignored), not shipped docs
   ],
 }
