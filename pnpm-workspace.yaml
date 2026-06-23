@@ -5,3 +5,28 @@ packages:
   # Standalone npm tool with a heavy one-off native dep (cn-font-split); not part of
   # the workspace install. Run on demand via `npm install` in the dir (see its README).
   - "!tools/font-subset"
+
+engineStrict: true
+
+# Nuxt modules (e.g. @nuxtjs/seo) dynamically installModule() their sub-modules,
+# which Nuxt resolves from the project root. Hoist nuxt-related packages so pnpm's
+# strict node_modules doesn't hide transitive modules like @nuxtjs/robots.
+publicHoistPattern:
+  - "*nuxt*"
+
+# Explicitly reviewed install-script allowlist. `allowBuilds` supersedes
+# `onlyBuiltDependencies` in pnpm 10.26+ and remains the forward-compatible form.
+allowBuilds:
+  "@parcel/watcher": true
+  "@prisma/client": true
+  "@prisma/engines": true
+  better-sqlite3: true
+  esbuild: true
+  prisma: true
+  sharp: true
+  unrs-resolver: true
+  vue-demi: true
+
+peerDependencyRules:
+  allowedVersions:
+    "@unhead/bundler>unhead": "2"

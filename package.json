@@ -44,23 +44,5 @@
     "turbo": "^2.3.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.61.1"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@parcel/watcher",
-      "@prisma/client",
-      "@prisma/engines",
-      "better-sqlite3",
-      "esbuild",
-      "prisma",
-      "sharp",
-      "unrs-resolver",
-      "vue-demi"
-    ],
-    "peerDependencyRules": {
-      "allowedVersions": {
-        "@unhead/bundler>unhead": "2"
-      }
-    }
   }
 }
