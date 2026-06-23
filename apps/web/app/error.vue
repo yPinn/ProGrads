@@ -9,9 +9,9 @@ const handleClear = () => clearError({ redirect: "/" });
 
 <template>
   <UApp>
-    <UContainer class="flex min-h-screen flex-col items-center justify-center gap-4 text-center">
-      <h1 class="text-4xl font-bold">{{ error.status }}</h1>
-      <p class="text-muted">{{ error.statusText || "發生未預期的錯誤" }}</p>
+    <UContainer class="flex min-h-dvh flex-col items-center justify-center gap-4 text-center">
+      <h1 class="font-serif text-title-lg tracking-tight">{{ error.status }}</h1>
+      <p class="text-muted text-body">{{ error.statusText || "發生未預期的錯誤" }}</p>
       <UButton @click="handleClear">回到首頁</UButton>
     </UContainer>
   </UApp>

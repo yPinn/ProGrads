@@ -9,7 +9,7 @@ import { toSelectItems } from "~/utils/select";
 import type { PaperQuestionRef } from "@prograds/shared";
 
 useSeoMeta({
-  title: "考古題庫",
+  title: "考古題",
   description: "跨校練單科:依考科、學校、年度、題型檢索研究所歷屆考題。",
 });
 
@@ -75,14 +75,12 @@ function groupRuns(
 </script>
 
 <template>
-  <UContainer class="py-12 md:py-16">
-    <PageHeader
-      eyebrow="Question Bank · 考古題庫"
-      title="考古題庫"
-      description="跨校練單科:依考科、學校、年度、題型檢索研究所歷屆考題。"
-    />
-
-    <div class="border-default mb-8 flex flex-wrap gap-3 rounded-(--ui-radius) border p-4">
+  <AppPage
+    eyebrow="Question Bank · 考古題"
+    title="考古題"
+    description="跨校練單科:依考科、學校、年度、題型檢索研究所歷屆考題。"
+  >
+    <div class="border-default mb-section flex flex-wrap gap-control rounded-card border p-card">
       <USelectMenu
         v-model="subject"
         :items="subjectItems"
@@ -90,7 +88,7 @@ function groupRuns(
         :loading="subjectsLoading"
         aria-label="考科"
         placeholder="全部考科"
-        class="w-56"
+        class="w-full sm:w-56"
       />
       <USelectMenu
         v-model="school"
@@ -99,9 +97,9 @@ function groupRuns(
         :loading="schoolsLoading"
         aria-label="學校"
         placeholder="全部學校"
-        class="w-44"
+        class="w-full sm:w-44"
       />
-      <USelect v-model="year" :items="yearOptions" aria-label="年度" class="w-32" />
+      <USelect v-model="year" :items="yearOptions" aria-label="年度" class="w-full sm:w-32" />
     </div>
 
     <div v-if="isPending" class="space-y-3">
@@ -110,7 +108,9 @@ function groupRuns(
 
     <ErrorState v-else-if="isError" :error="error" @retry="refetch" />
 
-    <EmptyState v-else-if="!data || data.items.length === 0">查無符合條件的考卷。</EmptyState>
+    <EmptyState v-else-if="!data || data.items.length === 0">
+      查無符合條件的考卷。試試放寬考科、學校或年度。
+    </EmptyState>
 
     <template v-else>
       <!-- 以考卷為單位:每張卷一張卡,內含題號選擇器(點題號進該題)。 -->
@@ -118,33 +118,29 @@ function groupRuns(
         <li
           v-for="p in data.items"
           :key="p.examSubject.id"
-          class="border-default hover:border-default/80 rounded-(--ui-radius) border p-5 transition-colors"
+          class="border-default hover:border-default/80 rounded-card border p-card transition-colors"
         >
           <div class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span class="font-serif text-base tracking-tight"
+            <span class="font-serif text-body tracking-tight"
               >{{ p.exam.school.name }} {{ p.exam.year }}</span
             >
-            <span class="text-muted text-sm">{{ p.examSubject.name }}</span>
-            <span class="text-muted text-sm"
+            <span class="text-muted text-small">{{ p.examSubject.name }}</span>
+            <span class="text-muted text-small"
               >· {{ ADMISSION_TYPE_LABELS[p.exam.admissionType] }}</span
             >
-            <span class="text-muted text-sm">· {{ p.questions.length }} 題</span>
+            <span class="text-muted text-small">· {{ p.questions.length }} 題</span>
             <UBadge v-for="s in p.subjects" :key="s.slug" color="neutral" variant="soft" size="sm">
               {{ s.name }}
             </UBadge>
           </div>
 
-          <!-- 題號選擇器:同題組(閱讀/克漏字共用篇章)的題號以虛線框 + 「題組」標示群聚。 -->
+          <!-- 題號選擇器:同題組(閱讀/克漏字共用篇章)的題號以底色塊 + 「題組」標示群聚。 -->
           <div class="flex flex-wrap items-start gap-2">
             <div
               v-for="(run, i) in groupRuns(p.questions)"
               :key="i"
               class="flex flex-wrap items-center gap-1.5"
-              :class="
-                run.group
-                  ? 'border-primary/30 bg-primary/5 rounded-md border border-dashed px-2 py-1.5'
-                  : ''
-              "
+              :class="run.group ? 'bg-primary/5 rounded-md px-2 py-1.5' : ''"
             >
               <UBadge v-if="run.group" color="primary" variant="soft" size="xs" :title="run.group">
                 題組
@@ -156,6 +152,7 @@ function groupRuns(
                 color="neutral"
                 variant="soft"
                 size="xs"
+                class="min-h-touch min-w-touch justify-center"
                 :aria-label="`第 ${qq.number} 題(${QUESTION_TYPE_LABELS[qq.type]})`"
               >
                 {{ qq.number }}
@@ -169,5 +166,5 @@ function groupRuns(
         <UPagination v-model:page="page" :total="data.meta.total" :items-per-page="pageSize" />
       </div>
     </template>
-  </UContainer>
+  </AppPage>
 </template>

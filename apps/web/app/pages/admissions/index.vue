@@ -9,7 +9,7 @@ import { toSelectItems } from "~/utils/select";
 import type { AdmissionRound } from "@prograds/shared";
 
 useSeoMeta({
-  title: "報名情報",
+  title: "報名資訊",
   description: "各校系所招生組別:名額、報名/錄取人數、採計考科與佔分、面試與簡章。",
 });
 
@@ -66,15 +66,13 @@ const ratio = (r: AdmissionRound) =>
 </script>
 
 <template>
-  <UContainer class="py-12 md:py-16">
-    <PageHeader
-      eyebrow="Admissions · 報名情報"
-      title="報名情報"
-      description="各校系所招生組別:名額、報名/錄取人數、採計考科與佔分、面試與簡章。"
-    />
-
+  <AppPage
+    eyebrow="Admissions · 報名資訊"
+    title="報名資訊"
+    description="各校系所招生組別:名額、報名/錄取人數、採計考科與佔分、面試與簡章。"
+  >
     <div
-      class="border-default mb-8 flex flex-wrap items-end gap-3 rounded-(--ui-radius) border p-4"
+      class="border-default mb-section flex flex-wrap items-end gap-control rounded-card border p-card"
     >
       <USelectMenu
         v-model="school"
@@ -83,7 +81,7 @@ const ratio = (r: AdmissionRound) =>
         :loading="schoolsLoading"
         aria-label="學校"
         placeholder="選擇學校"
-        class="w-56"
+        class="w-full sm:w-56"
       />
       <USelectMenu
         v-model="dept"
@@ -93,31 +91,28 @@ const ratio = (r: AdmissionRound) =>
         :loading="deptsLoading"
         aria-label="系所"
         placeholder="選擇系所"
-        class="w-64"
+        class="w-full sm:w-64"
       />
     </div>
 
     <!-- State A: no school chosen yet. -->
-    <EmptyState v-if="!school">選擇學校開始瀏覽。</EmptyState>
+    <EmptyState v-if="!school">選擇學校開始瀏覽各系所招生組別。</EmptyState>
 
     <!-- State B: school chosen, browsing its departments. -->
     <section v-else-if="!dept">
-      <h2 class="font-serif mb-3 text-lg tracking-tight">{{ schoolName }} · 系所</h2>
+      <h2 class="font-serif text-title-sm mb-3 tracking-tight">{{ schoolName }} · 系所</h2>
 
-      <div
-        v-if="deptsLoading"
-        class="border-default divide-default divide-y rounded-(--ui-radius) border"
-      >
+      <div v-if="deptsLoading" class="border-default divide-default divide-y rounded-card border">
         <USkeleton v-for="n in 6" :key="n" class="mx-5 my-4 h-5 w-48" />
       </div>
 
       <EmptyState v-else-if="!deptItems.length">該校尚無系所資料。</EmptyState>
 
-      <ul v-else class="border-default divide-default divide-y rounded-(--ui-radius) border">
+      <ul v-else class="border-default divide-default divide-y rounded-card border">
         <li v-for="d in deptItems" :key="d.value">
           <button
             type="button"
-            class="hover:bg-elevated/50 flex w-full items-center justify-between px-5 py-4 text-left transition-colors"
+            class="focus-ring hover:bg-elevated/50 flex min-h-touch w-full items-center justify-between px-5 py-4 text-left transition-colors"
             @click="dept = d.value"
           >
             <span>{{ d.label }}</span>
@@ -129,9 +124,9 @@ const ratio = (r: AdmissionRound) =>
 
     <!-- State C: dept chosen — admissions with a year tab slot. -->
     <template v-else>
-      <header class="mb-5">
-        <h2 class="font-serif text-xl tracking-tight">{{ deptName }}</h2>
-        <p class="text-muted text-sm">{{ schoolName }}</p>
+      <header class="mb-section">
+        <h2 class="font-serif text-title-sm tracking-tight">{{ deptName }}</h2>
+        <p class="text-muted text-small">{{ schoolName }}</p>
       </header>
 
       <div v-if="isLoading" class="space-y-3">
@@ -143,19 +138,19 @@ const ratio = (r: AdmissionRound) =>
       <EmptyState v-else-if="!data || data.length === 0">查無此校系的招生資料。</EmptyState>
 
       <template v-else>
-        <!-- Year slot: client-side filter over the already-loaded rounds. -->
+        <!-- Year slot: a client-side filter over the loaded rounds — a toggle-button group
+             (aria-pressed), not an ARIA tablist, since there are no associated tabpanels. -->
         <div
-          role="tablist"
-          aria-label="年度"
-          class="border-default mb-6 flex flex-wrap gap-1 border-b"
+          role="group"
+          aria-label="篩選年度"
+          class="border-default mb-section flex flex-wrap gap-1 border-b"
         >
           <button
             v-for="t in yearTabs"
             :key="t.value"
             type="button"
-            role="tab"
-            :aria-selected="selectedYear === t.value"
-            class="-mb-px border-b-2 px-3 py-2 text-sm tabular-nums transition-colors"
+            :aria-pressed="selectedYear === t.value"
+            class="focus-ring -mb-px inline-flex min-h-touch items-center border-b-2 px-3 text-small tabular-nums transition-colors"
             :class="
               selectedYear === t.value
                 ? 'border-primary text-default'
@@ -167,15 +162,15 @@ const ratio = (r: AdmissionRound) =>
           </button>
         </div>
 
-        <section v-for="g in visibleGroups" :key="g.id" class="mb-10">
-          <h3 class="font-serif mb-3 text-lg tracking-tight">
+        <section v-for="g in visibleGroups" :key="g.id" class="mb-section">
+          <h3 class="font-serif text-title-sm mb-3 tracking-tight">
             {{ g.name || "不分組" }}<span v-if="g.code" class="text-muted"> · {{ g.code }} 組</span>
           </h3>
 
           <div
             v-for="r in g.rounds"
             :key="`${r.year}-${r.admissionType}`"
-            class="border-default mt-3 rounded-(--ui-radius) border p-5"
+            class="border-default mt-3 rounded-card border p-card"
           >
             <div class="font-medium">
               {{ r.year }} 學年 · {{ ADMISSION_TYPE_LABELS[r.admissionType] }}
@@ -183,12 +178,12 @@ const ratio = (r: AdmissionRound) =>
               <span v-if="r.applicantType" class="text-muted">· {{ r.applicantType }}</span>
             </div>
 
-            <div class="mt-1 text-sm">
+            <div class="text-small mt-1">
               名額 {{ r.quota ?? "—" }} · 報名 {{ r.applicants ?? "—" }} · 錄取
               {{ r.admitted ?? "—" }} · 錄取率 {{ ratio(r) }}
             </div>
 
-            <div class="text-muted mt-1 text-sm">
+            <div class="text-muted text-small mt-1">
               採計:{{ r.methods.map((m) => ADMISSION_METHOD_LABELS[m]).join("、") || "—" }}
               <span v-if="r.calculator !== null">· 計算機 {{ r.calculator ? "可" : "不可" }}</span>
               <span v-if="r.writtenWeight !== null">· 筆試 {{ r.writtenWeight }}%</span>
@@ -197,7 +192,7 @@ const ratio = (r: AdmissionRound) =>
               <span v-if="r.interviewAt">· 面試 {{ formatDateTime(r.interviewAt) }}</span>
             </div>
 
-            <ul v-if="r.papers.length" class="mt-2 text-sm">
+            <ul v-if="r.papers.length" class="text-small mt-2">
               <li v-for="(p, i) in r.papers" :key="i">
                 {{ p.name }}<span v-if="p.weight !== null"> ({{ p.weight }}%)</span>
                 <span v-if="p.subjects.length" class="text-muted">
@@ -206,7 +201,7 @@ const ratio = (r: AdmissionRound) =>
               </li>
             </ul>
 
-            <p v-if="r.tiebreak.length" class="text-muted mt-1 text-sm">
+            <p v-if="r.tiebreak.length" class="text-muted text-small mt-1">
               同分參酌:{{ r.tiebreak.join("、") }}
             </p>
 
@@ -215,7 +210,7 @@ const ratio = (r: AdmissionRound) =>
               :href="r.sourceUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="text-primary mt-1 inline-block text-sm"
+              class="text-primary text-small mt-1 inline-block"
             >
               簡章連結
             </a>
@@ -223,5 +218,5 @@ const ratio = (r: AdmissionRound) =>
         </section>
       </template>
     </template>
-  </UContainer>
+  </AppPage>
 </template>
