@@ -23,6 +23,10 @@ TypeScript + tsx 執行的 workspace 套件。流程見
 
 會解析資料、寫檔、同步資料庫或修改 markdown 的 tool 必須另外提供 `test`。測試優先覆蓋 parser、path contract、frontmatter/body mutation、prune/delete 類邏輯與錯誤 exit path；純 one-off 轉檔工具可先以 `typecheck` + CLI usage/error behavior 為最低門檻。
 
+主指令 script 命名其**動作或產出**（verb-led kebab-case，如 `sync`、`crop`、`solve`、`to-images`），不可用裸名詞；同類子變體用 `:` 後綴（如 `sync:prune`）。
+
+> `font-subset` 為刻意排除於 workspace 的獨立 npm 工具（重型 native 依賴 cn-font-split，見 `pnpm-workspace.yaml`），僅提供 `build`，不受本標準約束。
+
 CLI 行為需一致：
 
 - 缺必要參數時輸出 `Usage:` 並以 non-zero exit code 結束。
