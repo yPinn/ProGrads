@@ -37,14 +37,9 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
-  # One job per package so each test summary is attributed to its package.
   test:
-    name: test (${{ matrix.package }})
+    name: test
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        package: [apps/api, apps/web, packages/shared, tools/content-sync]
     steps:
       - uses: actions/checkout@v7
 
@@ -58,4 +53,4 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Test
-        run: pnpm turbo run test --filter="./${{ matrix.package }}"
+        run: pnpm turbo run test --ui=stream
