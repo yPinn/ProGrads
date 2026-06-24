@@ -58,6 +58,9 @@ const query = computed(() => ({
 
 const { data, isPending, isError, error, refetch, isPlaceholderData } = useQuestionPapers(query);
 
+// Honour OS reduce-motion for the JS-driven stagger (CSS guard can't reach it).
+const prefersReducedMotion = useReducedMotion();
+
 // Cluster consecutive questions sharing a 題組 (passage/cloze set) so the 題號 selector can
 // visually bracket them. Questions arrive in paper order, so a single linear pass suffices.
 function groupRuns(
@@ -102,69 +105,84 @@ function groupRuns(
       <USelect v-model="year" :items="yearOptions" aria-label="年度" class="w-full sm:w-32" />
     </div>
 
-    <div v-if="isPending" class="space-y-3">
-      <USkeleton v-for="n in 6" :key="n" class="h-14 w-full" />
-    </div>
+    <Transition name="fade" mode="out-in">
+      <div v-if="isPending" key="loading" class="space-y-3">
+        <USkeleton v-for="n in 6" :key="n" class="h-14 w-full" />
+      </div>
 
-    <ErrorState v-else-if="isError" :error="error" @retry="refetch" />
+      <ErrorState v-else-if="isError" key="error" :error="error" @retry="refetch" />
 
-    <EmptyState v-else-if="!data || data.items.length === 0">
-      查無符合條件的考卷。試試放寬考科、學校或年度。
-    </EmptyState>
+      <EmptyState v-else-if="!data || data.items.length === 0" key="empty">
+        查無符合條件的考卷。試試放寬考科、學校或年度。
+      </EmptyState>
 
-    <template v-else>
-      <!-- 以考卷為單位:每張卷一張卡,內含題號選擇器(點題號進該題)。 -->
-      <ul class="space-y-4" :class="{ 'opacity-60': isPlaceholderData }">
-        <li
-          v-for="p in data.items"
-          :key="p.examSubject.id"
-          class="border-default hover:border-default/80 rounded-card border p-card transition-colors"
-        >
-          <div class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span class="font-serif text-body tracking-tight"
-              >{{ p.exam.school.name }} {{ p.exam.year }}</span
-            >
-            <span class="text-muted text-small">{{ p.examSubject.name }}</span>
-            <span class="text-muted text-small"
-              >· {{ ADMISSION_TYPE_LABELS[p.exam.admissionType] }}</span
-            >
-            <span class="text-muted text-small">· {{ p.questions.length }} 題</span>
-            <UBadge v-for="s in p.subjects" :key="s.slug" color="neutral" variant="soft" size="sm">
-              {{ s.name }}
-            </UBadge>
-          </div>
-
-          <!-- 題號選擇器:同題組(閱讀/克漏字共用篇章)的題號以底色塊 + 「題組」標示群聚。 -->
-          <div class="flex flex-wrap items-start gap-2">
-            <div
-              v-for="(run, i) in groupRuns(p.questions)"
-              :key="i"
-              class="flex flex-wrap items-center gap-1.5"
-              :class="run.group ? 'bg-primary/5 rounded-md px-2 py-1.5' : ''"
-            >
-              <UBadge v-if="run.group" color="primary" variant="soft" size="xs" :title="run.group">
-                題組
-              </UBadge>
-              <UButton
-                v-for="qq in run.items"
-                :key="qq.externalId"
-                :to="`/questions/${qq.externalId}`"
+      <div v-else key="results">
+        <!-- 以考卷為單位:每張卷一張卡,內含題號選擇器(點題號進該題)。 -->
+        <ul class="space-y-4" :class="{ 'opacity-60': isPlaceholderData }">
+          <li
+            v-for="(p, pi) in data.items"
+            :key="p.examSubject.id"
+            v-motion="motionFadeUp(pi, prefersReducedMotion)"
+            class="border-default hover:border-default/80 rounded-card border p-card transition-colors"
+          >
+            <div class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span class="font-serif text-body tracking-tight"
+                >{{ p.exam.school.name }} {{ p.exam.year }}</span
+              >
+              <span class="text-muted text-small">{{ p.examSubject.name }}</span>
+              <span class="text-muted text-small"
+                >· {{ ADMISSION_TYPE_LABELS[p.exam.admissionType] }}</span
+              >
+              <span class="text-muted text-small">· {{ p.questions.length }} 題</span>
+              <UBadge
+                v-for="s in p.subjects"
+                :key="s.slug"
                 color="neutral"
                 variant="soft"
-                size="xs"
-                class="min-h-touch min-w-touch justify-center"
-                :aria-label="`第 ${qq.number} 題(${QUESTION_TYPE_LABELS[qq.type]})`"
+                size="sm"
               >
-                {{ qq.number }}
-              </UButton>
+                {{ s.name }}
+              </UBadge>
             </div>
-          </div>
-        </li>
-      </ul>
 
-      <div v-if="data.meta.total > pageSize" class="mt-6 flex justify-center">
-        <UPagination v-model:page="page" :total="data.meta.total" :items-per-page="pageSize" />
+            <!-- 題號選擇器:同題組(閱讀/克漏字共用篇章)的題號以底色塊 + 「題組」標示群聚。 -->
+            <div class="flex flex-wrap items-start gap-2">
+              <div
+                v-for="(run, i) in groupRuns(p.questions)"
+                :key="i"
+                class="flex flex-wrap items-center gap-1.5"
+                :class="run.group ? 'bg-primary/5 rounded-md px-2 py-1.5' : ''"
+              >
+                <UBadge
+                  v-if="run.group"
+                  color="primary"
+                  variant="soft"
+                  size="xs"
+                  :title="run.group"
+                >
+                  題組
+                </UBadge>
+                <UButton
+                  v-for="qq in run.items"
+                  :key="qq.externalId"
+                  :to="`/questions/${qq.externalId}`"
+                  color="neutral"
+                  variant="soft"
+                  size="xs"
+                  class="min-h-touch min-w-touch justify-center"
+                  :aria-label="`第 ${qq.number} 題(${QUESTION_TYPE_LABELS[qq.type]})`"
+                >
+                  {{ qq.number }}
+                </UButton>
+              </div>
+            </div>
+          </li>
+        </ul>
+
+        <div v-if="data.meta.total > pageSize" class="mt-6 flex justify-center">
+          <UPagination v-model:page="page" :total="data.meta.total" :items-per-page="pageSize" />
+        </div>
       </div>
-    </template>
+    </Transition>
   </AppPage>
 </template>

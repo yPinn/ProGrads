@@ -63,6 +63,9 @@ const visibleGroups = computed(() => {
 // 錄取率 = 錄取 / 報名.
 const ratio = (r: AdmissionRound) =>
   r.applicants && r.admitted ? `${((r.admitted / r.applicants) * 100).toFixed(1)}%` : "—";
+
+// Honour OS reduce-motion for the JS-driven stagger (CSS guard can't reach it).
+const prefersReducedMotion = useReducedMotion();
 </script>
 
 <template>
@@ -109,7 +112,11 @@ const ratio = (r: AdmissionRound) =>
       <EmptyState v-else-if="!deptItems.length">該校尚無系所資料。</EmptyState>
 
       <ul v-else class="border-default divide-default divide-y rounded-card border">
-        <li v-for="d in deptItems" :key="d.value">
+        <li
+          v-for="(d, di) in deptItems"
+          :key="d.value"
+          v-motion="motionFadeUp(di, prefersReducedMotion)"
+        >
           <button
             type="button"
             class="focus-ring hover:bg-elevated/50 flex min-h-touch w-full items-center justify-between px-5 py-4 text-left transition-colors"
@@ -162,7 +169,12 @@ const ratio = (r: AdmissionRound) =>
           </button>
         </div>
 
-        <section v-for="g in visibleGroups" :key="g.id" class="mb-section">
+        <section
+          v-for="(g, gi) in visibleGroups"
+          :key="g.id"
+          v-motion="motionFadeUp(gi, prefersReducedMotion)"
+          class="mb-section"
+        >
           <h3 class="font-serif text-title-sm mb-3 tracking-tight">
             {{ g.name || "不分組" }}<span v-if="g.code" class="text-muted"> · {{ g.code }} 組</span>
           </h3>

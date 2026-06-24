@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     "@nuxtjs/seo",
     "@nuxtjs/i18n",
     "@pinia/nuxt",
+    "@vueuse/motion/nuxt",
     "@nuxt/eslint",
   ],
   css: ["~/assets/css/main.css", "katex/dist/katex.min.css"],
