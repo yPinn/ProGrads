@@ -44,6 +44,20 @@
 
   --container-reading: 45rem;
   --radius-card: 0.375rem; /* aligned with Nuxt UI's --ui-radius */
+
+  /* Motion tokens — single source for all animation timing. Consumed by Tailwind
+     transition utilities (via the --default-* overrides below), Vue/Nuxt page
+     transitions, and @vueuse/motion presets. Never write bare ms/cubic-bezier. */
+  --duration-fast: 120ms; /* micro-interactions: hover/focus colour + transform */
+  --duration-base: 220ms; /* general enter/leave */
+  --duration-slow: 320ms; /* page transitions, larger displacement */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1); /* → ease-standard utility */
+  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1); /* → ease-emphasized utility */
+
+  /* Anchor every bare `transition-*` utility to the tokens above, so micro-interactions
+     stay uniform without per-element duration/easing classes. */
+  --default-transition-duration: var(--duration-fast);
+  --default-transition-timing-function: var(--ease-standard);
 }
 
 :root {
@@ -77,12 +91,55 @@
   .focus-ring {
     @apply focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2;
   }
+
+  /* Route transition for <NuxtPage :transition="{ name: 'page', mode: 'out-in' }">.
+     Subtle fade-up, timed from motion tokens. reduced-motion guard neutralises it. */
+  .page-enter-active,
+  .page-leave-active {
+    transition:
+      opacity var(--duration-base) var(--ease-standard),
+      transform var(--duration-base) var(--ease-standard);
+  }
+  .page-enter-from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .page-leave-to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  /* Reusable opacity transition for <Transition name="fade" mode="out-in">: softens
+     loading ↔ error ↔ empty ↔ content swaps. CSS-based, so the reduced-motion guard
+     neutralises it automatically. */
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity var(--duration-base) var(--ease-standard);
+  }
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
+  }
 }
 
 @layer base {
   body {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /* Global accessibility guard: honour the OS "reduce motion" setting everywhere —
+     one place, whole site. Covers Tailwind utilities, Vue transitions, and JS-driven
+     (@vueuse/motion) animations, which read this preference themselves. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   /* Hide the page scrollbar only (scrolling still works); nested scroll containers

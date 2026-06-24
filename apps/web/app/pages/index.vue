@@ -26,6 +26,9 @@ const sections = [
     desc: "各校研究所招生事件時程:報名起訖、筆試、面試、放榜。",
   },
 ];
+
+// Honour OS reduce-motion for the JS-driven stagger (CSS guard can't reach it).
+const prefersReducedMotion = useReducedMotion();
 </script>
 
 <template>
@@ -44,8 +47,9 @@ const sections = [
       class="border-default divide-default mt-14 grid divide-y overflow-hidden rounded-card border sm:grid-cols-3 sm:divide-x sm:divide-y-0"
     >
       <NuxtLink
-        v-for="s in sections"
+        v-for="(s, i) in sections"
         :key="s.to"
+        v-motion="motionFadeUp(i, prefersReducedMotion)"
         :to="s.to"
         class="focus-ring hover:bg-elevated/50 group flex flex-col gap-2 p-6 transition-colors"
       >
