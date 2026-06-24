@@ -8,8 +8,12 @@
    pnpm --filter @prograds/pdf-extract to-images <pdf路徑> [output-dir]
    ```
 
-   建議 output-dir：`{content-repo}/images/raw/{school}/{year}/{paper}/`
-   （gitignored 的獨立 `images/` 樹，鏡射題目來源路徑，不與內容檔同層）
+   建議 output-dir：
+   - 題目 PDF：`{content-repo}/images/raw/questions/{school}/{year}/{paper}/`
+   - 簡章 PDF：`{content-repo}/images/raw/admissions/{year}/{school}/prospectus/`
+
+   這些路徑都在 gitignored 的 `images/` 樹下，只存放可重跑的 PDF 頁面圖與 crop。
+   原始 PDF 仍放在 `raw/` 或 `admissions/` 對應內容路徑。
    輸出：`page-01.png, page-02.png, ...`
 
 2. **確認 session metadata**（用於路徑與 frontmatter）：
