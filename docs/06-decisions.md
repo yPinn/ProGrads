@@ -107,3 +107,12 @@
 - **理由**：前後端框架天生不同（Nuxt vs Nest），硬塞單一巨型 config 更糟；「規則共用一份 `base`、差異各自覆寫」兼顧一致與隔離。Vitest 與 ESM/Vite 生態契合，前後端同一 runner 降低心智負擔。
 - **取捨**：因 pnpm 嚴格 node_modules（不 hoist，見 D15），Vitest 須列為各套件直接 devDep；`packages/db` 僅 re-export 生成的 Prisma client，無原始碼可測/可 lint，刻意不接。
 - **入口**：日常一律 root 下 `pnpm lint` / `format` / `typecheck` / `test`（turbo 自動分派、排序、快取）；針對單一套件用 `pnpm -F <name> <task>`。
+
+## D17. 使用者身分：延後至第二階段、OAuth-only（不存密碼）
+
+- **決策**：MVP 全匿名公開（對齊 SEO 命脈），不做登入；身分功能延到第二階段（做題記錄/弱點儀表板/線上追問）才上。屆時採 **OAuth-only**：不存密碼/憑證，只存最小身分對照列（`provider, providerUserId, email?, displayName?`），後端自簽 httpOnly JWT session cookie（父網域），沿用既定 `@nestjs/jwt + passport`（見 [01-architecture.md](01-architecture.md) BOM）。
+- **Provider**：首發 **Google**（普及率最高、整合成熟）；**LINE Login** 後續可考慮（與 D9 LINE 推播一條龍）；GitHub/Apple 暫不需要。
+- **MVP 提醒訂閱**：用純 email double opt-in，**不綁帳號**（`reminder_subscription` 獨立於 `user`），避免為單一功能提早引入 auth。
+- **理由**：非營利開源 → 不碰密碼即移除外洩責任、密碼重設流程與大半法遵負擔；OAuth 仍需一列本地身分以掛載 per-user 資料，但那是外部身分對照鍵、非「帳號」。
+- **取捨**：捨棄裝置端純匿名（零 PII，但換裝置/清快取即遺失、無法跨裝置同步、無法長社群），換取跨裝置同步與未來社群可行性。
+- **現況**：僅在文件預留決策與模型草圖（見 [02-data-model.md](02-data-model.md)）；**不建 model、不跑 migration**，第二階段才落地。
