@@ -12,6 +12,7 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "nuxt typecheck",
     "test": "vitest run --coverage",
+    "tokens:legacy": "node design/to-legacy.mjs",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
