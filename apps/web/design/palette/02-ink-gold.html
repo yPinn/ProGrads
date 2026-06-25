@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ProGrads · 墨金 學位袍（Rembrandt 夜巡）· 原值⇄優化</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+TC:wght@400;500;600&family=Fira+Code&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ===========================================================================
+     ProGrads scheme 02 — INK & GOLD, grounded in academic regalia: black gown
+     (neutral structure) + gold science-hood (the one brand colour). Faithful to
+     Rembrandt · The Night Watch (ColorLisa: near-black, ochre-gold, olive, rust).
+     Gold hue is constant across modes (only lightness flips) → smooth light/dark.
+     RAW = faithful values · TUNED = impeccable contrast/elevation optimisation.
+     =========================================================================== */
+      :root {
+        --font-ui: "Inter", "Noto Sans TC", ui-sans-serif, system-ui, sans-serif;
+        --font-content: "Noto Serif TC", ui-serif, Georgia, serif;
+        --font-mono: "Fira Code", ui-monospace, monospace;
+        --r: 0.375rem;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: var(--font-ui);
+        background: #e8e2d2;
+        color: #1a160c;
+        -webkit-font-smoothing: antialiased;
+      }
+      .page {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 34px 28px 80px;
+      }
+      header h1 {
+        font-family: var(--font-content);
+        font-weight: 600;
+        font-size: 1.45rem;
+        letter-spacing: -0.01em;
+        margin: 0;
+      }
+      header p {
+        color: #5f5740;
+        margin: 6px 0 0;
+        font-size: 0.85rem;
+        max-width: 74ch;
+        line-height: 1.6;
+      }
+
+      .anchors {
+        display: flex;
+        gap: 8px;
+        margin: 14px 0 0;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .anchors .src {
+        font-size: 0.72rem;
+        color: #7c6016;
+        font-style: italic;
+      }
+      .anchors .a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid #d6cdb2;
+        border-radius: 7px;
+        padding: 4px 8px 4px 4px;
+        background: #f8f2e2;
+      }
+      .anchors .a .c {
+        width: 22px;
+        height: 22px;
+        border-radius: 4px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+      }
+      .anchors .a code {
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        color: #5b5440;
+      }
+
+      .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #e8e2d2;
+        padding: 14px 0 12px;
+        margin-top: 16px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        border-bottom: 1px solid #ccc3a8;
+      }
+      .seg {
+        display: inline-flex;
+        border: 1px solid #bdb595;
+        border-radius: 999px;
+        overflow: hidden;
+        background: #f8f2e2;
+      }
+      .seg button {
+        font-family: var(--font-ui);
+        font-size: 0.84rem;
+        font-weight: 600;
+        padding: 8px 20px;
+        border: 0;
+        background: transparent;
+        color: #6b6346;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .seg button.on {
+        background: #1a160c;
+        color: #efe6ce;
+      }
+      .toolbar .hint {
+        font-size: 0.76rem;
+        color: #6b6346;
+      }
+      .toolbar kbd {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        background: #fff;
+        border: 1px solid #bdb595;
+        border-bottom-width: 2px;
+        border-radius: 4px;
+        padding: 1px 7px;
+      }
+      .toolbar .now {
+        font-family: var(--font-mono);
+        font-size: 0.76rem;
+        margin-left: auto;
+      }
+      .toolbar .now b {
+        color: #7c6016;
+      }
+
+      .stage {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+        margin-top: 20px;
+      }
+      @media (max-width: 900px) {
+        .stage {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* RAW — faithful Rembrandt mapping */
+      .stage[data-v="raw"] .light {
+        --bg: #efe6ce;
+        --card: #f8f1dd;
+        --elevated: #e7dcc0;
+        --border: #ddd0ab;
+        --ink: #1a160c;
+        --muted: #6e6444;
+        --dim: #a2986f;
+        --primary: #1a160c;
+        --primary-deep: #2c2614;
+        --on-primary: #f3ecd6;
+        --accent: #a68329;
+        --accent-ink: #7c5f16;
+        --accent-soft: #ecdfb4;
+        --board: #221d0e;
+        --board-ink: #ece2c2;
+        --success: #5b6a2e;
+        --warning: #b5701c;
+        --error: #8a350c;
+        --d1: #ede3c4;
+        --d2: #d8c58c;
+        --d3: #bfa452;
+        --d4: #a68329;
+        --d5: #7c6016;
+        --shadow: none;
+      }
+      .stage[data-v="raw"] .dark {
+        --bg: #14110a;
+        --card: #1f1b0f;
+        --elevated: #2c2614;
+        --border: #3a3219;
+        --ink: #e4d7b0;
+        --muted: #a89a6e;
+        --dim: #6e6444;
+        --primary: #e4d7b0;
+        --primary-deep: #f1e8c8;
+        --on-primary: #14110a;
+        --accent: #d8bc63;
+        --accent-ink: #d8bc63;
+        --accent-soft: #2c2614;
+        --board: #0d0b06;
+        --board-ink: #e4d7b0;
+        --success: #8a9a52;
+        --warning: #cba24e;
+        --error: #c2562a;
+        --d1: #3a3219;
+        --d2: #6e5c20;
+        --d3: #9c8330;
+        --d4: #c9a23b;
+        --d5: #e0ce7e;
+        --shadow: none;
+      }
+
+      /* TUNED — impeccable optimisation, hue-locked */
+      .stage[data-v="tuned"] .light {
+        --bg: #f3edda;
+        --card: #fbf6e8;
+        --elevated: #ece0c2;
+        --border: #e2d6b6;
+        --ink: #17130a;
+        --muted: #67603f;
+        --dim: #9c9269;
+        --primary: #17130a;
+        --primary-deep: #2c2614;
+        --on-primary: #f6f0dd;
+        --accent: #a68329;
+        --accent-ink: #75590f;
+        --accent-soft: #efe3bd;
+        --board: #201b0d;
+        --board-ink: #efe6c8;
+        --success: #54642a;
+        --warning: #a5631a;
+        --error: #863309;
+        --d1: #efe6c6;
+        --d2: #d9c587;
+        --d3: #c0a64f;
+        --d4: #a68329;
+        --d5: #7a5e14;
+        --shadow: 0 1px 2px rgba(40, 33, 12, 0.05), 0 6px 18px rgba(40, 33, 12, 0.07);
+      }
+      .stage[data-v="tuned"] .dark {
+        --bg: #15110a;
+        --card: #201c10;
+        --elevated: #2e2815;
+        --border: #3d341a;
+        --ink: #ece0bb;
+        --muted: #a89c70;
+        --dim: #74694a;
+        --primary: #ece0bb;
+        --primary-deep: #f6efcf;
+        --on-primary: #15110a;
+        --accent: #dcc06a;
+        --accent-ink: #dcc06a;
+        --accent-soft: #2e2815;
+        --board: #0c0a05;
+        --board-ink: #ece0bb;
+        --success: #92a25a;
+        --warning: #d0a854;
+        --error: #cb5e30;
+        --d1: #3d341a;
+        --d2: #6e5c20;
+        --d3: #9c8330;
+        --d4: #cba23d;
+        --d5: #e6d484;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 22px rgba(0, 0, 0, 0.34);
+      }
+
+      .panel {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--ink);
+        box-shadow: var(--shadow);
+        transition:
+          background 0.25s,
+          box-shadow 0.25s,
+          border-color 0.25s;
+      }
+      .panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 13px 18px;
+        border-bottom: 1px solid var(--border);
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .logo .mark {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        position: relative;
+        background: var(--primary);
+        display: grid;
+        place-items: center;
+        font-family: var(--font-content);
+        font-weight: 600;
+        color: var(--on-primary);
+        font-size: 0.95rem;
+      }
+      .logo .mark::after {
+        content: "";
+        position: absolute;
+        top: -3px;
+        right: -3px;
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--accent);
+        box-shadow: 0 0 0 2px var(--bg);
+      }
+      .logo b {
+        font-weight: 600;
+        font-size: 0.95rem;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+      }
+      .mode-tag {
+        font-size: 0.74rem;
+        color: var(--muted);
+      }
+
+      .body {
+        padding: 26px 22px 22px;
+      }
+      .eyebrow {
+        font-size: 0.68rem;
+        font-weight: 500;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .display {
+        font-family: var(--font-content);
+        font-weight: 600;
+        font-size: 1.7rem;
+        line-height: 1.15;
+        letter-spacing: -0.01em;
+        margin: 11px 0 0;
+        color: var(--ink);
+      }
+      .lede {
+        color: var(--muted);
+        margin: 11px 0 0;
+        line-height: 1.7;
+        font-size: 0.88rem;
+        max-width: 33ch;
+      }
+      .cta-row {
+        display: flex;
+        gap: 9px;
+        margin-top: 18px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .btn {
+        font-family: var(--font-ui);
+        font-size: 0.84rem;
+        font-weight: 500;
+        padding: 8px 14px;
+        border-radius: var(--r);
+        border: 1px solid transparent;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+      .btn-primary:hover {
+        background: var(--primary-deep);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--ink);
+        border-color: var(--border);
+      }
+      .gold-link {
+        font-size: 0.8rem;
+        color: var(--accent-ink);
+        font-weight: 500;
+      }
+
+      .nav {
+        margin-top: 22px;
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+      .nav a {
+        padding: 14px;
+        text-decoration: none;
+        color: inherit;
+        background: var(--card);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        transition: background 0.15s;
+      }
+      .nav a:last-child {
+        border-right: 0;
+      }
+      .nav a:hover {
+        background: var(--elevated);
+      }
+      .nav .en {
+        font-size: 0.64rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+      .nav h3 {
+        font-family: var(--font-content);
+        font-weight: 600;
+        font-size: 0.96rem;
+        margin: 0;
+        letter-spacing: -0.01em;
+      }
+      .nav h3 .arrow {
+        color: var(--muted);
+      }
+      .nav a:hover h3 .arrow {
+        color: var(--accent);
+      }
+      .nav p {
+        font-size: 0.74rem;
+        color: var(--muted);
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      .board-band {
+        margin-top: 20px;
+        border-radius: var(--r);
+        padding: 16px 18px;
+        background: var(--board);
+        color: var(--board-ink);
+      }
+      .board-band .k {
+        font-size: 0.68rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.6;
+      }
+      .board-band .v {
+        font-family: var(--font-content);
+        font-size: 1.12rem;
+        margin-top: 5px;
+      }
+      .board-band .v .d {
+        color: var(--accent);
+      }
+
+      .status {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+        font-size: 0.76rem;
+      }
+      .status span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--muted);
+      }
+      .status i {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+      }
+
+      .data {
+        margin-top: 20px;
+      }
+      .data .lh {
+        font-size: 0.66rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--dim);
+        margin-bottom: 7px;
+      }
+      .data .ramp {
+        display: flex;
+        height: 26px;
+        border-radius: 5px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+      .data .ramp span {
+        flex: 1;
+      }
+
+      .swatch {
+        display: flex;
+        gap: 7px;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+      }
+      .swatch .s {
+        flex: 1;
+        text-align: center;
+      }
+      .swatch .s .nm {
+        font-size: 0.62rem;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 4px;
+      }
+      .swatch .s .box {
+        height: 30px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+      }
+      .swatch .s code {
+        font-family: var(--font-mono);
+        font-size: 0.56rem;
+        color: var(--dim);
+        display: block;
+        margin-top: 3px;
+      }
+      .panel-foot {
+        padding: 10px 18px;
+        border-top: 1px solid var(--border);
+        font-size: 0.68rem;
+        color: var(--dim);
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .vt {
+        margin-top: 26px;
+        background: #f8f2e2;
+        border: 1px solid #ddd0ab;
+        border-radius: 10px;
+        padding: 16px 18px;
+      }
+      .vt h3 {
+        font-family: var(--font-content);
+        font-size: 1rem;
+        margin: 0 0 10px;
+      }
+      .vt table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.74rem;
+      }
+      .vt th,
+      .vt td {
+        text-align: left;
+        padding: 5px 8px;
+        border-bottom: 1px solid #ece0c2;
+      }
+      .vt th {
+        color: #6b6346;
+        font-weight: 600;
+      }
+      .vt td code {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+      }
+      .vt .chip {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        vertical-align: middle;
+        margin-right: 6px;
+      }
+      .vt .changed {
+        color: #7c6016;
+        font-weight: 600;
+      }
+      .vt .same {
+        color: #9b9272;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <h1>ProGrads · 墨金 學位袍配色</h1>
+        <p>
+          學術傳統：<strong>黑袍＝中性結構</strong>，<strong>金黃垂帶（理學）＝唯一品牌色</strong>。忠於
+          <strong>Rembrandt《夜巡》</strong>（ColorLisa）。金的色相跨模式不變、只翻明度 →
+          平滑切換。Light＝羊皮紙文憑，Dark＝黑袍夜讀。
+        </p>
+        <div class="anchors">
+          <span class="src">《夜巡》錨點 →</span>
+          <div class="a">
+            <span class="c" style="background: #dbc99a"></span><code>#DBC99A</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #a68329"></span><code>#A68329</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #5b5224"></span><code>#5B5224</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #8a350c"></span><code>#8A350C</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #090a04"></span><code>#090A04</code>
+          </div>
+        </div>
+      </header>
+
+      <div class="toolbar">
+        <div class="seg">
+          <button id="btn-raw" class="on" onclick="setVariant('raw')">原值 RAW</button>
+          <button id="btn-tuned" onclick="setVariant('tuned')">優化 TUNED</button>
+        </div>
+        <span class="hint">按 <kbd>空白鍵</kbd> 快速 A/B 閃比</span>
+        <span class="now">目前：<b id="now">原值 RAW</b></span>
+      </div>
+
+      <div class="stage" id="stage" data-v="raw">
+        <section class="panel light" id="p-light">
+          <div class="panel-head">
+            <span class="logo"><span class="mark">P</span><b>ProGrads</b></span
+            ><span class="mode-tag">☀️ 羊皮紙 Light</span>
+          </div>
+          <div class="body">
+            <p class="eyebrow">Graduate Exam Prep · 研究所備考</p>
+            <h2 class="display">研究所備考作戰中心</h2>
+            <p class="lede">一處整合報名資訊、考古題與招生日程，讓備考的每一步都有依據。</p>
+            <div class="cta-row">
+              <button class="btn btn-primary">開始練題 →</button
+              ><button class="btn btn-ghost">瀏覽考古題</button
+              ><a class="gold-link" href="#">★ 上榜計畫</a>
+            </div>
+            <nav class="nav">
+              <a href="#"
+                ><span class="en">Admissions</span>
+                <h3>報名資訊 <span class="arrow">→</span></h3>
+                <p>名額、報名/錄取、採計考科。</p></a
+              >
+              <a href="#"
+                ><span class="en">Question Bank</span>
+                <h3>考古題 <span class="arrow">→</span></h3>
+                <p>依考科、學校、年度檢索。</p></a
+              >
+              <a href="#"
+                ><span class="en">Schedule</span>
+                <h3>招生日程 <span class="arrow">→</span></h3>
+                <p>報名、筆試、面試、放榜。</p></a
+              >
+            </nav>
+            <div class="board-band">
+              <div class="k">Deadline · 報名倒數</div>
+              <div class="v">臺大 資管所 — 還有 <span class="d">12 天</span></div>
+            </div>
+            <div class="status">
+              <span><i style="background: var(--success)"></i>已完成</span
+              ><span><i style="background: var(--warning)"></i>即將截止</span
+              ><span><i style="background: var(--error)"></i>報名失敗</span>
+            </div>
+            <div class="data">
+              <div class="lh">趨勢 · 金色單色階</div>
+              <div class="ramp">
+                <span style="background: var(--d1)"></span
+                ><span style="background: var(--d2)"></span
+                ><span style="background: var(--d3)"></span
+                ><span style="background: var(--d4)"></span
+                ><span style="background: var(--d5)"></span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="s">
+                <span class="nm">袍 主色</span>
+                <div class="box" style="background: var(--primary)"></div>
+                <code data-var="primary"></code>
+              </div>
+              <div class="s">
+                <span class="nm">垂帶金</span>
+                <div class="box" style="background: var(--accent)"></div>
+                <code data-var="accent"></code>
+              </div>
+              <div class="s">
+                <span class="nm">羊皮紙</span>
+                <div class="box" style="background: var(--bg)"></div>
+                <code data-var="bg"></code>
+              </div>
+              <div class="s">
+                <span class="nm">墨</span>
+                <div class="box" style="background: var(--ink)"></div>
+                <code data-var="ink"></code>
+              </div>
+              <div class="s">
+                <span class="nm">鏽紅</span>
+                <div class="box" style="background: var(--error)"></div>
+                <code data-var="error"></code>
+              </div>
+            </div>
+          </div>
+          <div class="panel-foot">
+            <span>Light · <span class="vlabel">原值</span></span
+            ><span>羊皮紙文憑</span>
+          </div>
+        </section>
+
+        <section class="panel dark" id="p-dark">
+          <div class="panel-head">
+            <span class="logo"><span class="mark">P</span><b>ProGrads</b></span
+            ><span class="mode-tag">🌙 黑袍 Dark</span>
+          </div>
+          <div class="body">
+            <p class="eyebrow">Graduate Exam Prep · 研究所備考</p>
+            <h2 class="display">研究所備考作戰中心</h2>
+            <p class="lede">一處整合報名資訊、考古題與招生日程，讓備考的每一步都有依據。</p>
+            <div class="cta-row">
+              <button class="btn btn-primary">開始練題 →</button
+              ><button class="btn btn-ghost">瀏覽考古題</button
+              ><a class="gold-link" href="#">★ 上榜計畫</a>
+            </div>
+            <nav class="nav">
+              <a href="#"
+                ><span class="en">Admissions</span>
+                <h3>報名資訊 <span class="arrow">→</span></h3>
+                <p>名額、報名/錄取、採計考科。</p></a
+              >
+              <a href="#"
+                ><span class="en">Question Bank</span>
+                <h3>考古題 <span class="arrow">→</span></h3>
+                <p>依考科、學校、年度檢索。</p></a
+              >
+              <a href="#"
+                ><span class="en">Schedule</span>
+                <h3>招生日程 <span class="arrow">→</span></h3>
+                <p>報名、筆試、面試、放榜。</p></a
+              >
+            </nav>
+            <div class="board-band">
+              <div class="k">Deadline · 報名倒數</div>
+              <div class="v">臺大 資管所 — 還有 <span class="d">12 天</span></div>
+            </div>
+            <div class="status">
+              <span><i style="background: var(--success)"></i>已完成</span
+              ><span><i style="background: var(--warning)"></i>即將截止</span
+              ><span><i style="background: var(--error)"></i>報名失敗</span>
+            </div>
+            <div class="data">
+              <div class="lh">趨勢 · 金色單色階</div>
+              <div class="ramp">
+                <span style="background: var(--d1)"></span
+                ><span style="background: var(--d2)"></span
+                ><span style="background: var(--d3)"></span
+                ><span style="background: var(--d4)"></span
+                ><span style="background: var(--d5)"></span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="s">
+                <span class="nm">主色(亮)</span>
+                <div class="box" style="background: var(--primary)"></div>
+                <code data-var="primary"></code>
+              </div>
+              <div class="s">
+                <span class="nm">垂帶金</span>
+                <div class="box" style="background: var(--accent)"></div>
+                <code data-var="accent"></code>
+              </div>
+              <div class="s">
+                <span class="nm">黑袍底</span>
+                <div class="box" style="background: var(--bg)"></div>
+                <code data-var="bg"></code>
+              </div>
+              <div class="s">
+                <span class="nm">卡面</span>
+                <div class="box" style="background: var(--card)"></div>
+                <code data-var="card"></code>
+              </div>
+              <div class="s">
+                <span class="nm">金文字</span>
+                <div class="box" style="background: var(--ink)"></div>
+                <code data-var="ink"></code>
+              </div>
+            </div>
+          </div>
+          <div class="panel-foot">
+            <span>Dark · <span class="vlabel">原值</span></span
+            ><span>黑袍夜讀</span>
+          </div>
+        </section>
+      </div>
+
+      <div class="vt">
+        <h3>設定值核對（即時讀取 · 變更者標金）</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Token</th>
+              <th>Light · RAW</th>
+              <th>Light · TUNED</th>
+              <th>Dark · RAW</th>
+              <th>Dark · TUNED</th>
+            </tr>
+          </thead>
+          <tbody id="vt-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      const RAW = {
+        light: {
+          bg: "#efe6ce",
+          card: "#f8f1dd",
+          border: "#ddd0ab",
+          ink: "#1a160c",
+          muted: "#6e6444",
+          primary: "#1a160c",
+          "primary-deep": "#2c2614",
+          accent: "#a68329",
+          "accent-ink": "#7c5f16",
+          board: "#221d0e",
+          success: "#5b6a2e",
+          warning: "#b5701c",
+          error: "#8a350c",
+        },
+        dark: {
+          bg: "#14110a",
+          card: "#1f1b0f",
+          border: "#3a3219",
+          ink: "#e4d7b0",
+          muted: "#a89a6e",
+          primary: "#e4d7b0",
+          "primary-deep": "#f1e8c8",
+          accent: "#d8bc63",
+          "accent-ink": "#d8bc63",
+          board: "#0d0b06",
+          success: "#8a9a52",
+          warning: "#cba24e",
+          error: "#c2562a",
+        },
+      };
+      const TUNED = {
+        light: {
+          bg: "#f3edda",
+          card: "#fbf6e8",
+          border: "#e2d6b6",
+          ink: "#17130a",
+          muted: "#67603f",
+          primary: "#17130a",
+          "primary-deep": "#2c2614",
+          accent: "#a68329",
+          "accent-ink": "#75590f",
+          board: "#201b0d",
+          success: "#54642a",
+          warning: "#a5631a",
+          error: "#863309",
+        },
+        dark: {
+          bg: "#15110a",
+          card: "#201c10",
+          border: "#3d341a",
+          ink: "#ece0bb",
+          muted: "#a89c70",
+          primary: "#ece0bb",
+          "primary-deep": "#f6efcf",
+          accent: "#dcc06a",
+          "accent-ink": "#dcc06a",
+          board: "#0c0a05",
+          success: "#92a25a",
+          warning: "#d0a854",
+          error: "#cb5e30",
+        },
+      };
+      const ROWS = [
+        "primary",
+        "primary-deep",
+        "accent",
+        "accent-ink",
+        "board",
+        "bg",
+        "card",
+        "border",
+        "ink",
+        "muted",
+        "success",
+        "warning",
+        "error",
+      ];
+
+      function chip(v) {
+        return '<span class="chip" style="background:' + v + '"></span>';
+      }
+      function buildTable() {
+        document.getElementById("vt-body").innerHTML = ROWS.map((k) => {
+          const lr = RAW.light[k],
+            lt = TUNED.light[k],
+            dr = RAW.dark[k],
+            dt = TUNED.dark[k];
+          const lc = lr.toLowerCase() !== lt.toLowerCase(),
+            dc = dr.toLowerCase() !== dt.toLowerCase();
+          return (
+            "<tr><td><code>--" +
+            k +
+            "</code></td>" +
+            "<td>" +
+            chip(lr) +
+            "<code>" +
+            lr +
+            "</code></td>" +
+            '<td class="' +
+            (lc ? "changed" : "same") +
+            '">' +
+            chip(lt) +
+            "<code>" +
+            lt +
+            "</code></td>" +
+            "<td>" +
+            chip(dr) +
+            "<code>" +
+            dr +
+            "</code></td>" +
+            '<td class="' +
+            (dc ? "changed" : "same") +
+            '">' +
+            chip(dt) +
+            "<code>" +
+            dt +
+            "</code></td></tr>"
+          );
+        }).join("");
+      }
+      function syncReadouts() {
+        document.querySelectorAll(".panel").forEach((p) => {
+          const cs = getComputedStyle(p);
+          p.querySelectorAll("[data-var]").forEach((el) => {
+            el.textContent = cs.getPropertyValue("--" + el.dataset.var).trim();
+          });
+        });
+      }
+      function setVariant(v) {
+        document.getElementById("stage").dataset.v = v;
+        document.getElementById("btn-raw").classList.toggle("on", v === "raw");
+        document.getElementById("btn-tuned").classList.toggle("on", v === "tuned");
+        document.getElementById("now").textContent = v === "raw" ? "原值 RAW" : "優化 TUNED";
+        document
+          .querySelectorAll(".vlabel")
+          .forEach((e) => (e.textContent = v === "raw" ? "原值" : "優化"));
+        requestAnimationFrame(syncReadouts);
+      }
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "Space") {
+          e.preventDefault();
+          setVariant(document.getElementById("stage").dataset.v === "raw" ? "tuned" : "raw");
+        }
+      });
+
+      buildTable();
+      syncReadouts();
+    </script>
+  </body>
+</html>

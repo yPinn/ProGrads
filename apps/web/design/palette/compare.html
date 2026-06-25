@@ -1,0 +1,1110 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ProGrads · 三方案綜合比較（Vermeer ×2 / Rembrandt）</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+TC:wght@400;500;600&family=Fira+Code&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* 3-scheme comparison · faithful ColorLisa values, hue-locked. Optimisation comes after pick.
+         A Vermeer Milkmaid (navy+gold) · B Vermeer Pearl (dusty+brass) · C Rembrandt Night Watch (ochre+rust, no blue). */
+      :root {
+        --font-ui: "Inter", "Noto Sans TC", ui-sans-serif, system-ui, sans-serif;
+        --font-content: "Noto Serif TC", ui-serif, Georgia, serif;
+        --font-mono: "Fira Code", ui-monospace, monospace;
+        --r: 0.375rem;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: var(--font-ui);
+        background: #e7e4da;
+        color: #23201a;
+        -webkit-font-smoothing: antialiased;
+      }
+      .page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 34px 28px 90px;
+      }
+      header h1 {
+        font-family: var(--font-content);
+        font-weight: 600;
+        font-size: 1.45rem;
+        margin: 0;
+        letter-spacing: -0.01em;
+      }
+      header p {
+        color: #5f5848;
+        margin: 6px 0 0;
+        font-size: 0.85rem;
+        max-width: 74ch;
+        line-height: 1.6;
+      }
+      .jump {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #e7e4da;
+        padding: 12px 0;
+        margin-top: 14px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        border-bottom: 1px solid #cfc7b4;
+      }
+      .jump a {
+        font-size: 0.78rem;
+        text-decoration: none;
+        color: #3a352a;
+        border: 1px solid #c2bca9;
+        background: #faf8f1;
+        padding: 5px 12px;
+        border-radius: 999px;
+      }
+      .jump a b {
+        color: #022f69;
+      }
+
+      .scheme {
+        margin-top: 34px;
+        scroll-margin-top: 60px;
+      }
+      .scheme > h2 {
+        font-family: var(--font-content);
+        font-size: 1.15rem;
+        margin: 0 0 4px;
+      }
+      .scheme > .meta {
+        font-size: 0.8rem;
+        color: #6b6453;
+        margin: 0 0 10px;
+      }
+      .scheme > .verdict {
+        font-size: 0.8rem;
+        margin: 0 0 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #faf8f1;
+        border: 1px solid #e1dac7;
+        color: #3a4030;
+      }
+      .anchors {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 0 0 14px;
+      }
+      .anchors .a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid #d8d2c2;
+        border-radius: 7px;
+        padding: 4px 8px 4px 4px;
+        background: #faf8f1;
+      }
+      .anchors .a .c {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+      }
+      .anchors .a code {
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        color: #5b5448;
+      }
+
+      .stage {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      @media (max-width: 900px) {
+        .stage {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ---------- A · Vermeer Milkmaid ---------- */
+      .a-light {
+        --bg: #f1ece0;
+        --card: #faf6ec;
+        --elevated: #e4dccb;
+        --border: #dad0bc;
+        --ink: #221c14;
+        --muted: #6e6650;
+        --dim: #a39c86;
+        --primary: #022f69;
+        --primary-deep: #061e45;
+        --on-primary: #f1ece0;
+        --accent: #d6c17a;
+        --accent-ink: #846722;
+        --accent-soft: #efe3c2;
+        --board: #08213f;
+        --board-ink: #e8e0cd;
+        --success: #5b7a3e;
+        --warning: #a86a1e;
+        --error: #7c3e2f;
+        --d1: #dde2ec;
+        --d2: #aab6cc;
+        --d3: #6e80a6;
+        --d4: #2f4e7e;
+        --d5: #022f69;
+      }
+      .a-dark {
+        --bg: #08203d;
+        --card: #0e2a4a;
+        --elevated: #163556;
+        --border: #244466;
+        --ink: #e8e0cd;
+        --muted: #9ba7bd;
+        --dim: #5e6e88;
+        --primary: #6e89bc;
+        --primary-deep: #8aa0cb;
+        --on-primary: #08203d;
+        --accent: #e0cb8a;
+        --accent-ink: #e0cb8a;
+        --accent-soft: #13294a;
+        --board: #06182e;
+        --board-ink: #e8e0cd;
+        --success: #84a766;
+        --warning: #c99a4e;
+        --error: #c77e5e;
+        --d1: #1e3a66;
+        --d2: #2f4e7e;
+        --d3: #4e6f9e;
+        --d4: #6e89bc;
+        --d5: #9db2d6;
+      }
+
+      /* ---------- B · Vermeer Pearl ---------- */
+      .b-light {
+        --bg: #ece3d8;
+        --card: #f7f0e7;
+        --elevated: #dfd3c4;
+        --border: #d6c9b8;
+        --ink: #0c0b10;
+        --muted: #6a6358;
+        --dim: #9e968a;
+        --primary: #4a5878;
+        --primary-deep: #36425c;
+        --on-primary: #ece3d8;
+        --accent: #b08e4a;
+        --accent-ink: #84662e;
+        --accent-soft: #e6d9be;
+        --board: #2a2e3a;
+        --board-ink: #ddd3c5;
+        --success: #5e7350;
+        --warning: #9c7a2e;
+        --error: #863b34;
+        --d1: #dbdee7;
+        --d2: #aeb6c6;
+        --d3: #808ca8;
+        --d4: #5a6786;
+        --d5: #4a5878;
+      }
+      .b-dark {
+        --bg: #14131c;
+        --card: #1e1d28;
+        --elevated: #2a2937;
+        --border: #383646;
+        --ink: #ded3c5;
+        --muted: #9a9080;
+        --dim: #665f4f;
+        --primary: #8e9ac0;
+        --primary-deep: #a6b0ce;
+        --on-primary: #14131c;
+        --accent: #c6a45e;
+        --accent-ink: #c6a45e;
+        --accent-soft: #23222e;
+        --board: #0e0d15;
+        --board-ink: #ded3c5;
+        --success: #86a074;
+        --warning: #c49a52;
+        --error: #c07a6e;
+        --d1: #3a4257;
+        --d2: #5a6786;
+        --d3: #707da6;
+        --d4: #8e9ac0;
+        --d5: #b2bbd6;
+      }
+
+      /* ---------- C · Rembrandt Night Watch (gold×black, no blue) ---------- */
+      .c-light {
+        --bg: #efe6ce;
+        --card: #f8f1dd;
+        --elevated: #e2d5b4;
+        --border: #d8cba8;
+        --ink: #1a160c;
+        --muted: #6e6444;
+        --dim: #a2986f;
+        --primary: #a68329;
+        --primary-deep: #836619;
+        --on-primary: #1a160c;
+        --accent: #8a350c;
+        --accent-ink: #8a350c;
+        --accent-soft: #e7d3a8;
+        --board: #2a2510;
+        --board-ink: #e4d7b0;
+        --success: #5b6a2e;
+        --warning: #b5701c;
+        --error: #8a350c;
+        --d1: #ede3c4;
+        --d2: #d8c58c;
+        --d3: #bfa452;
+        --d4: #a68329;
+        --d5: #806219;
+      }
+      .c-dark {
+        --bg: #14110a;
+        --card: #1f1b0f;
+        --elevated: #2c2614;
+        --border: #3a3219;
+        --ink: #e4d7b0;
+        --muted: #a89a6e;
+        --dim: #6e6444;
+        --primary: #c9a23b;
+        --primary-deep: #dcba5a;
+        --on-primary: #14110a;
+        --accent: #c2562a;
+        --accent-ink: #c2562a;
+        --accent-soft: #241f10;
+        --board: #0e0c06;
+        --board-ink: #e4d7b0;
+        --success: #8a9a52;
+        --warning: #cba24e;
+        --error: #c2562a;
+        --d1: #4a3f18;
+        --d2: #6e5c20;
+        --d3: #9c8330;
+        --d4: #c9a23b;
+        --d5: #e0ce7e;
+      }
+
+      .panel {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--ink);
+      }
+      .ph {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .logo .mark {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        position: relative;
+        background: var(--primary);
+        display: grid;
+        place-items: center;
+        font-family: var(--font-content);
+        font-weight: 600;
+        color: var(--on-primary);
+        font-size: 0.9rem;
+      }
+      .logo .mark::after {
+        content: "";
+        position: absolute;
+        top: -3px;
+        right: -3px;
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--accent);
+        box-shadow: 0 0 0 2px var(--bg);
+      }
+      .logo b {
+        font-weight: 600;
+        font-size: 0.92rem;
+        color: var(--ink);
+        letter-spacing: -0.01em;
+      }
+      .mt {
+        font-size: 0.72rem;
+        color: var(--muted);
+      }
+
+      .body {
+        padding: 22px 18px 18px;
+      }
+      .eyebrow {
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .display {
+        font-family: var(--font-content);
+        font-weight: 600;
+        font-size: 1.5rem;
+        line-height: 1.15;
+        letter-spacing: -0.01em;
+        margin: 9px 0 0;
+      }
+      .lede {
+        color: var(--muted);
+        margin: 9px 0 0;
+        line-height: 1.65;
+        font-size: 0.84rem;
+        max-width: 34ch;
+      }
+      .cta {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .btn {
+        font-size: 0.82rem;
+        font-weight: 500;
+        padding: 7px 13px;
+        border-radius: var(--r);
+        border: 1px solid transparent;
+        cursor: pointer;
+      }
+      .btn-p {
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+      .btn-g {
+        background: transparent;
+        color: var(--ink);
+        border-color: var(--border);
+      }
+      .gl {
+        font-size: 0.78rem;
+        color: var(--accent-ink);
+        font-weight: 500;
+        text-decoration: none;
+      }
+
+      .nav {
+        margin-top: 18px;
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+      .nav a {
+        padding: 12px;
+        text-decoration: none;
+        color: inherit;
+        background: var(--card);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .nav a:last-child {
+        border-right: 0;
+      }
+      .nav a:hover {
+        background: var(--elevated);
+      }
+      .nav .en {
+        font-size: 0.6rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+      .nav h3 {
+        font-family: var(--font-content);
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin: 0;
+      }
+      .nav h3 .ar {
+        color: var(--accent);
+      }
+      .nav p {
+        font-size: 0.7rem;
+        color: var(--muted);
+        margin: 0;
+        line-height: 1.45;
+      }
+
+      .board {
+        margin-top: 16px;
+        border-radius: var(--r);
+        padding: 14px 16px;
+        background: var(--board);
+        color: var(--board-ink);
+      }
+      .board .k {
+        font-size: 0.64rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.6;
+      }
+      .board .v {
+        font-family: var(--font-content);
+        font-size: 1.05rem;
+        margin-top: 4px;
+      }
+      .board .v .d {
+        color: var(--accent);
+      }
+
+      .status {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+        font-size: 0.74rem;
+      }
+      .status span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--muted);
+      }
+      .status i {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+      }
+
+      .data {
+        margin-top: 16px;
+      }
+      .data .lh {
+        font-size: 0.62rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--dim);
+        margin-bottom: 6px;
+      }
+      .data .ramp {
+        display: flex;
+        height: 22px;
+        border-radius: 5px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+      .data .ramp span {
+        flex: 1;
+      }
+
+      .sw {
+        display: flex;
+        gap: 5px;
+        margin-top: 16px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border);
+      }
+      .sw .s {
+        flex: 1;
+        text-align: center;
+      }
+      .sw .s .nm {
+        font-size: 0.58rem;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 3px;
+      }
+      .sw .s .b {
+        height: 26px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+      }
+      .sw .s code {
+        font-family: var(--font-mono);
+        font-size: 0.52rem;
+        color: var(--dim);
+        display: block;
+        margin-top: 2px;
+      }
+      .pf {
+        padding: 9px 16px;
+        border-top: 1px solid var(--border);
+        font-size: 0.66rem;
+        color: var(--dim);
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <h1>ProGrads · 三方案綜合比較</h1>
+        <p>
+          皆為 ColorLisa <strong>原值忠實</strong>映射（色相鎖定）。挑定一套後，再做 impeccable
+          對比/層級優化與「原值⇄優化」切換。Logo 標準色＝主色＋穗金。
+        </p>
+      </header>
+      <nav class="jump">
+        <a href="#A"><b>A</b> Vermeer · 倒牛奶</a>
+        <a href="#B"><b>B</b> Vermeer · 珍珠耳環</a>
+        <a href="#C"><b>C</b> Rembrandt · 夜巡</a>
+      </nav>
+
+      <!-- ===== A ===== -->
+      <section class="scheme" id="A">
+        <h2>A · Vermeer《倒牛奶的女僕》</h2>
+        <p class="meta">深群青主色 · 金赭輔色 · 暖奶油紙；橄欖＋陶土支援。深色模式＝夜的群青。</p>
+        <p class="verdict">
+          ✓ 最貼 logo（深navy＋穗金）與「窗邊讀書人」概念；主/輔/紙三色同出一畫，品牌閉環最強。
+        </p>
+        <div class="anchors">
+          <div class="a">
+            <span class="c" style="background: #022f69"></span><code>#022F69</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #d6c17a"></span><code>#D6C17A</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #d8d0be"></span><code>#D8D0BE</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #6b724b"></span><code>#6B724B</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #7c3e2f"></span><code>#7C3E2F</code>
+          </div>
+        </div>
+        <div class="stage">
+          <section class="panel a-light">
+            <div class="ph">
+              <span class="logo"><span class="mark">P</span><b>ProGrads</b></span
+              ><span class="mt">☀️ Light</span>
+            </div>
+            <div class="body">
+              <p class="eyebrow">Graduate Exam Prep · 研究所備考</p>
+              <h3 class="display">研究所備考作戰中心</h3>
+              <p class="lede">一處整合報名資訊、考古題與招生日程，讓備考的每一步都有依據。</p>
+              <div class="cta">
+                <button class="btn btn-p">開始練題 →</button
+                ><button class="btn btn-g">瀏覽考古題</button><a class="gl" href="#">★ 上榜計畫</a>
+              </div>
+              <nav class="nav">
+                <a href="#"
+                  ><span class="en">Admissions</span>
+                  <h3>報名資訊 <span class="ar">→</span></h3>
+                  <p>名額、報名/錄取、採計考科。</p></a
+                ><a href="#"
+                  ><span class="en">Question Bank</span>
+                  <h3>考古題 <span class="ar">→</span></h3>
+                  <p>依考科、學校、年度檢索。</p></a
+                ><a href="#"
+                  ><span class="en">Schedule</span>
+                  <h3>招生日程 <span class="ar">→</span></h3>
+                  <p>報名、筆試、面試、放榜。</p></a
+                >
+              </nav>
+              <div class="board">
+                <div class="k">Deadline · 報名倒數</div>
+                <div class="v">臺大 資管所 — 還有 <span class="d">12 天</span></div>
+              </div>
+              <div class="status">
+                <span><i style="background: var(--success)"></i>已完成</span
+                ><span><i style="background: var(--warning)"></i>即將截止</span
+                ><span><i style="background: var(--error)"></i>報名失敗</span>
+              </div>
+              <div class="data">
+                <div class="lh">趨勢 · 主色單色階</div>
+                <div class="ramp">
+                  <span style="background: var(--d1)"></span
+                  ><span style="background: var(--d2)"></span
+                  ><span style="background: var(--d3)"></span
+                  ><span style="background: var(--d4)"></span
+                  ><span style="background: var(--d5)"></span>
+                </div>
+              </div>
+              <div class="sw">
+                <div class="s">
+                  <span class="nm">主</span>
+                  <div class="b" style="background: var(--primary)"></div>
+                  <code>#022F69</code>
+                </div>
+                <div class="s">
+                  <span class="nm">金</span>
+                  <div class="b" style="background: var(--accent)"></div>
+                  <code>#D6C17A</code>
+                </div>
+                <div class="s">
+                  <span class="nm">紙</span>
+                  <div class="b" style="background: var(--bg)"></div>
+                  <code>#F1ECE0</code>
+                </div>
+                <div class="s">
+                  <span class="nm">墨</span>
+                  <div class="b" style="background: var(--ink)"></div>
+                  <code>#221C14</code>
+                </div>
+                <div class="s">
+                  <span class="nm">暗帶</span>
+                  <div class="b" style="background: var(--board)"></div>
+                  <code>#08213F</code>
+                </div>
+              </div>
+            </div>
+            <div class="pf"><span>A · Light</span><span>原值忠實</span></div>
+          </section>
+          <section class="panel a-dark">
+            <div class="ph">
+              <span class="logo"><span class="mark">P</span><b>ProGrads</b></span
+              ><span class="mt">🌙 Dark · 夜群青</span>
+            </div>
+            <div class="body">
+              <p class="eyebrow">Graduate Exam Prep · 研究所備考</p>
+              <h3 class="display">研究所備考作戰中心</h3>
+              <p class="lede">一處整合報名資訊、考古題與招生日程，讓備考的每一步都有依據。</p>
+              <div class="cta">
+                <button class="btn btn-p">開始練題 →</button
+                ><button class="btn btn-g">瀏覽考古題</button><a class="gl" href="#">★ 上榜計畫</a>
+              </div>
+              <nav class="nav">
+                <a href="#"
+                  ><span class="en">Admissions</span>
+                  <h3>報名資訊 <span class="ar">→</span></h3>
+                  <p>名額、報名/錄取、採計考科。</p></a
+                ><a href="#"
+                  ><span class="en">Question Bank</span>
+                  <h3>考古題 <span class="ar">→</span></h3>
+                  <p>依考科、學校、年度檢索。</p></a
+                ><a href="#"
+                  ><span class="en">Schedule</span>
+                  <h3>招生日程 <span class="ar">→</span></h3>
+                  <p>報名、筆試、面試、放榜。</p></a
+                >
+              </nav>
+              <div class="board">
+                <div class="k">Deadline · 報名倒數</div>
+                <div class="v">臺大 資管所 — 還有 <span class="d">12 天</span></div>
+              </div>
+              <div class="status">
+                <span><i style="background: var(--success)"></i>已完成</span
+                ><span><i style="background: var(--warning)"></i>即將截止</span
+                ><span><i style="background: var(--error)"></i>報名失敗</span>
+              </div>
+              <div class="data">
+                <div class="lh">趨勢 · 主色單色階</div>
+                <div class="ramp">
+                  <span style="background: var(--d1)"></span
+                  ><span style="background: var(--d2)"></span
+                  ><span style="background: var(--d3)"></span
+                  ><span style="background: var(--d4)"></span
+                  ><span style="background: var(--d5)"></span>
+                </div>
+              </div>
+              <div class="sw">
+                <div class="s">
+                  <span class="nm">主</span>
+                  <div class="b" style="background: var(--primary)"></div>
+                  <code>#6E89BC</code>
+                </div>
+                <div class="s">
+                  <span class="nm">金</span>
+                  <div class="b" style="background: var(--accent)"></div>
+                  <code>#E0CB8A</code>
+                </div>
+                <div class="s">
+                  <span class="nm">底</span>
+                  <div class="b" style="background: var(--bg)"></div>
+                  <code>#08203D</code>
+                </div>
+                <div class="s">
+                  <span class="nm">卡</span>
+                  <div class="b" style="background: var(--card)"></div>
+                  <code>#0E2A4A</code>
+                </div>
+                <div class="s">
+                  <span class="nm">文</span>
+                  <div class="b" style="background: var(--ink)"></div>
+                  <code>#E8E0CD</code>
+                </div>
+              </div>
+            </div>
+            <div class="pf"><span>A · Dark</span><span>同色相·只翻明度</span></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- ===== B ===== -->
+      <section class="scheme" id="B">
+        <h2>B · Vermeer《戴珍珠耳環的少女》</h2>
+        <p class="meta">塵藍主色 · 黃銅輔色 · 近黑墨；玫瑰米與深紅棕支援。最沉、最肅穆內斂。</p>
+        <p class="verdict">◐ 氣質最安靜內斂；藍偏「塵藍」非深navy，logo 藍需推深一階才掛得住。</p>
+        <div class="anchors">
+          <div class="a">
+            <span class="c" style="background: #0c0b10"></span><code>#0C0B10</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #707da6"></span><code>#707DA6</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #ccad9d"></span><code>#CCAD9D</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #b08e4a"></span><code>#B08E4A</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #863b34"></span><code>#863B34</code>
+          </div>
+        </div>
+        <div class="stage">
+          <section class="panel b-light">
+            <div class="ph">
+              <span class="logo"><span class="mark">P</span><b>ProGrads</b></span
+              ><span class="mt">☀️ Light</span>
+            </div>
+            <div class="body">
+              <p class="eyebrow">Graduate Exam Prep · 研究所備考</p>
+              <h3 class="display">研究所備考作戰中心</h3>
+              <p class="lede">一處整合報名資訊、考古題與招生日程，讓備考的每一步都有依據。</p>
+              <div class="cta">
+                <button class="btn btn-p">開始練題 →</button
+                ><button class="btn btn-g">瀏覽考古題</button><a class="gl" href="#">★ 上榜計畫</a>
+              </div>
+              <nav class="nav">
+                <a href="#"
+                  ><span class="en">Admissions</span>
+                  <h3>報名資訊 <span class="ar">→</span></h3>
+                  <p>名額、報名/錄取、採計考科。</p></a
+                ><a href="#"
+                  ><span class="en">Question Bank</span>
+                  <h3>考古題 <span class="ar">→</span></h3>
+                  <p>依考科、學校、年度檢索。</p></a
+                ><a href="#"
+                  ><span class="en">Schedule</span>
+                  <h3>招生日程 <span class="ar">→</span></h3>
+                  <p>報名、筆試、面試、放榜。</p></a
+                >
+              </nav>
+              <div class="board">
+                <div class="k">Deadline · 報名倒數</div>
+                <div class="v">臺大 資管所 — 還有 <span class="d">12 天</span></div>
+              </div>
+              <div class="status">
+                <span><i style="background: var(--success)"></i>已完成</span
+                ><span><i style="background: var(--warning)"></i>即將截止</span
+                ><span><i style="background: var(--error)"></i>報名失敗</span>
+              </div>
+              <div class="data">
+                <div class="lh">趨勢 · 主色單色階</div>
+                <div class="ramp">
+                  <span style="background: var(--d1)"></span
+                  ><span style="background: var(--d2)"></span
+                  ><span style="background: var(--d3)"></span
+                  ><span style="background: var(--d4)"></span
+                  ><span style="background: var(--d5)"></span>
+                </div>
+              </div>
+              <div class="sw">
+                <div class="s">
+                  <span class="nm">主</span>
+                  <div class="b" style="background: var(--primary)"></div>
+                  <code>#4A5878</code>
+                </div>
+                <div class="s">
+                  <span class="nm">金</span>
+                  <div class="b" style="background: var(--accent)"></div>
+                  <code>#B08E4A</code>
+                </div>
+                <div class="s">
+                  <span class="nm">紙</span>
+                  <div class="b" style="background: var(--bg)"></div>
+                  <code>#ECE3D8</code>
+                </div>
+                <div class="s">
+                  <span class="nm">墨</span>
+                  <div class="b" style="background: var(--ink)"></div>
+                  <code>#0C0B10</code>
+                </div>
+                <div class="s">
+                  <span class="nm">暗帶</span>
+                  <div class="b" style="background: var(--board)"></div>
+                  <code>#2A2E3A</code>
+                </div>
+              </div>
+            </div>
+            <div class="pf"><span>B · Light</span><span>原值忠實</span></div>
+          </section>
+          <section class="panel b-dark">
+            <div class="ph">
+              <span class="logo"><span class="mark">P</span><b>ProGrads</b></span
+              ><span class="mt">🌙 Dark</span>
+            </div>
+            <div class="body">
+              <p class="eyebrow">Graduate Exam Prep · 研究所備考</p>
+              <h3 class="display">研究所備考作戰中心</h3>
+              <p class="lede">一處整合報名資訊、考古題與招生日程，讓備考的每一步都有依據。</p>
+              <div class="cta">
+                <button class="btn btn-p">開始練題 →</button
+                ><button class="btn btn-g">瀏覽考古題</button><a class="gl" href="#">★ 上榜計畫</a>
+              </div>
+              <nav class="nav">
+                <a href="#"
+                  ><span class="en">Admissions</span>
+                  <h3>報名資訊 <span class="ar">→</span></h3>
+                  <p>名額、報名/錄取、採計考科。</p></a
+                ><a href="#"
+                  ><span class="en">Question Bank</span>
+                  <h3>考古題 <span class="ar">→</span></h3>
+                  <p>依考科、學校、年度檢索。</p></a
+                ><a href="#"
+                  ><span class="en">Schedule</span>
+                  <h3>招生日程 <span class="ar">→</span></h3>
+                  <p>報名、筆試、面試、放榜。</p></a
+                >
+              </nav>
+              <div class="board">
+                <div class="k">Deadline · 報名倒數</div>
+                <div class="v">臺大 資管所 — 還有 <span class="d">12 天</span></div>
+              </div>
+              <div class="status">
+                <span><i style="background: var(--success)"></i>已完成</span
+                ><span><i style="background: var(--warning)"></i>即將截止</span
+                ><span><i style="background: var(--error)"></i>報名失敗</span>
+              </div>
+              <div class="data">
+                <div class="lh">趨勢 · 主色單色階</div>
+                <div class="ramp">
+                  <span style="background: var(--d1)"></span
+                  ><span style="background: var(--d2)"></span
+                  ><span style="background: var(--d3)"></span
+                  ><span style="background: var(--d4)"></span
+                  ><span style="background: var(--d5)"></span>
+                </div>
+              </div>
+              <div class="sw">
+                <div class="s">
+                  <span class="nm">主</span>
+                  <div class="b" style="background: var(--primary)"></div>
+                  <code>#8E9AC0</code>
+                </div>
+                <div class="s">
+                  <span class="nm">金</span>
+                  <div class="b" style="background: var(--accent)"></div>
+                  <code>#C6A45E</code>
+                </div>
+                <div class="s">
+                  <span class="nm">底</span>
+                  <div class="b" style="background: var(--bg)"></div>
+                  <code>#14131C</code>
+                </div>
+                <div class="s">
+                  <span class="nm">卡</span>
+                  <div class="b" style="background: var(--card)"></div>
+                  <code>#1E1D28</code>
+                </div>
+                <div class="s">
+                  <span class="nm">文</span>
+                  <div class="b" style="background: var(--ink)"></div>
+                  <code>#DED3C5</code>
+                </div>
+              </div>
+            </div>
+            <div class="pf"><span>B · Dark</span><span>同色相·只翻明度</span></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- ===== C ===== -->
+      <section class="scheme" id="C">
+        <h2>C · Rembrandt《夜巡》</h2>
+        <p class="meta">金赭主色 · 鏽紅輔色 · 近黑底；明暗對比、燭光學者感。⚠ 全無藍。</p>
+        <p class="verdict">
+          ⚠ 無藍：logo 須改成「金＋墨」、捨棄 navy。氛圍最戲劇、最古典，但偏離既定 navy 方向。
+        </p>
+        <div class="anchors">
+          <div class="a">
+            <span class="c" style="background: #dbc99a"></span><code>#DBC99A</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #a68329"></span><code>#A68329</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #5b5224"></span><code>#5B5224</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #8a350c"></span><code>#8A350C</code>
+          </div>
+          <div class="a">
+            <span class="c" style="background: #090a04"></span><code>#090A04</code>
+          </div>
+        </div>
+        <div class="stage">
+          <section class="panel c-light">
+            <div class="ph">
+              <span class="logo"><span class="mark">P</span><b>ProGrads</b></span
+              ><span class="mt">☀️ Light</span>
+            </div>
+            <div class="body">
+              <p class="eyebrow">Graduate Exam Prep · 研究所備考</p>
+              <h3 class="display">研究所備考作戰中心</h3>
+              <p class="lede">一處整合報名資訊、考古題與招生日程，讓備考的每一步都有依據。</p>
+              <div class="cta">
+                <button class="btn btn-p">開始練題 →</button
+                ><button class="btn btn-g">瀏覽考古題</button><a class="gl" href="#">★ 上榜計畫</a>
+              </div>
+              <nav class="nav">
+                <a href="#"
+                  ><span class="en">Admissions</span>
+                  <h3>報名資訊 <span class="ar">→</span></h3>
+                  <p>名額、報名/錄取、採計考科。</p></a
+                ><a href="#"
+                  ><span class="en">Question Bank</span>
+                  <h3>考古題 <span class="ar">→</span></h3>
+                  <p>依考科、學校、年度檢索。</p></a
+                ><a href="#"
+                  ><span class="en">Schedule</span>
+                  <h3>招生日程 <span class="ar">→</span></h3>
+                  <p>報名、筆試、面試、放榜。</p></a
+                >
+              </nav>
+              <div class="board">
+                <div class="k">Deadline · 報名倒數</div>
+                <div class="v">臺大 資管所 — 還有 <span class="d">12 天</span></div>
+              </div>
+              <div class="status">
+                <span><i style="background: var(--success)"></i>已完成</span
+                ><span><i style="background: var(--warning)"></i>即將截止</span
+                ><span><i style="background: var(--error)"></i>報名失敗</span>
+              </div>
+              <div class="data">
+                <div class="lh">趨勢 · 金色單色階</div>
+                <div class="ramp">
+                  <span style="background: var(--d1)"></span
+                  ><span style="background: var(--d2)"></span
+                  ><span style="background: var(--d3)"></span
+                  ><span style="background: var(--d4)"></span
+                  ><span style="background: var(--d5)"></span>
+                </div>
+              </div>
+              <div class="sw">
+                <div class="s">
+                  <span class="nm">主</span>
+                  <div class="b" style="background: var(--primary)"></div>
+                  <code>#A68329</code>
+                </div>
+                <div class="s">
+                  <span class="nm">鏽</span>
+                  <div class="b" style="background: var(--accent)"></div>
+                  <code>#8A350C</code>
+                </div>
+                <div class="s">
+                  <span class="nm">紙</span>
+                  <div class="b" style="background: var(--bg)"></div>
+                  <code>#EFE6CE</code>
+                </div>
+                <div class="s">
+                  <span class="nm">墨</span>
+                  <div class="b" style="background: var(--ink)"></div>
+                  <code>#1A160C</code>
+                </div>
+                <div class="s">
+                  <span class="nm">暗帶</span>
+                  <div class="b" style="background: var(--board)"></div>
+                  <code>#2A2510</code>
+                </div>
+              </div>
+            </div>
+            <div class="pf"><span>C · Light</span><span>原值忠實</span></div>
+          </section>
+          <section class="panel c-dark">
+            <div class="ph">
+              <span class="logo"><span class="mark">P</span><b>ProGrads</b></span
+              ><span class="mt">🌙 Dark · 燭光</span>
+            </div>
+            <div class="body">
+              <p class="eyebrow">Graduate Exam Prep · 研究所備考</p>
+              <h3 class="display">研究所備考作戰中心</h3>
+              <p class="lede">一處整合報名資訊、考古題與招生日程，讓備考的每一步都有依據。</p>
+              <div class="cta">
+                <button class="btn btn-p">開始練題 →</button
+                ><button class="btn btn-g">瀏覽考古題</button><a class="gl" href="#">★ 上榜計畫</a>
+              </div>
+              <nav class="nav">
+                <a href="#"
+                  ><span class="en">Admissions</span>
+                  <h3>報名資訊 <span class="ar">→</span></h3>
+                  <p>名額、報名/錄取、採計考科。</p></a
+                ><a href="#"
+                  ><span class="en">Question Bank</span>
+                  <h3>考古題 <span class="ar">→</span></h3>
+                  <p>依考科、學校、年度檢索。</p></a
+                ><a href="#"
+                  ><span class="en">Schedule</span>
+                  <h3>招生日程 <span class="ar">→</span></h3>
+                  <p>報名、筆試、面試、放榜。</p></a
+                >
+              </nav>
+              <div class="board">
+                <div class="k">Deadline · 報名倒數</div>
+                <div class="v">臺大 資管所 — 還有 <span class="d">12 天</span></div>
+              </div>
+              <div class="status">
+                <span><i style="background: var(--success)"></i>已完成</span
+                ><span><i style="background: var(--warning)"></i>即將截止</span
+                ><span><i style="background: var(--error)"></i>報名失敗</span>
+              </div>
+              <div class="data">
+                <div class="lh">趨勢 · 金色單色階</div>
+                <div class="ramp">
+                  <span style="background: var(--d1)"></span
+                  ><span style="background: var(--d2)"></span
+                  ><span style="background: var(--d3)"></span
+                  ><span style="background: var(--d4)"></span
+                  ><span style="background: var(--d5)"></span>
+                </div>
+              </div>
+              <div class="sw">
+                <div class="s">
+                  <span class="nm">主</span>
+                  <div class="b" style="background: var(--primary)"></div>
+                  <code>#C9A23B</code>
+                </div>
+                <div class="s">
+                  <span class="nm">鏽</span>
+                  <div class="b" style="background: var(--accent)"></div>
+                  <code>#C2562A</code>
+                </div>
+                <div class="s">
+                  <span class="nm">底</span>
+                  <div class="b" style="background: var(--bg)"></div>
+                  <code>#14110A</code>
+                </div>
+                <div class="s">
+                  <span class="nm">卡</span>
+                  <div class="b" style="background: var(--card)"></div>
+                  <code>#1F1B0F</code>
+                </div>
+                <div class="s">
+                  <span class="nm">文</span>
+                  <div class="b" style="background: var(--ink)"></div>
+                  <code>#E4D7B0</code>
+                </div>
+              </div>
+            </div>
+            <div class="pf"><span>C · Dark</span><span>同色相·只翻明度</span></div>
+          </section>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

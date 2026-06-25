@@ -9,7 +9,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const SRC = join(here, "tokens.json");
 const OUT = join(here, "tokens.legacy.json");
 
-// DTCG $type (+ group, which disambiguates the shared "dimension"/"number" types) → legacy type.
+// DTCG $type → legacy type; group disambiguates the shared dimension/number types.
 function legacyType(dtcgType, group) {
   const byGroup = {
     fontSize: "fontSizes",
