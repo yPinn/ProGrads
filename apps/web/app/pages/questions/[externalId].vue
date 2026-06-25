@@ -5,6 +5,8 @@ import { useQuestion } from "~/composables/useQuestion";
 import { ApiError } from "~/utils/api-error";
 import { QUESTION_TYPE_LABELS, REVIEW_STATUS_LABELS } from "~/utils/question-labels";
 import { ADMISSION_TYPE_LABELS } from "~/utils/admission-labels";
+// KaTeX styles only this page's MDC-rendered math; scoped here so it code-splits with the route.
+import "katex/dist/katex.min.css";
 
 const route = useRoute();
 const externalId = computed(() => String(route.params.externalId));
