@@ -38,6 +38,11 @@ export default defineNuxtConfig({
   mdc: {
     remarkPlugins: { "remark-math": {} },
     rehypePlugins: { "rehype-katex": {} },
+    // Shiki bundles only the grammars listed here; others fall back to plain text. Cover our
+    // 資工/資管 paper languages. (Unlabelled blocks need no entry; there is no "plaintext" id.)
+    highlight: {
+      langs: ["c", "cpp", "java", "python", "javascript", "sql", "asm", "bash"],
+    },
   },
   // Public runtime config; override per-env via NUXT_PUBLIC_* (see docs/01-architecture.md env layers).
   runtimeConfig: {
@@ -114,6 +119,10 @@ export default defineNuxtConfig({
     locales: [{ code: "zh-TW", language: "zh-TW", name: "繁體中文" }],
   },
   vite: {
-    optimizeDeps: { include: ["@tanstack/vue-query", "@unhead/schema-org/vue"] },
+    // Pre-bundle deps Vite would otherwise discover mid-session (MDC math plugins,
+    // vue-query, schema-org) so dev doesn't trigger a re-optimize page reload.
+    optimizeDeps: {
+      include: ["@tanstack/vue-query", "@unhead/schema-org/vue", "rehype-katex", "remark-math"],
+    },
   },
 });
