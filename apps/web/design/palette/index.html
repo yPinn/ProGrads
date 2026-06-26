@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ProGrads · 配色提案</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+TC:wght@400;500;600&family=Fira+Code&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <h1>ProGrads · 配色提案</h1>
+        <p>
+          固定結構 · 注入顏色組（資料在
+          <code>schemes.js</code>）。RAW＝注入值；TUNED＝對比/層級程式化微調。
+        </p>
+        <div class="anchors" id="strip"></div>
+      </header>
+
+      <div class="toolbar">
+        <select id="scheme" aria-label="配色方案"></select>
+        <div class="seg">
+          <button id="btn-raw" class="on" onclick="setVariant('raw')">RAW</button>
+          <button id="btn-tuned" onclick="setVariant('tuned')">TUNED</button>
+        </div>
+        <span class="hint">按 <kbd>空白鍵</kbd> RAW/TUNED 閃比 · <kbd>← →</kbd> 切方案</span>
+        <span class="now"><b id="now">—</b></span>
+      </div>
+
+      <div class="stage" id="stage">
+        <section class="panel light" id="p-light"></section>
+        <section class="panel dark" id="p-dark"></section>
+      </div>
+
+      <div class="vt">
+        <h3>設定值核對（變更者標色）</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Token</th>
+              <th>Light · RAW</th>
+              <th>Light · TUNED</th>
+              <th>Dark · RAW</th>
+              <th>Dark · TUNED</th>
+            </tr>
+          </thead>
+          <tbody id="vt-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="schemes.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

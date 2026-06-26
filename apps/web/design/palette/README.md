@@ -1,17 +1,24 @@
 # 配色探索 / Palette Exploration
 
-ProGrads 品牌配色研究（尚未進 `../tokens.json`）。慣例：忠於 ColorLisa 萃取值、色相鎖定，只調明度/彩度做 impeccable 對比優化；畫作未提供的中性（紙/墨）取其暖光/暗部色相壓低彩度派生。
+ProGrads 品牌配色研究（尚未進 `../tokens.json`）。資料驅動：**一個結構 `index.html` ＋ 一組組顏色 `schemes.js`**。
 
-- `preview.html` — 工作檔：單一方案，原值⇄優化（RAW/TUNED）切換
-- `compare.html` — 多方案並排比較
-- `NN-name.html` — 定案存檔，編號遞增
+- `index.html` — 結構與引用（無樣式/邏輯/資料）。
+- `styles.css` — 版面與元件樣式（顏色全走 CSS 變數，不寫死方案色）。
+- `app.js` — 渲染邏輯：讀 `window.SCHEMES`、把選定色組灌進 CSS 變數、即時算 TUNED、選單/鍵盤事件。
+- `schemes.js` — 顏色設定值：`window.SCHEMES = [{ id, light, dark }, …]`。**新增配色＝在此 append 一筆**（24 token/模式），不用 build、不用改其他檔。
+- 操作：下拉選方案、`← →` 切方案、`空白鍵` RAW/TUNED 閃比。
 
-| #   | 方案              | 來源              | 狀態 |
-| --- | ----------------- | ----------------- | ---- |
-| 01  | Starry Night 星夜 | 梵谷《星夜》      | 候選 |
-| 02  | Ink & Gold 墨金   | Rembrandt《夜巡》 | 候選 |
+## 現有方案
 
-配色重點：
+| id              | 來源                      | 主色 / 輔色     |
+| --------------- | ------------------------- | --------------- |
+| 01-starry-night | 梵谷《星夜》              | 靛藍 / 星金     |
+| 02-ink-gold     | Rembrandt《夜巡》         | 墨黑 / 金赭     |
+| 03-klimt        | Klimt《吻》               | 靛藍 / 鎏金     |
+| 04-turner       | Turner《Val d'Aosta》     | 赭橘 / 棕金     |
+| 05-vermeer      | Vermeer《倒牛奶》         | 群青 / 金赭     |
+| 06-van-eyck     | Van Eyck《阿諾菲尼》      | 深綠(黑板) / 赭 |
+| 07-grant-wood   | Grant Wood《美國哥德》    | 橄欖綠 / 暖褐   |
+| 08-homer        | Winslow Homer《一籃蛤蜊》 | 藍橫線 / 鉛筆赭 |
 
-- **01** 靛藍 `#2b41a7` / 星金 `#c7ad24`；黑板綠 `#1a3431`。
-- **02** 黑袍＝中性結構、金黃垂帶（理學）`#a68329`＝唯一品牌色；鏽紅 `#8a350c`；金色相跨 light/dark 不變。
+06–08 為「黑板綠＋筆記本紙質」方向的 ColorLisa 候選（深綠/學堂/筆記本各偏一半）。
