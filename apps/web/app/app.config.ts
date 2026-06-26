@@ -1,10 +1,11 @@
 // Nuxt UI theme tokens. See https://ui.nuxt.com/getting-started/theme
 export default defineAppConfig({
   ui: {
-    // Editorial Minimal: violet accent + zinc near-black neutral (built-in Tailwind palettes).
+    // Homer «A Basket of Clams» (ColorLisa, TUNED): ink-blue primary, warm stone neutral.
+    // Exact light/dark values are overridden on --ui-* in assets/css/main.css.
     colors: {
-      primary: "violet",
-      neutral: "zinc",
+      primary: "blue",
+      neutral: "stone",
     },
   },
 });

@@ -74,10 +74,10 @@ useSeoMeta({
           />
         </section>
 
-        <!-- contentMd 經 MDC 渲染(粗體/引用/清單/程式碼/KaTeX 數學式)。 -->
+        <!-- 題幹呈現為「黑板」:深色面在奶油頁上製造焦點與層次。prose-invert 讓 MDC 內文轉粉筆色。 -->
         <MDC
           :value="q.contentMd"
-          class="border-default font-serif prose dark:prose-invert max-w-none rounded-card border p-card"
+          class="board font-serif prose prose-invert max-w-none rounded-card p-card"
         />
 
         <ul v-if="q.choices.length" class="mt-4 space-y-2">
@@ -111,3 +111,14 @@ useSeoMeta({
     </div>
   </UContainer>
 </template>
+
+<style scoped>
+/* Blackboard panel for the question stem (component-level). Consumes global --board* tokens
+   (semantic.css); `prose-invert` in the template renders MDC body as chalk on the board. */
+.board {
+  background: var(--board);
+  color: var(--board-ink);
+  border: 1px solid var(--board-line);
+  box-shadow: 0 2px 10px rgb(20 30 24 / 0.18);
+}
+</style>

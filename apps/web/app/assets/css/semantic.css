@@ -1,0 +1,89 @@
+/* SEMANTIC — colour roles. Overrides Nuxt UI's --ui-* tokens with the applied brand theme
+   (Winslow Homer «A Basket of Clams», ColorLisa TUNED; explored in design/palette). Light = :root,
+   dark = .dark. Mirrored to design/tokens.json semantic sets. Named component surfaces (--board*)
+   live here so light/dark cascade; the .board component class consumes them. */
+:root {
+  --ui-radius: 0.375rem;
+
+  /* primary palette (ink-blue ramp) — Nuxt UI derives component states from these */
+  --color-primary-50: #eef1f6;
+  --color-primary-100: #dfe3ec;
+  --color-primary-200: #c6cee0;
+  --color-primary-300: #b9c2d8;
+  --color-primary-400: #8e9dbf;
+  --color-primary-500: #5b6f9a;
+  --color-primary-600: #4d5f86;
+  --color-primary-700: #3c4e74;
+  --color-primary-800: #2f3d5b;
+  --color-primary-900: #243047;
+  --color-primary-950: #161d2c;
+  --ui-color-primary-50: var(--color-primary-50);
+  --ui-color-primary-100: var(--color-primary-100);
+  --ui-color-primary-200: var(--color-primary-200);
+  --ui-color-primary-300: var(--color-primary-300);
+  --ui-color-primary-400: var(--color-primary-400);
+  --ui-color-primary-500: var(--color-primary-500);
+  --ui-color-primary-600: var(--color-primary-600);
+  --ui-color-primary-700: var(--color-primary-700);
+  --ui-color-primary-800: var(--color-primary-800);
+  --ui-color-primary-900: var(--color-primary-900);
+  --ui-color-primary-950: var(--color-primary-950);
+
+  /* surfaces / text / borders / roles — light = 筆記本紙質 */
+  --ui-bg: #f8eeda;
+  --ui-bg-muted: #fbf2e1;
+  --ui-bg-elevated: #ece0c2;
+  --ui-bg-accented: #e7d9b8;
+  --ui-bg-inverted: #433222;
+  --ui-text-dimmed: #a99a7e;
+  --ui-text-muted: #725435;
+  --ui-text-toned: #58412b;
+  --ui-text: #433222;
+  --ui-text-highlighted: #2f2318;
+  --ui-text-inverted: #f8eeda;
+  --ui-border: #e3d4b2;
+  --ui-border-muted: #ece0c2;
+  --ui-border-accented: #c6b798;
+  --ui-border-inverted: #433222;
+  --ui-primary: #5b6f9a;
+  --ui-secondary: #a9944a;
+  --ui-success: #5a7a4e;
+  --ui-info: #5b6f9a;
+  --ui-warning: #b5781c;
+  --ui-error: #bd483c;
+
+  /* blackboard surface (consumed by .board) — light */
+  --board: #243b30;
+  --board-ink: #edefe4;
+  --board-line: #3a5446;
+}
+
+/* dark = 燈下夜讀：冷藍夜底、燈光奶油字、提亮靛藍主色。 */
+.dark {
+  --ui-bg: #1c2330;
+  --ui-bg-muted: #363f4f;
+  --ui-bg-elevated: #495367;
+  --ui-bg-accented: #545d70;
+  --ui-bg-inverted: #dcc8a9;
+  --ui-text-dimmed: #858f9c;
+  --ui-text-muted: #bbb195;
+  --ui-text-toned: #dacaaa;
+  --ui-text: #f4debc;
+  --ui-text-highlighted: #f6e4c8;
+  --ui-text-inverted: #1c2330;
+  --ui-border: #5b677d;
+  --ui-border-muted: #495367;
+  --ui-border-accented: #6b768a;
+  --ui-border-inverted: #f4debc;
+  --ui-primary: #a9b8d7;
+  --ui-secondary: #c7b272;
+  --ui-success: #84a87e;
+  --ui-info: #a9b8d7;
+  --ui-warning: #cda152;
+  --ui-error: #d0685c;
+
+  /* blackboard — darker than the night page so it still reads as a board */
+  --board: #15231c;
+  --board-ink: #edefe4;
+  --board-line: #2c4034;
+}
