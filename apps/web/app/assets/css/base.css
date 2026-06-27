@@ -19,15 +19,13 @@
     }
   }
 
-  /* Hide the page scrollbar only (scrolling still works); nested scroll containers
-     keep their scrollbar so the affordance survives in dropdowns/overflow areas. */
-  html,
-  body {
+  /* Hide scrollbar appearance everywhere while keeping scroll functionality.
+     Applies to the page and every nested scroll container. */
+  * {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* legacy Edge/IE */
   }
-  html::-webkit-scrollbar,
-  body::-webkit-scrollbar {
+  *::-webkit-scrollbar {
     display: none; /* Chromium/Safari */
   }
 }
