@@ -13,7 +13,8 @@
     "typecheck": "nuxt typecheck",
     "test": "vitest run --coverage",
     "tokens:legacy": "node design/to-legacy.mjs",
-    "tokens:build": "node design/to-legacy.mjs && node design/styleguide.mjs",
+    "tokens:designmd": "node design/to-designmd.mjs",
+    "tokens:build": "node design/to-legacy.mjs && node design/to-designmd.mjs && node design/styleguide.mjs",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
