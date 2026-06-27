@@ -44,6 +44,7 @@ const prefersReducedMotion = useReducedMotion();
     </section>
 
     <nav
+      aria-label="主要功能"
       class="border-default divide-default mt-14 grid divide-y overflow-hidden rounded-card border sm:grid-cols-3 sm:divide-x sm:divide-y-0"
     >
       <NuxtLink

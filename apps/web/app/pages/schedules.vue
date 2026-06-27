@@ -47,28 +47,27 @@ const prefersReducedMotion = useReducedMotion();
       <USelect v-model="year" :items="yearOptions" aria-label="學年" class="w-36" />
     </template>
 
-    <Transition name="fade" mode="out-in">
-      <div
-        v-if="isPending"
-        key="loading"
-        class="border-default divide-default divide-y rounded-card border"
-      >
-        <div v-for="n in 5" :key="n" class="flex items-center gap-4 px-5 py-4">
-          <USkeleton class="h-4 w-40 shrink-0" />
-          <USkeleton class="h-5 w-16" />
-          <USkeleton class="h-4 w-48" />
+    <QueryState
+      :pending="isPending"
+      :error="isError ? error : null"
+      :empty="!data || data.length === 0"
+      @retry="refetch"
+    >
+      <template #loading>
+        <div class="border-default divide-default divide-y rounded-card border">
+          <div v-for="n in 5" :key="n" class="flex items-center gap-4 px-5 py-4">
+            <USkeleton class="h-4 w-40 shrink-0" />
+            <USkeleton class="h-5 w-16" />
+            <USkeleton class="h-4 w-48" />
+          </div>
         </div>
-      </div>
+      </template>
 
-      <ErrorState v-else-if="isError" key="error" :error="error" @retry="refetch" />
-
-      <EmptyState v-else-if="!data || data.length === 0" key="empty"
-        >此學年尚無招生事件。</EmptyState
-      >
+      <template #empty>此學年尚無招生事件。</template>
 
       <!-- Side-by-side: phase-grouped list (exact times) on the left, month overview on the
            right. Stacks to a single column below lg; the calendar sticks while the list scrolls. -->
-      <div v-else key="results" class="grid gap-section lg:grid-cols-2 lg:items-start">
+      <div class="grid gap-section lg:grid-cols-2 lg:items-start">
         <div class="space-y-section">
           <section
             v-for="(group, gi) in phaseGroups"
@@ -104,6 +103,6 @@ const prefersReducedMotion = useReducedMotion();
           <ScheduleCalendar :key="year" :items="data ?? []" class="lg:sticky lg:top-6" />
         </ClientOnly>
       </div>
-    </Transition>
+    </QueryState>
   </AppPage>
 </template>

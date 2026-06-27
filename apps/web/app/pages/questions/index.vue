@@ -105,18 +105,21 @@ function groupRuns(
       <USelect v-model="year" :items="yearOptions" aria-label="年度" class="w-full sm:w-32" />
     </div>
 
-    <Transition name="fade" mode="out-in">
-      <div v-if="isPending" key="loading" class="space-y-3">
-        <USkeleton v-for="n in 6" :key="n" class="h-14 w-full" />
-      </div>
+    <QueryState
+      :pending="isPending"
+      :error="isError ? error : null"
+      :empty="!data || data.items.length === 0"
+      @retry="refetch"
+    >
+      <template #loading>
+        <div class="space-y-3">
+          <USkeleton v-for="n in 6" :key="n" class="h-14 w-full" />
+        </div>
+      </template>
 
-      <ErrorState v-else-if="isError" key="error" :error="error" @retry="refetch" />
+      <template #empty>查無符合條件的考卷。試試放寬考科、學校或年度。</template>
 
-      <EmptyState v-else-if="!data || data.items.length === 0" key="empty">
-        查無符合條件的考卷。試試放寬考科、學校或年度。
-      </EmptyState>
-
-      <div v-else key="results">
+      <div v-if="data">
         <!-- 以考卷為單位:每張卷一張卡,內含題號選擇器(點題號進該題)。 -->
         <ul class="space-y-4" :class="{ 'opacity-60': isPlaceholderData }">
           <li
@@ -183,6 +186,6 @@ function groupRuns(
           <UPagination v-model:page="page" :total="data.meta.total" :items-per-page="pageSize" />
         </div>
       </div>
-    </Transition>
+    </QueryState>
   </AppPage>
 </template>

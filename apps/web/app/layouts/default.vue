@@ -7,7 +7,7 @@
           class="focus-ring inline-flex min-h-touch items-center font-serif text-title-sm tracking-tight"
           >ProGrads</NuxtLink
         >
-        <nav class="text-muted text-small flex gap-6">
+        <nav aria-label="主要導覽" class="text-muted text-small flex gap-6">
           <NuxtLink
             to="/admissions"
             class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"

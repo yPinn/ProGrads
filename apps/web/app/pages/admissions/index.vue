@@ -136,15 +136,20 @@ const prefersReducedMotion = useReducedMotion();
         <p class="text-muted text-small">{{ schoolName }}</p>
       </header>
 
-      <div v-if="isLoading" class="space-y-3">
-        <USkeleton v-for="n in 3" :key="n" class="h-24 w-full" />
-      </div>
+      <QueryState
+        :pending="isLoading"
+        :error="isError ? error : null"
+        :empty="!data || data.length === 0"
+        @retry="refetch"
+      >
+        <template #loading>
+          <div class="space-y-3">
+            <USkeleton v-for="n in 3" :key="n" class="h-24 w-full" />
+          </div>
+        </template>
 
-      <ErrorState v-else-if="isError" :error="error" @retry="refetch" />
+        <template #empty>查無此校系的招生資料。</template>
 
-      <EmptyState v-else-if="!data || data.length === 0">查無此校系的招生資料。</EmptyState>
-
-      <template v-else>
         <!-- Year slot: a client-side filter over the loaded rounds — a toggle-button group
              (aria-pressed), not an ARIA tablist, since there are no associated tabpanels. -->
         <div
@@ -228,7 +233,7 @@ const prefersReducedMotion = useReducedMotion();
             </a>
           </div>
         </section>
-      </template>
+      </QueryState>
     </template>
   </AppPage>
 </template>

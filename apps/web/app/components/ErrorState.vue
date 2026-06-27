@@ -7,6 +7,7 @@ const emit = defineEmits<{ retry: [] }>();
 
 <template>
   <UAlert
+    role="alert"
     color="error"
     variant="subtle"
     title="載入失敗"
