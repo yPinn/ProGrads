@@ -26,6 +26,11 @@ const badgeColors = [
 ] as const;
 const alertColors = ["primary", "success", "warning", "error", "neutral"] as const;
 const demoError = new Error("示範錯誤訊息");
+
+// Live QueryState demo — the segmented control drives the four-state machine so the loading
+// skeleton, ErrorState (with retry), empty copy, and data content can be eyeballed in place.
+const demoStates = ["pending", "error", "empty", "data"] as const;
+const demoState = ref<(typeof demoStates)[number]>("data");
 </script>
 
 <template>
@@ -48,6 +53,7 @@ const demoError = new Error("示範錯誤訊息");
       </div>
       <!-- App-owned focus ring (Tab to a link to see outline-primary). -->
       <a href="#" class="focus-ring text-primary text-small inline-block">app link · .focus-ring</a>
+      <p class="text-dimmed text-caption">hover 上方按鈕、Tab 聚焦此連結即見互動態。</p>
     </section>
 
     <!-- Badges -->
@@ -102,10 +108,54 @@ const demoError = new Error("示範錯誤訊息");
       </div>
     </section>
 
+    <!-- States (interactive) — drive the QueryState machine to see each branch + transition -->
+    <section class="space-y-3">
+      <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">
+        States (QueryState)
+      </h3>
+      <div role="group" aria-label="切換示範狀態" class="flex flex-wrap gap-1">
+        <button
+          v-for="s in demoStates"
+          :key="s"
+          type="button"
+          :aria-pressed="demoState === s"
+          class="focus-ring rounded-md px-2.5 py-1 text-caption transition-colors"
+          :class="
+            demoState === s
+              ? 'bg-primary text-inverted'
+              : 'bg-elevated text-muted hover:text-default'
+          "
+          @click="demoState = s"
+        >
+          {{ s }}
+        </button>
+      </div>
+      <QueryState
+        :pending="demoState === 'pending'"
+        :error="demoState === 'error' ? demoError : null"
+        :empty="demoState === 'empty'"
+        @retry="demoState = 'data'"
+      >
+        <template #loading>
+          <div class="space-y-2">
+            <USkeleton class="h-4 w-40" />
+            <USkeleton class="h-4 w-24" />
+          </div>
+        </template>
+        <template #empty>沒有符合條件的項目。</template>
+        <div class="border-default text-small rounded-card border p-card">
+          資料載入完成的內容範例。
+        </div>
+      </QueryState>
+    </section>
+
     <!-- Navigation -->
     <section class="space-y-3">
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Navigation</h3>
-      <UPagination v-model:page="page" :total="120" :items-per-page="20" />
+      <div class="flex flex-wrap items-center gap-4">
+        <UPagination v-model:page="page" :total="120" :items-per-page="20" />
+        <UColorModeButton />
+      </div>
     </section>
 
     <!-- Surfaces -->
@@ -138,16 +188,26 @@ const demoError = new Error("示範錯誤訊息");
       <p class="text-muted text-small">small muted · 次要說明文字。</p>
       <p class="text-dimmed text-small">small dimmed · 最低強度（已調至 ~3.2:1）。</p>
     </section>
+
+    <!-- Prose (MDC content) — the @tailwindcss/typography mapping recoloured to --ui-* roles.
+         Mirrors how question stems/choices/explanations render markdown. -->
+    <section class="space-y-3">
+      <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Prose (MDC)</h3>
+      <div class="prose prose-sm max-w-none">
+        <h4>標題範例</h4>
+        <p>
+          內文段落，含 <a href="#">連結</a>、<code>inline code</code> 與 <strong>粗體</strong>。
+        </p>
+        <ul>
+          <li>清單項目一</li>
+          <li>清單項目二</li>
+        </ul>
+        <blockquote>引用區塊範例。</blockquote>
+      </div>
+      <!-- Same prose on the blackboard surface → chalk text + chalk links (.board.prose). -->
+      <div class="board font-serif prose prose-sm max-w-none rounded-card p-card">
+        <p>黑板題幹：<a href="#">連結</a> 與 <code>code</code> 在粉筆色下的呈現。</p>
+      </div>
+    </section>
   </div>
 </template>
-
-<style scoped>
-/* Mirror the app's blackboard surface (pages/questions/[externalId].vue) so the board token
-   renders correctly here too. Consumes the global --board* tokens (re-scoped under .dark). */
-.board {
-  background: var(--board);
-  color: var(--board-ink);
-  border: 1px solid var(--board-line);
-  box-shadow: 0 2px 10px rgb(20 30 24 / 0.18);
-}
-</style>
