@@ -1,32 +1,59 @@
 <script setup lang="ts">
 import { shallowRef, watch, onBeforeUnmount } from "vue";
 import { ScheduleXCalendar } from "@schedule-x/vue";
-import { createCalendar, createViewMonthGrid } from "@schedule-x/calendar";
+import {
+  createCalendar,
+  createViewMonthGrid,
+  createViewWeek,
+  createViewDay,
+  createViewList,
+} from "@schedule-x/calendar";
 import "@schedule-x/theme-default/dist/index.css";
 import type { AdmissionScheduleItem } from "@prograds/shared";
 import {
   buildScheduleCalendars,
   toCalendarEvents,
+  toTimedEvents,
   initialSelectedDate,
 } from "~/utils/schedule-calendar";
 
-// Month-grid overview of the year's admission events, coloured by phase. Exact times live in
-// the list view beside it; this answers "what's happening around when". The page passes
-// :key="year" so a year switch remounts this with the right events + selected month.
-const props = defineProps<{ items: AdmissionScheduleItem[] }>();
+// Schedule-X view, coloured by admission phase. `view` selects the layout: month = all-day
+// overview (default, "what's happening around when"); week/day = hour-axis timetable where 考試
+// start/end times matter; list = chronological. Hour-axis views need timed events; the rest use
+// all-day blocks. View is fixed per instance — a parent switching view should pass :key to remount.
+type CalendarView = "month" | "week" | "day" | "list";
+const props = withDefaults(defineProps<{ items: AdmissionScheduleItem[]; view?: CalendarView }>(), {
+  view: "month",
+});
 
-const colorMode = useColorMode();
+const isTimed = props.view === "week" || props.view === "day";
+const mapEvents = isTimed ? toTimedEvents : toCalendarEvents;
+
+function createView(view: CalendarView) {
+  switch (view) {
+    case "week":
+      return createViewWeek();
+    case "day":
+      return createViewDay();
+    case "list":
+      return createViewList();
+    default:
+      return createViewMonthGrid();
+  }
+}
 
 // Schedule-X drives its own Preact-signals tree, so keep the app instance out of Vue's deep
-// reactivity (shallowRef) to avoid the two systems fighting over the same object.
+// reactivity (shallowRef) to avoid the two systems fighting over the same object. The Homer
+// theme lives in assets/css/schedule-x.css (global, shared by every calendar/view) keyed off
+// the .schedule-calendar class; it maps --sx-* to --ui-* tokens that flip with the .dark
+// cascade, so no Schedule-X isDark/setTheme bridge is needed.
 const calendarApp = shallowRef(
   createCalendar({
-    views: [createViewMonthGrid()],
-    events: toCalendarEvents(props.items),
+    views: [createView(props.view)],
+    events: mapEvents(props.items),
     calendars: buildScheduleCalendars(),
     selectedDate: initialSelectedDate(props.items),
     locale: "zh-TW",
-    isDark: colorMode.value === "dark",
   }),
 );
 
@@ -34,29 +61,17 @@ const calendarApp = shallowRef(
 // rather than remounting (preserves the user's current month/scroll position).
 watch(
   () => props.items,
-  (items) => calendarApp.value.events.set(toCalendarEvents(items)),
-);
-
-// Bridge the app's light/dark toggle into Schedule-X without recreating the calendar.
-watch(
-  () => colorMode.value,
-  (mode) => calendarApp.value.setTheme(mode === "dark" ? "dark" : "light"),
+  (items) => calendarApp.value.events.set(mapEvents(items)),
 );
 
 onBeforeUnmount(() => calendarApp.value.destroy());
 </script>
 
 <template>
-  <ScheduleXCalendar :calendar-app="calendarApp" class="schedule-calendar" />
+  <!-- view modifier lets schedule-x.css give hour-axis/list views their own height -->
+  <ScheduleXCalendar
+    :calendar-app="calendarApp"
+    class="schedule-calendar"
+    :class="`schedule-calendar--${view}`"
+  />
 </template>
-
-<style scoped>
-/* Sit the calendar on our card surface: app radius, app primary accent, no hard-coded chrome. */
-.schedule-calendar {
-  --sx-color-primary: var(--ui-primary);
-  --sx-rounding: var(--ui-radius);
-  border: 1px solid var(--ui-border);
-  border-radius: var(--radius-card);
-  overflow: hidden;
-}
-</style>

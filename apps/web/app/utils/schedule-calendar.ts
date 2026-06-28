@@ -17,31 +17,39 @@ import {
 // day (e.g. exam start) stays in the list view that sits beside the calendar.
 const TZ = "Asia/Taipei";
 
+// ISO 8601 (any offset) → the same instant as a Taipei ZonedDateTime (keeps the time of day).
+export function isoToZonedDateTime(iso: string): Temporal.ZonedDateTime {
+  return Temporal.Instant.from(iso).toZonedDateTimeISO(TZ);
+}
+
 // ISO 8601 (any offset) → the calendar day it falls on in Taipei. Slicing the string would
 // drop the offset; going through Instant keeps a +00:00 source landing on the right day.
 export function isoToPlainDate(iso: string): Temporal.PlainDate {
-  return Temporal.Instant.from(iso).toZonedDateTimeISO(TZ).toPlainDate();
+  return isoToZonedDateTime(iso).toPlainDate();
 }
 
-// Phase → colour bucket. One Schedule-X "calendar" per admission phase so a registration
-// block reads the same hue here as under the "報名" heading in the list view. Hand-picked
-// hex (Schedule-X needs concrete light/dark values; it can't read our CSS design tokens).
+// Phase → colour bucket. One Schedule-X "calendar" per admission phase so a registration block
+// reads the same hue as under the "報名" heading in the list view. Concrete hex (Schedule-X can't
+// read CSS tokens) but drawn from the Homer ramps (design/tokens.json): info / warning / secondary
+// / success for 報名 / 考試 / 甄選 / 放榜. Light = role-600 main on a role-100 chip with role-900
+// text; dark inverts. The calendar follows the app theme through the --sx-* chrome mapping (see
+// ScheduleCalendar.vue); these phase chips stay legible on both the cream and dark surfaces.
 const PHASE_COLORS: Record<AdmissionPhase, { light: ColorTriplet; dark: ColorTriplet }> = {
   registration: {
-    light: { main: "#2563eb", container: "#dbeafe", onContainer: "#1e3a8a" },
-    dark: { main: "#93c5fd", container: "#1e3a5f", onContainer: "#dbeafe" },
+    light: { main: "#4d5f86", container: "#e1e5ee", onContainer: "#253047" },
+    dark: { main: "#8e9ec0", container: "#253047", onContainer: "#e1e5ee" },
   },
   exam: {
-    light: { main: "#d97706", container: "#fef3c7", onContainer: "#7c2d12" },
-    dark: { main: "#fcd34d", container: "#4a2f0a", onContainer: "#fef3c7" },
+    light: { main: "#9c6408", container: "#f2e6d8", onContainer: "#4b2e00" },
+    dark: { main: "#d2a46b", container: "#4b2e00", onContainer: "#f2e6d8" },
   },
   selection: {
-    light: { main: "#7c3aed", container: "#ede9fe", onContainer: "#4c1d95" },
-    dark: { main: "#c4b5fd", container: "#3b2a63", onContainer: "#ede9fe" },
+    light: { main: "#8f7c38", container: "#edeadd", onContainer: "#43370c" },
+    dark: { main: "#c6b782", container: "#43370c", onContainer: "#edeadd" },
   },
   result: {
-    light: { main: "#059669", container: "#d1fae5", onContainer: "#064e3b" },
-    dark: { main: "#6ee7b7", container: "#0c3b2e", onContainer: "#d1fae5" },
+    light: { main: "#4c6941", container: "#e1e8df", onContainer: "#24361e" },
+    dark: { main: "#8ea785", container: "#24361e", onContainer: "#e1e8df" },
   },
 };
 
@@ -82,6 +90,24 @@ export function toCalendarEvents(items: AdmissionScheduleItem[]): CalendarEvent[
     calendarId: ADMISSION_EVENT_PHASE[item.event],
     ...(item.location ? { location: item.location } : {}),
   }));
+}
+
+// Timed variant for the hour-axis views (Week/Day): keep the time of day from `at`/`endAt`
+// (Taipei local) as a ZonedDateTime instead of collapsing to an all-day block — this is where
+// 考試 start/end times matter. A null endAt gets a 1-hour default so point events (e.g. 放榜)
+// still render as a block on the time axis.
+export function toTimedEvents(items: AdmissionScheduleItem[]): CalendarEvent[] {
+  return items.map((item) => {
+    const start = isoToZonedDateTime(item.at);
+    return {
+      id: eventId(item),
+      start,
+      end: item.endAt ? isoToZonedDateTime(item.endAt) : start.add({ hours: 1 }),
+      title: `${ADMISSION_EVENT_LABELS[item.event]}・${item.school.name}`,
+      calendarId: ADMISSION_EVENT_PHASE[item.event],
+      ...(item.location ? { location: item.location } : {}),
+    };
+  });
 }
 
 // Open the calendar on the earliest event so a freshly switched year lands on populated months

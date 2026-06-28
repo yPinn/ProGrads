@@ -4,6 +4,7 @@ import type { AdmissionScheduleItem } from "@prograds/shared";
 import {
   isoToPlainDate,
   toCalendarEvents,
+  toTimedEvents,
   buildScheduleCalendars,
   initialSelectedDate,
   eventId,
@@ -69,6 +70,27 @@ describe("toCalendarEvents", () => {
     // ISO ':' and '+' sanitised to '-' so the id is a valid CSS ident for Schedule-X.
     expect(eventId(it1)).toBe("ntu-registration_start-2025-10-01T09-00-00-08-00");
     expect(eventId(it1)).toMatch(/^[A-Za-z0-9_-]+$/);
+  });
+});
+
+describe("toTimedEvents", () => {
+  const onlyTimed = (over: Partial<AdmissionScheduleItem> = {}) => {
+    const [ev] = toTimedEvents([item(over)]);
+    if (!ev) throw new Error("expected one event");
+    return ev;
+  };
+
+  it("keeps the local start time as a Taipei ZonedDateTime", () => {
+    expect(onlyTimed().start.toString()).toContain("2025-10-01T09:00:00+08:00");
+  });
+
+  it("defaults a null endAt to one hour after start", () => {
+    expect(onlyTimed().end.toString()).toContain("2025-10-01T10:00:00+08:00");
+  });
+
+  it("uses the explicit endAt time when present", () => {
+    const ev = onlyTimed({ endAt: "2025-10-01T12:00:00+08:00" });
+    expect(ev.end.toString()).toContain("2025-10-01T12:00:00+08:00");
   });
 });
 

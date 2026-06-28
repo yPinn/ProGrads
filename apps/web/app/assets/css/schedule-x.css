@@ -1,0 +1,71 @@
+/* Schedule-X (theme-default) re-skinned to the Homer palette. GLOBAL — not scoped to one
+   component — so every calendar instance and view shares a single theme, and library-rendered
+   nodes are reachable with plain descendant selectors (no :deep needed). Pairs with the base
+   theme CSS that ScheduleCalendar.vue imports. Every value is a --ui-* token, so the calendar
+   flips with the app's .dark cascade; no Schedule-X isDark/setTheme bridge is required.
+   Overriding --sx-* on .schedule-calendar beats the library's :root defaults for all descendants
+   (nearer ancestor wins). */
+.schedule-calendar {
+  /* primary accent + text on it (today marker, selected) */
+  --sx-color-primary: var(--ui-primary);
+  --sx-color-on-primary: var(--ui-text-inverted);
+  --sx-color-primary-container: var(--ui-bg-elevated);
+  --sx-color-on-primary-container: var(--ui-text);
+
+  /* canvas + raised/tonal surfaces → warm paper layers */
+  --sx-color-background: var(--ui-bg);
+  --sx-color-on-background: var(--ui-text);
+  --sx-color-surface: var(--ui-bg);
+  --sx-color-surface-bright: var(--ui-bg);
+  --sx-color-surface-dim: var(--ui-bg-muted);
+  --sx-color-surface-container-low: var(--ui-bg-muted);
+  --sx-color-surface-container: var(--ui-bg-muted);
+  --sx-color-surface-container-high: var(--ui-bg-elevated);
+  --sx-color-on-surface: var(--ui-text);
+
+  /* text + grid lines */
+  --sx-internal-color-text: var(--ui-text);
+  --sx-internal-color-light-gray: var(--ui-bg-muted);
+  --sx-color-neutral: var(--ui-text-muted);
+  --sx-color-neutral-variant: var(--ui-text-muted);
+  --sx-color-outline: var(--ui-border-accented);
+  --sx-color-outline-variant: var(--ui-border);
+
+  /* radius — the library has no bare --sx-rounding; the real vars are small/extra-small */
+  --sx-rounding-small: var(--radius-card);
+  --sx-rounding-extra-small: var(--radius-card);
+
+  /* Schedule-X chains height:100% down to flex:1 rows, so it needs a definite height on this
+     wrapper to divide — without one the cells fall back to an oversized default. ~26rem gives
+     ~5–6 proportional week rows for the month overview; per-view tuning can override this. */
+  height: 26rem;
+
+  border: 1px solid var(--ui-border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+/* Per-view height (modifier set by ScheduleCalendar.vue). The month overview stays compact; the
+   hour-axis week/day views need vertical room (they scroll internally); the list grows to fit. */
+.schedule-calendar--week,
+.schedule-calendar--day {
+  height: 40rem;
+}
+.schedule-calendar--list {
+  height: auto;
+}
+
+/* The date-picker popup uses --sx-color-background and leans on a shadow to lift off the page —
+   but this system is flat and shadows vanish on the dark surface, so the popup blended into the
+   background. Give it an explicit elevated surface + border (tonal elevation) in both themes. */
+.schedule-calendar .sx__date-picker-popup {
+  background-color: var(--ui-bg-elevated);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--radius-card);
+}
+
+/* Week-number column shipped hardcoded greys (#eceef1 / dark #4a4458); use a tonal token so it
+   sits a step off the canvas and follows the theme. */
+.schedule-calendar .sx__month-grid-week__week-number {
+  background-color: var(--ui-bg-muted);
+}
