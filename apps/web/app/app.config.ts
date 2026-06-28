@@ -7,5 +7,9 @@ export default defineAppConfig({
       primary: "blue",
       neutral: "stone",
     },
+    // Skeleton default (bg-elevated) is near-invisible on the cream page (~1.2:1) and vanishes
+    // under prefers-reduced-motion (no pulse). Use the warmer border-accented tone so the
+    // loading shape stays perceivable in both themes without leaving the palette.
+    skeleton: { base: "animate-pulse rounded-md bg-(--ui-border-accented)" },
   },
 });

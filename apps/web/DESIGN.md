@@ -102,7 +102,7 @@ spacing:
   control: 0.75rem
   sidebar: 17rem
   touch: 2.75rem
-  container-reading: 45rem
+  container-reading: 52rem
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
@@ -193,7 +193,7 @@ its own line-height (tighter as size grows). The `label-eyebrow` style is upperc
 
 Named spacing tokens express layout intent rather than a raw numeric scale: `page`/`hero`
 section rhythm, `section`/`header` gaps, `card`/`control` padding, `sidebar` (17rem), and
-a 2.75rem (44px) `touch` target. Reading content is capped at `container-reading` (45rem)
+a 2.75rem (44px) `touch` target. Reading content is capped at `container-reading` (52rem)
 for line length.
 
 `page` and `hero` take a **responsive bump ≥768px** (page 3→4rem, hero 5→7rem) via cascade,
@@ -240,6 +240,11 @@ app-owned interactive elements (Nuxt UI components ship their own).
   system is flat (the `board` surface is the sole exception).
 - **Do** use `secondary`/`success`/`warning`/`error` as sparse flat accents; **don't** build
   multi-step interactive ramps from them in UI without pulling the tuned ramp from tokens.json.
+- **Do** keep coloured _text_ (badges, links, alert titles) to `primary`/`neutral` — the only
+  roles that clear WCAG AA on the cream surface in light mode. For `secondary`/`success`/
+  `warning`/`error` semantics at text size, convey them with solid fills + icons or the role's
+  **700** ramp step; **don't** set small text in their base (500) tones on light surfaces
+  (2.6–4.4:1, below AA).
 - **Do** set headings in serif Ming and body in Inter; **don't** mix more than these roles.
 - **Do** maintain WCAG AA (4.5:1) for body text on its surface in both themes.
 - **Don't** hard-code ms or cubic-beziers — use the motion tokens (fast/base/slow, standard ease).

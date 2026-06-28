@@ -34,3 +34,21 @@ The primary role is tuned to `#566a93` so the primary button (`text-inverted` cr
 `primary` ink-blue) and primary links (on the `bg` cream) clear WCAG AA at **4.70:1**.
 `text-dimmed` (#96845f light) is the lowest-emphasis role at ~3.2:1 — intended for
 incidental/placeholder text, not body copy; use `text-muted` (6.0:1) for anything readable.
+
+Coloured text is limited to `primary`/`neutral` (see DESIGN.md Do/Don't): in light mode the
+status roles as small text on cream are below AA — `error` 4.4, `success` 4.2, `warning` 3.2,
+`secondary` 2.6:1. Use solid fills + icons, or the role's 700 ramp step, for status text. The
+`ErrorState` alert follows this — its `color="error"` only tints the icon/ring; the title and
+description use ink text.
+
+### Accepted tradeoffs
+
+The warm low-contrast palette makes a few non-text values dip below the 3:1 WCAG 1.4.11 target;
+kept deliberately for the calm editorial look:
+
+- **Form input resting borders** `border` on `bg` ≈ 1.2:1 (light) / 2.8:1 (dark) — the focus
+  ring carries the interactive affordance.
+- **`primary` text on `bg-elevated`** (links inside cards) ≈ 4.1:1 — just under AA; prefer ink
+  text inside elevated panels.
+- **Skeletons** are intentionally quiet; bumped to `border-accented` so the shape survives
+  `prefers-reduced-motion`, but they remain low-contrast by design.

@@ -41,7 +41,7 @@
   --spacing-sidebar: 17rem; /* spacing namespace so w-sidebar resolves */
   --spacing-touch: 2.75rem; /* 44px iOS tap target → size-touch / min-h-touch */
 
-  --container-reading: 45rem;
+  --container-reading: 52rem;
   --radius-card: 0.375rem; /* aligned with Nuxt UI's --ui-radius */
 
   /* Motion tokens — single source for all animation timing. Consumed by Tailwind
