@@ -40,7 +40,10 @@ export default defineNuxtConfig({
     rehypePlugins: { "rehype-katex": {} },
     // Shiki bundles only the grammars listed here; others fall back to plain text. Cover our
     // 資工/資管 paper languages. (Unlabelled blocks need no entry; there is no "plaintext" id.)
+    // One theme = a single unified look (colours + font) for every code block; only the blackboard
+    // swaps the block background (components.css) so its dark code fits the board.
     highlight: {
+      theme: "github-dark",
       langs: ["c", "cpp", "java", "python", "javascript", "sql", "asm", "bash"],
     },
   },
@@ -119,10 +122,19 @@ export default defineNuxtConfig({
     locales: [{ code: "zh-TW", language: "zh-TW", name: "繁體中文" }],
   },
   vite: {
-    // Pre-bundle deps Vite would otherwise discover mid-session (MDC math plugins,
-    // vue-query, schema-org) so dev doesn't trigger a re-optimize page reload.
+    // Pre-bundle deps Vite would otherwise discover mid-session (MDC math plugins, vue-query,
+    // schema-org, and the Schedule-X calendar + its temporal polyfill, which only load on
+    // /schedules) so dev doesn't trigger a re-optimize page reload.
     optimizeDeps: {
-      include: ["@tanstack/vue-query", "@unhead/schema-org/vue", "rehype-katex", "remark-math"],
+      include: [
+        "@schedule-x/calendar",
+        "@schedule-x/vue",
+        "@tanstack/vue-query",
+        "@unhead/schema-org/vue",
+        "rehype-katex",
+        "remark-math",
+        "temporal-polyfill/global",
+      ],
     },
   },
 });

@@ -51,6 +51,7 @@
     "@iconify-json/lucide": "^1.2.114",
     "@nuxt/eslint": "^1.16.0",
     "@nuxt/test-utils": "^4.0.3",
+    "@tailwindcss/typography": "^0.5.20",
     "@vitest/coverage-v8": "^4.1.9",
     "@vue/test-utils": "^2.4.11",
     "eslint": "^10.5.0",

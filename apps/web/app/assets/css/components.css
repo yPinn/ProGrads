@@ -1,5 +1,5 @@
-/* COMPONENTS — app-wide reusable classes (@layer components). Component-specific styles
-   live with their component (e.g. .board in pages/questions/[externalId].vue). */
+/* COMPONENTS — app-wide reusable classes (@layer components) plus shared surfaces (.board) and
+   the prose token mapping below. Truly component-local styles stay with their component. */
 @layer components {
   /* Shared keyboard focus for app-owned interactive elements (Nuxt UI ships its own). */
   .focus-ring {
@@ -34,4 +34,62 @@
   .fade-leave-to {
     opacity: 0;
   }
+}
+
+/* @tailwindcss/typography recolour. Kept UNLAYERED so these --tw-prose-* overrides win over the
+   plugin's own (layered) defaults — we keep its typographic structure (sizes, spacing) and only
+   swap colours to the Homer --ui-* roles. Those flip with light/dark, so MDC markup needs no
+   `prose-invert`. */
+.prose {
+  --tw-prose-body: var(--ui-text);
+  --tw-prose-headings: var(--ui-text-highlighted);
+  --tw-prose-lead: var(--ui-text-toned);
+  --tw-prose-links: var(--ui-primary);
+  --tw-prose-bold: var(--ui-text-highlighted);
+  --tw-prose-counters: var(--ui-text-muted);
+  --tw-prose-bullets: var(--ui-border-accented);
+  --tw-prose-hr: var(--ui-border);
+  --tw-prose-quotes: var(--ui-text-toned);
+  --tw-prose-quote-borders: var(--ui-border-accented);
+  --tw-prose-captions: var(--ui-text-muted);
+  --tw-prose-code: var(--ui-text-highlighted);
+  --tw-prose-pre-code: var(--ui-text);
+  --tw-prose-pre-bg: var(--ui-bg-elevated);
+  --tw-prose-th-borders: var(--ui-border-accented);
+  --tw-prose-td-borders: var(--ui-border);
+}
+
+/* Blackboard surface (question stem + styleguide sample). The flat system's lone shadow
+   exception (DESIGN.md). GLOBAL, not scoped: the stem is an <MDC> component, and a component's
+   scoped styles don't reach its rendered root — only a global class styles that element. */
+.board {
+  background: var(--board);
+  color: var(--board-ink);
+  border: 1px solid var(--board-line);
+  box-shadow: 0 2px 10px rgb(20 30 24 / 0.18);
+}
+
+/* Code blocks render with one Shiki theme (github-dark, nuxt.config) for a single unified look
+   everywhere. Only the blackboard swaps the block background to a darker board green so its dark
+   code reads as an inset panel; !important overrides Shiki's inline background-color. */
+.board .shiki {
+  background-color: color-mix(in srgb, var(--board) 78%, #000) !important;
+}
+
+/* Blackboard stem: dark green surface in BOTH themes, so its prose stays chalk regardless of
+   light/dark (links chalk + underlined for affordance; code on a faint chalk tint). */
+.board.prose {
+  --tw-prose-body: var(--board-ink);
+  --tw-prose-headings: var(--board-ink);
+  --tw-prose-bold: var(--board-ink);
+  --tw-prose-links: var(--board-ink);
+  --tw-prose-code: var(--board-ink);
+  --tw-prose-quotes: var(--board-ink);
+  --tw-prose-bullets: var(--board-line);
+  --tw-prose-hr: var(--board-line);
+  --tw-prose-quote-borders: var(--board-line);
+  --tw-prose-pre-code: var(--board-ink);
+  --tw-prose-pre-bg: color-mix(in srgb, var(--board-ink) 8%, transparent);
+  --tw-prose-th-borders: var(--board-line);
+  --tw-prose-td-borders: var(--board-line);
 }

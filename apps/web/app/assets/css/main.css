@@ -1,15 +1,19 @@
 /* Design system entry. Import order = cascade order:
      1) tailwindcss — preflight + utilities
+     +) @tailwindcss/typography — `prose` for MDC-rendered markdown; recoloured to --ui-* in components
      2) @nuxt/ui    — component defaults (provides the --ui-* tokens we override next)
      3) tokens      — foundation @theme tokens (font / type / spacing / radius / motion)
      4) semantic    — colour roles: --ui-* + --board* surfaces, light/dark
      5) base        — global element styles & a11y
-     6) components  — app-wide reusable classes (.focus-ring, transitions)
-   Layer model: token → semantic → component. Component-specific styles live with their
-   component (e.g. .board in pages/questions/[externalId].vue), not here. */
+     6) components  — app-wide reusable classes (.focus-ring, transitions, prose token mapping)
+   Layer model: token → semantic → component. Truly component-local styles stay with their
+   component; shared surfaces like .board live in components.css (it styles an <MDC> root,
+   which a component's scoped styles can't reach). */
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 @import "@nuxt/ui";
 @import "./tokens.css";
 @import "./semantic.css";
 @import "./base.css";
 @import "./components.css";
+@import "./schedule-x.css";

@@ -70,18 +70,14 @@ useSeoMeta({
             class="border-default bg-elevated mb-3 rounded-card border p-card"
           >
             <h2 class="text-muted text-caption mb-2 font-semibold">題組共用篇章</h2>
-            <!-- Reading surface → Ming serif (font-serif); prose code/pre keep --font-mono. -->
-            <MDC
-              :value="q.groupPassageMd"
-              class="font-serif prose prose-sm dark:prose-invert max-w-none"
-            />
+            <!-- Reading surface → Ming serif. prose colours come from --ui-* (components.css),
+                 which flip with the theme, so no prose-invert is needed. -->
+            <MDC :value="q.groupPassageMd" class="font-serif prose prose-sm max-w-none" />
           </section>
 
-          <!-- 題幹呈現為「黑板」:深色面在奶油頁上製造焦點與層次。prose-invert 讓 MDC 內文轉粉筆色。 -->
-          <MDC
-            :value="q.contentMd"
-            class="board font-serif prose prose-invert max-w-none rounded-card p-card"
-          />
+          <!-- 題幹呈現為「黑板」:深色面在奶油頁上製造焦點與層次。.board.prose 把 MDC 內文映成粉筆色
+               (components.css),兩主題皆然,故不需 prose-invert。 -->
+          <MDC :value="q.contentMd" class="board font-serif prose max-w-none rounded-card p-card" />
 
           <ul v-if="q.choices.length" class="mt-4 space-y-2">
             <li
@@ -91,24 +87,22 @@ useSeoMeta({
               :class="c.isCorrect ? 'text-primary font-medium' : ''"
             >
               <span class="shrink-0">({{ c.label }})</span>
-              <MDC
-                :value="c.contentMd"
-                unwrap="p"
-                class="prose prose-sm dark:prose-invert max-w-none"
-              />
+              <MDC :value="c.contentMd" unwrap="p" class="prose prose-sm max-w-none" />
             </li>
           </ul>
 
-          <section v-if="q.explanation" class="bg-elevated mt-6 rounded-card p-card">
+          <section v-if="q.explanation" class="mt-6">
             <div class="mb-2 flex items-center gap-2">
               <h2 class="font-serif text-title-sm tracking-tight">標準解析</h2>
               <UBadge variant="subtle">{{
                 REVIEW_STATUS_LABELS[q.explanation.reviewStatus]
               }}</UBadge>
             </div>
+            <!-- Explanation renders on the blackboard too (chalk prose + dark-green code),
+                 matching the stem; .board.prose and .board .shiki apply automatically. -->
             <MDC
               :value="q.explanation.standardAnswer"
-              class="font-serif prose prose-sm dark:prose-invert max-w-none"
+              class="board font-serif prose prose-sm max-w-none rounded-card p-card"
             />
             <p class="text-muted text-caption mt-3">AI 生成解析,僅供參考。</p>
           </section>
@@ -117,14 +111,3 @@ useSeoMeta({
     </div>
   </UContainer>
 </template>
-
-<style scoped>
-/* Blackboard panel for the question stem (component-level). Consumes global --board* tokens
-   (semantic.css); `prose-invert` in the template renders MDC body as chalk on the board. */
-.board {
-  background: var(--board);
-  color: var(--board-ink);
-  border: 1px solid var(--board-line);
-  box-shadow: 0 2px 10px rgb(20 30 24 / 0.18);
-}
-</style>
