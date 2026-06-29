@@ -76,6 +76,19 @@
   background-color: color-mix(in srgb, var(--board) 78%, #000) !important;
 }
 
+/* MDC never highlights ```text (and unlabelled) blocks — it short-circuits on language==="text"
+   (rehype.js), so they render as a plain <pre>, NOT .shiki, and the rule above misses them.
+   Pseudocode papers use ```text heavily, so give plain code on the board the same chalk-on-darker
+   -green inset. Unlayered → wins over Nuxt UI's layered prose <pre> colour (which ignores
+   --tw-prose-pre-*); :not(.shiki) keeps real Shiki blocks on their own theme. */
+.board.prose :where(pre):not(.shiki) {
+  background-color: color-mix(in srgb, var(--board) 78%, #000);
+  color: var(--board-ink);
+}
+.board.prose :where(pre):not(.shiki) code {
+  color: inherit;
+}
+
 /* Blackboard stem: dark green surface in BOTH themes, so its prose stays chalk regardless of
    light/dark (links chalk + underlined for affordance; code on a faint chalk tint). */
 .board.prose {
