@@ -4,9 +4,12 @@
       <UContainer class="flex h-16 items-center gap-8">
         <NuxtLink
           to="/"
-          class="focus-ring inline-flex min-h-touch items-center font-serif text-title-sm tracking-tight"
-          >ProGrads</NuxtLink
+          class="focus-ring inline-flex min-h-touch items-center gap-2 font-serif text-title-sm tracking-tight"
         >
+          <!-- Decorative: the adjacent wordmark already names the site (alt=""). -->
+          <img src="/logo.svg" alt="" width="28" height="28" class="size-7" />
+          ProGrads
+        </NuxtLink>
         <nav aria-label="主要導覽" class="text-muted text-small flex gap-6">
           <NuxtLink
             to="/admissions"
