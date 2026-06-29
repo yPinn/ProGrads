@@ -1,5 +1,6 @@
 import {
   PapersResponseSchema,
+  QuestionFacetsResponseSchema,
   QuestionResponseSchema,
   QuestionsResponseSchema,
 } from "@prograds/shared";
@@ -9,3 +10,4 @@ import { createZodDto } from "nestjs-zod";
 export class QuestionsResponseDto extends createZodDto(QuestionsResponseSchema) {}
 export class PapersResponseDto extends createZodDto(PapersResponseSchema) {}
 export class QuestionResponseDto extends createZodDto(QuestionResponseSchema) {}
+export class QuestionFacetsResponseDto extends createZodDto(QuestionFacetsResponseSchema) {}

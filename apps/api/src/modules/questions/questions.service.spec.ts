@@ -75,12 +75,36 @@ describe("QuestionsService.getPapers", () => {
   });
 });
 
+describe("QuestionsService.getFacets", () => {
+  it("maps facet rows to subjects(+paperCount)/schools/years", async () => {
+    const findFacets = vi.fn().mockResolvedValue({
+      subjects: [
+        { id: "subj1", slug: "algo", name: "演算法", _count: { examSubjects: 3 } },
+        { id: "subj2", slug: "os", name: "作業系統", _count: { examSubjects: 1 } },
+      ],
+      schools: [school],
+      years: [{ year: 2026 }, { year: 2025 }],
+    });
+
+    const service = makeService({ findFacets });
+    const facets = await service.getFacets();
+
+    expect(facets.subjects).toEqual([
+      { id: "subj1", slug: "algo", name: "演算法", paperCount: 3 },
+      { id: "subj2", slug: "os", name: "作業系統", paperCount: 1 },
+    ]);
+    expect(facets.schools).toEqual([school]);
+    expect(facets.years).toEqual([2026, 2025]);
+  });
+});
+
 describe("QuestionsService.getQuestion", () => {
   function detailRow(overrides: Record<string, unknown> = {}) {
     return {
       externalId: "Q-1",
       number: "1",
       type: "SINGLE",
+      order: 1,
       contentMd: "題目內容",
       metadata: { sourceUrl: "https://example.edu/q1", group: "題組A" },
       examSubjectId: "es1",
@@ -113,22 +137,31 @@ describe("QuestionsService.getQuestion", () => {
     await expect(service.getQuestion("missing")).rejects.toBeInstanceOf(NotFoundException);
   });
 
+  const noSiblings = () => vi.fn().mockResolvedValue({ prev: null, next: null });
+
   it("maps full detail and surfaces the group passage from the lead", async () => {
     const findByExternalId = vi.fn().mockResolvedValue(detailRow());
     const findGroupLead = vi
       .fn()
       .mockResolvedValue({ externalId: "Q-0", metadata: { passage: "共同題幹" } });
-    const service = makeService({ findByExternalId, findGroupLead });
+    const findSiblings = vi.fn().mockResolvedValue({
+      prev: { externalId: "Q-0", number: "0" },
+      next: { externalId: "Q-2", number: "2" },
+    });
+    const service = makeService({ findByExternalId, findGroupLead, findSiblings });
 
     const detail = await service.getQuestion("Q-1");
 
     expect(findGroupLead).toHaveBeenCalledWith("es1", "題組A");
+    expect(findSiblings).toHaveBeenCalledWith("es1", 1, "Q-1");
     expect(detail.sourceUrl).toBe("https://example.edu/q1");
     expect(detail.group).toBe("題組A");
     expect(detail.groupPassageMd).toBe("共同題幹");
     expect(detail.licenseStatus).toBe("LICENSED");
     expect(detail.choices).toEqual([{ label: "A", contentMd: "選項A", isCorrect: true }]);
     expect(detail.explanation?.standardAnswer).toBe("A");
+    expect(detail.prev).toEqual({ externalId: "Q-0", number: "0" });
+    expect(detail.next).toEqual({ externalId: "Q-2", number: "2" });
     expect(detail.examSubject.departments).toEqual([
       { id: "d1", slug: "cs", name: "資訊科學系", schoolId: "s1", trackId: "t1" },
     ]);
@@ -139,7 +172,7 @@ describe("QuestionsService.getQuestion", () => {
       .fn()
       .mockResolvedValue(detailRow({ metadata: null, explanation: null }));
     const findGroupLead = vi.fn();
-    const service = makeService({ findByExternalId, findGroupLead });
+    const service = makeService({ findByExternalId, findGroupLead, findSiblings: noSiblings() });
 
     const detail = await service.getQuestion("Q-1");
 
@@ -147,13 +180,15 @@ describe("QuestionsService.getQuestion", () => {
     expect(detail.group).toBeNull();
     expect(detail.groupPassageMd).toBeNull();
     expect(detail.explanation).toBeNull();
+    expect(detail.prev).toBeNull();
+    expect(detail.next).toBeNull();
     expect(findGroupLead).not.toHaveBeenCalled();
   });
 
   it("leaves groupPassageMd null when the lead has no string passage", async () => {
     const findByExternalId = vi.fn().mockResolvedValue(detailRow());
     const findGroupLead = vi.fn().mockResolvedValue({ externalId: "Q-0", metadata: null });
-    const service = makeService({ findByExternalId, findGroupLead });
+    const service = makeService({ findByExternalId, findGroupLead, findSiblings: noSiblings() });
 
     const detail = await service.getQuestion("Q-1");
 

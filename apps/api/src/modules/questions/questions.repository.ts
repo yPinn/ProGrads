@@ -108,6 +108,31 @@ export class QuestionsRepository {
     return { rows, total };
   }
 
+  // Filter facets: subjects/schools/years that actually have content, so the 題庫 dropdowns
+  // never offer empty options. Subjects carry their 考卷份數 (distinct papers, via the paper
+  // composition link) — a sync invariant guarantees每張有題的卷都有對應 subject 連結.
+  async findFacets() {
+    const [subjects, schools, years] = await this.prisma.$transaction([
+      this.prisma.subject.findMany({
+        where: { examSubjects: { some: {} } },
+        select: { id: true, slug: true, name: true, _count: { select: { examSubjects: true } } },
+        orderBy: [{ examSubjects: { _count: "desc" } }, { name: "asc" }],
+      }),
+      this.prisma.school.findMany({
+        where: { exams: { some: { examSubjects: { some: { questions: { some: {} } } } } } },
+        select: { id: true, slug: true, name: true },
+        orderBy: [{ displayOrder: "asc" }, { slug: "asc" }],
+      }),
+      this.prisma.exam.findMany({
+        where: { examSubjects: { some: { questions: { some: {} } } } },
+        select: { year: true },
+        distinct: ["year"],
+        orderBy: { year: "desc" },
+      }),
+    ]);
+    return { subjects, schools, years };
+  }
+
   // The "lead" of a 題組: lowest-order question in the same paper sharing this group slug.
   // The shared passage lives in its contentMd (see content pipeline convention).
   findGroupLead(examSubjectId: string, group: string) {
@@ -116,6 +141,30 @@ export class QuestionsRepository {
       orderBy: [{ order: "asc" }, { externalId: "asc" }],
       select: { externalId: true, metadata: true },
     });
+  }
+
+  // Same-paper neighbours for prev/next nav. Ordering mirrors the paper's 題序
+  // (order asc, externalId asc); tuple comparison gives the immediate neighbour.
+  async findSiblings(examSubjectId: string, order: number, externalId: string) {
+    const [prev, next] = await this.prisma.$transaction([
+      this.prisma.question.findFirst({
+        where: {
+          examSubjectId,
+          OR: [{ order: { lt: order } }, { order, externalId: { lt: externalId } }],
+        },
+        orderBy: [{ order: "desc" }, { externalId: "desc" }],
+        select: { externalId: true, number: true },
+      }),
+      this.prisma.question.findFirst({
+        where: {
+          examSubjectId,
+          OR: [{ order: { gt: order } }, { order, externalId: { gt: externalId } }],
+        },
+        orderBy: [{ order: "asc" }, { externalId: "asc" }],
+        select: { externalId: true, number: true },
+      }),
+    ]);
+    return { prev, next };
   }
 
   findByExternalId(externalId: string) {
