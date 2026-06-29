@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shallowRef, watch, onBeforeUnmount } from "vue";
+import { shallowRef, ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { ScheduleXCalendar } from "@schedule-x/vue";
 import {
   createCalendar,
@@ -64,14 +64,38 @@ watch(
   (items) => calendarApp.value.events.set(mapEvents(items)),
 );
 
-onBeforeUnmount(() => calendarApp.value.destroy());
+// Schedule-X's Vue wrapper renders into `document.getElementById(id)` inside its own mounted
+// hook. When this calendar first mounts inside an out-in transition (the page transition and
+// QueryState's fade both use mode="out-in"), Vue fires child mounted hooks before the new
+// subtree is attached to the document — so getElementById returns null and Preact throws
+// "Cannot read properties of null (reading '__k')". Gate the wrapper until our root is actually
+// connected to the live DOM, so it only mounts once getElementById can find its element.
+const rootEl = ref<HTMLElement | null>(null);
+const ready = ref(false);
+let rafId = 0;
+
+onMounted(() => {
+  const waitForConnection = () => {
+    if (rootEl.value?.isConnected) ready.value = true;
+    else rafId = requestAnimationFrame(waitForConnection);
+  };
+  waitForConnection();
+});
+
+onBeforeUnmount(() => {
+  cancelAnimationFrame(rafId);
+  calendarApp.value.destroy();
+});
 </script>
 
 <template>
-  <!-- view modifier lets schedule-x.css give hour-axis/list views their own height -->
-  <ScheduleXCalendar
-    :calendar-app="calendarApp"
-    class="schedule-calendar"
-    :class="`schedule-calendar--${view}`"
-  />
+  <div ref="rootEl">
+    <!-- view modifier lets schedule-x.css give hour-axis/list views their own height -->
+    <ScheduleXCalendar
+      v-if="ready"
+      :calendar-app="calendarApp"
+      class="schedule-calendar"
+      :class="`schedule-calendar--${view}`"
+    />
+  </div>
 </template>

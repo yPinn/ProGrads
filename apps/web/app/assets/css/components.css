@@ -106,3 +106,19 @@
   --tw-prose-th-borders: var(--board-line);
   --tw-prose-td-borders: var(--board-line);
 }
+
+/* Nuxt UI's prose table/code components colour with utility classes (bg-muted, border-muted),
+   ignoring --tw-prose-* — so on the board they show as cream frames/chips, and the chalk thead
+   text even washes out on its cream surface. Re-skin every inset to the board's own line + a faint
+   chalk tint, unifying them with the board edge. Unlayered → wins over the layered utilities. */
+.board.prose :where(pre, code, th, td) {
+  border-color: var(--board-line);
+}
+.board.prose :where(thead),
+.board.prose :where(:not(pre) > code) {
+  background-color: color-mix(in srgb, var(--board-ink) 10%, transparent);
+}
+/* Inline chips also need chalk text (ProseCode hard-codes dark text-highlighted). */
+.board.prose :where(:not(pre) > code) {
+  color: var(--board-ink);
+}
