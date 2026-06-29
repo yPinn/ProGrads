@@ -22,7 +22,15 @@ export default defineNuxtConfig({
   // by the sheet's own font-display; <noscript> keeps it working with JS disabled.
   app: {
     head: {
+      // Brand icons: vector monogram (public/logo.svg, blackboard-green, dark-mode→cream),
+      // transparent. SVG first (modern browsers prefer it); .ico + PNGs are fallbacks.
       link: [
+        { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+        { rel: "icon", href: "/favicon.ico", sizes: "any" },
+        { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" },
+        { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16x16.png" },
+        { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+        { rel: "manifest", href: "/site.webmanifest" },
         {
           rel: "preload",
           as: "style",
@@ -30,6 +38,7 @@ export default defineNuxtConfig({
           onload: "this.onload=null;this.rel='stylesheet'",
         },
       ],
+      meta: [{ name: "theme-color", content: "#243b30" }],
       noscript: [{ innerHTML: '<link rel="stylesheet" href="/fonts/genwanmin/result.css">' }],
     },
   },
