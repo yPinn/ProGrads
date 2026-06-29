@@ -28,7 +28,7 @@
     "@schedule-x/calendar": "^4.6.0",
     "@schedule-x/theme-default": "^4.6.0",
     "@schedule-x/vue": "^4.1.0",
-    "@tanstack/vue-query": "^5.101.0",
+    "@tanstack/vue-query": "^5.101.2",
     "@tanstack/vue-table": "^8.21.3",
     "@vee-validate/zod": "^4.15.1",
     "@vueuse/motion": "^3.0.3",
