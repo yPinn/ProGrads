@@ -150,6 +150,8 @@ describe("useQuestion", () => {
         explanation: null,
         group: null,
         groupPassageMd: null,
+        prev: null,
+        next: null,
       },
     }));
     const { result } = await runComposable(() => useQuestion("q-1"));
