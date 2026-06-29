@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useQuestionPapers } from "~/composables/useQuestionPapers";
-import { useSubjects } from "~/composables/useSubjects";
-import { useSchools } from "~/composables/useSchools";
+import { useQuestionFacets } from "~/composables/useQuestionFacets";
 import { QUESTION_TYPE_LABELS } from "~/utils/question-labels";
 import { ADMISSION_TYPE_LABELS } from "~/utils/admission-labels";
-import { toSelectItems } from "~/utils/select";
 import type { PaperQuestionRef } from "@prograds/shared";
 
 useSeoMeta({
@@ -15,37 +14,46 @@ useSeoMeta({
 
 // "all" sentinel: reka-ui forbids an empty-string option value, so a filter's
 // "no filter" state uses an explicit "all" item, mapped back to undefined in the query.
-const subject = ref<string>("all");
+// 考科 deep-link: a clickable subject tag elsewhere lands here as ?subject=<slug>
+// (跨校練單科 entry), so the filter初始化自 URL 並回寫,維持可分享狀態。
+const route = useRoute();
+const router = useRouter();
+const subject = ref<string>(typeof route.query.subject === "string" ? route.query.subject : "all");
 const school = ref<string>("all");
 const year = ref<number | "all">("all");
 const page = ref(1);
 const pageSize = 20;
 
-// Year dropdown: recent exam years, newest first ("all" = no filter).
-const currentYear = new Date().getFullYear();
-const yearOptions = [
-  { label: "全部年度", value: "all" as const },
-  ...Array.from({ length: 12 }, (_, i) => ({
-    label: `${currentYear - i}`,
-    value: currentYear - i,
-  })),
-];
-
-// 考科 (subjects) + 學校 (schools, server-ordered 四大→政治→四中→…) for the filter selects.
-const { data: subjects, isLoading: subjectsLoading } = useSubjects();
-const { data: schools, isLoading: schoolsLoading } = useSchools();
+// Filter options come from facets — only 考科/學校/年度 that actually have questions, so the
+// dropdowns never offer dead options. 考科 shows its题數; 學校 keeps server order; 年度 newest first.
+const { data: facets, isLoading: facetsLoading } = useQuestionFacets();
 const subjectItems = computed(() => [
   { label: "全部考科", value: "all" },
-  ...toSelectItems(subjects.value),
+  ...(facets.value?.subjects ?? []).map((s) => ({
+    label: `${s.name} · ${s.paperCount} 份`,
+    value: s.slug,
+  })),
 ]);
 const schoolItems = computed(() => [
   { label: "全部學校", value: "all" },
-  ...toSelectItems(schools.value),
+  ...(facets.value?.schools ?? []).map((s) => ({ label: s.name, value: s.slug })),
+]);
+const yearOptions = computed(() => [
+  { label: "全部年度", value: "all" as const },
+  ...(facets.value?.years ?? []).map((y) => ({ label: `${y}`, value: y })),
 ]);
 
 // Any filter change resets to the first page.
 watch([subject, school, year], () => {
   page.value = 1;
+});
+
+// Keep the 考科 filter in the URL so it's shareable and survives reload/back.
+watch(subject, (s) => {
+  const query = { ...route.query };
+  if (s === "all") delete query.subject;
+  else query.subject = s;
+  router.replace({ query });
 });
 
 const query = computed(() => ({
@@ -88,7 +96,7 @@ function groupRuns(
         v-model="subject"
         :items="subjectItems"
         value-key="value"
-        :loading="subjectsLoading"
+        :loading="facetsLoading"
         aria-label="考科"
         placeholder="全部考科"
         class="w-full sm:w-56"
@@ -97,12 +105,18 @@ function groupRuns(
         v-model="school"
         :items="schoolItems"
         value-key="value"
-        :loading="schoolsLoading"
+        :loading="facetsLoading"
         aria-label="學校"
         placeholder="全部學校"
         class="w-full sm:w-44"
       />
-      <USelect v-model="year" :items="yearOptions" aria-label="年度" class="w-full sm:w-32" />
+      <USelect
+        v-model="year"
+        :items="yearOptions"
+        :loading="facetsLoading"
+        aria-label="年度"
+        class="w-full sm:w-32"
+      />
     </div>
 
     <QueryState
@@ -128,15 +142,9 @@ function groupRuns(
             v-motion="motionFadeUp(pi, prefersReducedMotion)"
             class="border-default hover:border-default/80 rounded-card border p-card transition-colors"
           >
-            <div class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span class="font-serif text-body tracking-tight"
-                >{{ p.exam.school.name }} {{ p.exam.year }}</span
-              >
-              <span class="text-muted text-small">{{ p.examSubject.name }}</span>
-              <span class="text-muted text-small"
-                >· {{ ADMISSION_TYPE_LABELS[p.exam.admissionType] }}</span
-              >
-              <span class="text-muted text-small">· {{ p.questions.length }} 題</span>
+            <!-- 主角是考科(卷別);學校年度為出處,降為 muted。 -->
+            <div class="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span class="font-serif text-body tracking-tight">{{ p.examSubject.name }}</span>
               <UBadge
                 v-for="s in p.subjects"
                 :key="s.slug"
@@ -147,6 +155,10 @@ function groupRuns(
                 {{ s.name }}
               </UBadge>
             </div>
+            <p class="text-muted text-small mb-3">
+              {{ p.exam.school.name }} {{ p.exam.year }} ·
+              {{ ADMISSION_TYPE_LABELS[p.exam.admissionType] }} · {{ p.questions.length }} 題
+            </p>
 
             <!-- 題號選擇器:同題組(閱讀/克漏字共用篇章)的題號以底色塊 + 「題組」標示群聚。 -->
             <div class="flex flex-wrap items-start gap-2">

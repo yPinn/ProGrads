@@ -80,6 +80,13 @@ export const ChoiceSchema = z.object({
 });
 export type Choice = z.infer<typeof ChoiceSchema>;
 
+// Same-paper neighbour for prev/next navigation on the detail page (依題序,同卷).
+export const QuestionNavRefSchema = z.object({
+  externalId: z.string().describe("相鄰題目對外唯一代碼"),
+  number: z.string().describe("相鄰題目題號"),
+});
+export type QuestionNavRef = z.infer<typeof QuestionNavRefSchema>;
+
 export const QuestionDetailSchema = QuestionSummarySchema.extend({
   contentMd: z.string().describe("題目內容(Markdown)"),
   sourceUrl: z.string().nullable().describe("原始來源 URL,可能為 null"),
@@ -102,6 +109,9 @@ export const QuestionDetailSchema = QuestionSummarySchema.extend({
     .string()
     .nullable()
     .describe("題組共用篇章(Markdown,取自題組首題);非題組為 null"),
+  // 同卷上下題(依題序);頭/尾題對應端為 null。
+  prev: QuestionNavRefSchema.nullable().describe("同卷前一題;本卷首題為 null"),
+  next: QuestionNavRefSchema.nullable().describe("同卷後一題;本卷末題為 null"),
 });
 export type QuestionDetail = z.infer<typeof QuestionDetailSchema>;
 
@@ -123,7 +133,22 @@ export const QuestionQuerySchema = z.object({
 });
 export type QuestionQuery = z.infer<typeof QuestionQuerySchema>;
 
+// Filter facets for the 題庫 dropdowns: only values that actually have questions, so the
+// 考科/學校/年度 selects don't offer dead options (空題庫). See questions list page.
+export const SubjectFacetSchema = SubjectSchema.extend({
+  paperCount: z.number().int().describe("該考科出現的考卷份數(校×年×卷)"),
+});
+export type SubjectFacet = z.infer<typeof SubjectFacetSchema>;
+
+export const QuestionFacetsSchema = z.object({
+  subjects: z.array(SubjectFacetSchema).describe("有考卷的考科 + 份數(份數多者在前)"),
+  schools: z.array(SchoolSchema).describe("有題目的學校(沿用 server 排序)"),
+  years: z.array(z.number().int()).describe("有題目的考試年度(新到舊)"),
+});
+export type QuestionFacets = z.infer<typeof QuestionFacetsSchema>;
+
 // Response envelopes.
 export const QuestionsResponseSchema = paginatedResponse(QuestionSummarySchema);
 export const PapersResponseSchema = paginatedResponse(PaperSummarySchema);
 export const QuestionResponseSchema = dataResponse(QuestionDetailSchema);
+export const QuestionFacetsResponseSchema = dataResponse(QuestionFacetsSchema);

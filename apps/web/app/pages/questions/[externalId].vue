@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from "vue";
+import { computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 import { useQuestion } from "~/composables/useQuestion";
 import { ApiError } from "~/utils/api-error";
@@ -21,10 +21,23 @@ watch(error, (e) => {
   }
 });
 
+// 主角是考科:title 以卷別領頭,學校年度為出處,提升搜尋性。
 useSeoMeta({
   title: () =>
-    q.value ? `${q.value.exam.school.name} ${q.value.exam.year} 第 ${q.value.number} 題` : "題目",
+    q.value
+      ? `${q.value.examSubject.name} ${q.value.exam.school.name} ${q.value.exam.year} 第 ${q.value.number} 題`
+      : "題目",
 });
+
+// 同卷上下題:左右方向鍵切換(prev/next 由 detail API 帶入)。忽略修飾鍵 / 已處理事件。
+function onArrowNav(e: KeyboardEvent) {
+  if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === "ArrowLeft" && q.value?.prev) navigateTo(`/questions/${q.value.prev.externalId}`);
+  else if (e.key === "ArrowRight" && q.value?.next)
+    navigateTo(`/questions/${q.value.next.externalId}`);
+}
+onMounted(() => window.addEventListener("keydown", onArrowNav));
+onBeforeUnmount(() => window.removeEventListener("keydown", onArrowNav));
 </script>
 
 <template>
@@ -45,21 +58,31 @@ useSeoMeta({
         </template>
 
         <article v-if="q" class="mt-4">
-          <header class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1">
-            <h1 class="font-serif text-title-md tracking-tight">
-              {{ q.exam.school.name }} {{ q.exam.year }}
-            </h1>
-            <UBadge variant="subtle">{{ QUESTION_TYPE_LABELS[q.type] }}</UBadge>
-            <span class="text-muted text-small"
-              >{{ q.examSubject.name }} · 第 {{ q.number }} 題</span
-            >
-            <span class="text-muted text-small">{{
-              ADMISSION_TYPE_LABELS[q.exam.admissionType]
-            }}</span>
+          <!-- 卷別(考科)為主角;學校×年度×管道×題號為出處,降為 muted。 -->
+          <header class="mb-4">
+            <p class="text-muted text-caption mb-1 tracking-eyebrow uppercase">卷別</p>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h1 class="font-serif text-title-md tracking-tight">{{ q.examSubject.name }}</h1>
+              <UBadge variant="subtle">{{ QUESTION_TYPE_LABELS[q.type] }}</UBadge>
+            </div>
+            <p class="text-muted text-small mt-1">
+              {{ q.exam.school.name }} {{ q.exam.year }} ·
+              {{ ADMISSION_TYPE_LABELS[q.exam.admissionType] }} · 第 {{ q.number }} 題
+            </p>
           </header>
 
-          <div class="mb-3 flex flex-wrap gap-1">
-            <UBadge v-for="s in q.subjects" :key="s.slug" color="neutral" variant="soft">
+          <!-- 考科練習標籤:點擊跳到該考科的跨校題庫(跨校練單科入口)。 -->
+          <div v-if="q.subjects.length" class="mb-3 flex flex-wrap items-center gap-1.5">
+            <span class="text-muted text-caption">考科</span>
+            <UBadge
+              v-for="s in q.subjects"
+              :key="s.slug"
+              :to="`/questions?subject=${s.slug}`"
+              color="neutral"
+              variant="soft"
+              class="focus-ring hover:bg-elevated transition-colors"
+              :aria-label="`練習考科:${s.name}(跨校)`"
+            >
               {{ s.name }}
             </UBadge>
           </div>
@@ -106,6 +129,33 @@ useSeoMeta({
             />
             <p class="text-muted text-caption mt-3">AI 生成解析,僅供參考。</p>
           </section>
+
+          <!-- 同卷上下題切換(依題序);頭/尾題對應端 disable。亦支援左右方向鍵。 -->
+          <nav
+            class="border-default mt-8 flex items-center justify-between gap-3 border-t pt-4"
+            aria-label="同卷題目切換"
+          >
+            <UButton
+              :to="q.prev ? `/questions/${q.prev.externalId}` : undefined"
+              :disabled="!q.prev"
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-arrow-left"
+              :aria-label="q.prev ? `上一題:第 ${q.prev.number} 題` : '已是本卷首題'"
+            >
+              上一題<span v-if="q.prev" class="text-muted ml-1">第 {{ q.prev.number }} 題</span>
+            </UButton>
+            <UButton
+              :to="q.next ? `/questions/${q.next.externalId}` : undefined"
+              :disabled="!q.next"
+              color="neutral"
+              variant="ghost"
+              trailing-icon="i-lucide-arrow-right"
+              :aria-label="q.next ? `下一題:第 ${q.next.number} 題` : '已是本卷末題'"
+            >
+              <span v-if="q.next" class="text-muted mr-1">第 {{ q.next.number }} 題</span>下一題
+            </UButton>
+          </nav>
         </article>
       </QueryState>
     </div>

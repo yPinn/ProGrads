@@ -1,10 +1,17 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
-import type { Meta, PaperSummary, QuestionDetail, QuestionSummary } from "@prograds/shared";
+import type {
+  Meta,
+  PaperSummary,
+  QuestionDetail,
+  QuestionFacets,
+  QuestionSummary,
+} from "@prograds/shared";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiBadRequest, ApiNotFound } from "../../common/api-error-responses.js";
 import { QuestionQueryDto } from "./dto/question-query.dto.js";
 import {
   PapersResponseDto,
+  QuestionFacetsResponseDto,
   QuestionResponseDto,
   QuestionsResponseDto,
 } from "./dto/questions-response.dto.js";
@@ -57,6 +64,17 @@ export class QuestionsController {
       query.page,
       query.pageSize,
     );
+  }
+
+  @Get("facets")
+  @ApiOperation({
+    summary: "題庫篩選 facets",
+    description:
+      "回傳**實際有題目**的考科(含題數)、學校與年度,供題庫下拉收斂,避免列出空題庫的選項。",
+  })
+  @ApiOkResponse({ type: QuestionFacetsResponseDto })
+  async facets(): Promise<{ data: QuestionFacets }> {
+    return { data: await this.service.getFacets() };
   }
 
   @Get(":externalId")

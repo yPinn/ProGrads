@@ -4,6 +4,7 @@ import type {
   Meta,
   PaperSummary,
   QuestionDetail,
+  QuestionFacets,
   QuestionSummary,
   Subject,
 } from "@prograds/shared";
@@ -91,6 +92,20 @@ export class QuestionsService {
     return { data, meta: { page, pageSize, total } };
   }
 
+  async getFacets(): Promise<QuestionFacets> {
+    const { subjects, schools, years } = await this.repo.findFacets();
+    return {
+      subjects: subjects.map((s) => ({
+        id: s.id,
+        slug: s.slug,
+        name: s.name,
+        paperCount: s._count.examSubjects,
+      })),
+      schools: schools.map((s) => ({ id: s.id, slug: s.slug, name: s.name })),
+      years: years.map((e) => e.year),
+    };
+  }
+
   async getQuestion(externalId: string): Promise<QuestionDetail> {
     const q = await this.repo.findByExternalId(externalId);
     if (!q) {
@@ -109,6 +124,9 @@ export class QuestionsService {
       const leadMeta = (lead?.metadata ?? null) as { passage?: unknown } | null;
       groupPassageMd = leadMeta && typeof leadMeta.passage === "string" ? leadMeta.passage : null;
     }
+
+    // 同卷上下題(依題序),供詳情頁前後切換。
+    const { prev, next } = await this.repo.findSiblings(q.examSubjectId, q.order, q.externalId);
 
     return {
       externalId: q.externalId,
@@ -143,6 +161,8 @@ export class QuestionsService {
         : null,
       group,
       groupPassageMd,
+      prev,
+      next,
     };
   }
 }
