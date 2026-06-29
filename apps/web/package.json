@@ -40,7 +40,7 @@
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "tailwindcss": "^4.3.1",
-    "temporal-polyfill": "0.3.0",
+    "temporal-polyfill": "1.0.1",
     "vee-validate": "^4.15.1",
     "vue": "^3.5.35",
     "vue-echarts": "^8.0.1",
