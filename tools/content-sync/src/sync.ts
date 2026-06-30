@@ -82,7 +82,7 @@ export async function syncFile(
 
   const sections = parseSections(parsed.content);
   const questionMd = sections.get("題目");
-  const standardAnswer = sections.get("標準解答") ?? "";
+  const standardAnswer = sections.get("標準解答")?.trim() ?? "";
   if (!questionMd) throw new Error(`missing "## 題目" section: ${relPath}`);
   const knowledgeExtension = sections.get("知識點延伸") ?? null;
   // 題組共用篇章(閱讀/克漏字): 只存於題組首題, 與該題自身題幹(## 題目)分離。
@@ -180,18 +180,22 @@ export async function syncFile(
       });
     }
 
-    const explanationData = {
-      standardAnswer,
-      answerType,
-      confidence: fm.confidence ?? null,
-      modelUsed: fm.model_used ?? null,
-      reviewStatus: fm.review_status,
-    };
-    await tx.explanation.upsert({
-      where: { questionId: question.id },
-      update: explanationData,
-      create: { questionId: question.id, ...explanationData },
-    });
+    if (standardAnswer.length > 0) {
+      const explanationData = {
+        standardAnswer,
+        answerType,
+        confidence: fm.confidence ?? null,
+        modelUsed: fm.model_used ?? null,
+        reviewStatus: fm.review_status,
+      };
+      await tx.explanation.upsert({
+        where: { questionId: question.id },
+        update: explanationData,
+        create: { questionId: question.id, ...explanationData },
+      });
+    } else {
+      await tx.explanation.deleteMany({ where: { questionId: question.id } });
+    }
   });
 
   return { examSubjectId, departmentIds: departments.map((d) => d.id) };

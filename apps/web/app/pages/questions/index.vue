@@ -25,7 +25,7 @@ const page = ref(1);
 const pageSize = 20;
 
 // Filter options come from facets — only 考科/學校/年度 that actually have questions, so the
-// dropdowns never offer dead options. 考科 shows its题數; 學校 keeps server order; 年度 newest first.
+// dropdowns never offer dead options. 考科 shows its考卷份數; 學校 keeps server order; 年度 newest first.
 const { data: facets, isLoading: facetsLoading } = useQuestionFacets();
 const subjectItems = computed(() => [
   { label: "全部考科", value: "all" },

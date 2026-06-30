@@ -70,7 +70,7 @@ export class QuestionsController {
   @ApiOperation({
     summary: "題庫篩選 facets",
     description:
-      "回傳**實際有題目**的考科(含題數)、學校與年度,供題庫下拉收斂,避免列出空題庫的選項。",
+      "回傳**實際有題目**的考科(含考卷份數)、學校與年度,供題庫下拉收斂,避免列出空題庫的選項。",
   })
   @ApiOkResponse({ type: QuestionFacetsResponseDto })
   async facets(): Promise<{ data: QuestionFacets }> {

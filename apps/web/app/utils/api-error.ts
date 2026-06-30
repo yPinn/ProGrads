@@ -1,5 +1,8 @@
 import type { ErrorCode, ErrorResponse } from "@prograds/shared";
 
+type ErrorEnvelope = Partial<ErrorResponse>;
+type H3ErrorBody = { data?: ErrorEnvelope };
+
 // Normalized API failure. Carries the backend's stable error.code (docs/05-api-conventions.md)
 // so callers can branch on it; falls back to NETWORK/UNKNOWN for non-envelope failures.
 export class ApiError extends Error {
@@ -15,7 +18,9 @@ export class ApiError extends Error {
 
 // HTTP error response → ApiError, preserving the backend error envelope's stable code.
 export function envelopeToApiError(body: unknown, statusText?: string, status?: number): ApiError {
-  const err = (body as Partial<ErrorResponse> | undefined)?.error;
+  const envelope =
+    body && typeof body === "object" ? (body as ErrorEnvelope & H3ErrorBody) : undefined;
+  const err = envelope?.error ?? envelope?.data?.error;
   return new ApiError(err?.code ?? "UNKNOWN", err?.message ?? (statusText || "請求失敗"), status);
 }
 

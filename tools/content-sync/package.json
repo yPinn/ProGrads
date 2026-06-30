@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/admissions.spec.ts src/prune.spec.ts src/validate-questions.spec.ts"
+    "test": "tsx --test src/admissions.spec.ts src/prune.spec.ts src/sync.spec.ts src/validate-questions.spec.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
