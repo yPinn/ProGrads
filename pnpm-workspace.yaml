@@ -31,3 +31,13 @@ allowBuilds:
 peerDependencyRules:
   allowedVersions:
     "@unhead/bundler>unhead": "2"
+
+# @nuxtjs/mdc imports "h3" without declaring it, so it picks up whatever h3 is
+# hoisted — which ends up being devframe's prerelease v2. Its highlight event
+# handler runs inside the nitro server (h3 v1), so v2's getQuery(new URL(req.url))
+# throws on the relative dev URL. Pin mdc to v1 to match the runtime; devframe
+# keeps its own v2.
+packageExtensions:
+  "@nuxtjs/mdc":
+    dependencies:
+      h3: "^1.15.11"
