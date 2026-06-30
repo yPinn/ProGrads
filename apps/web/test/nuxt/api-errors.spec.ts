@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { mountSuspended, registerEndpoint } from "@nuxt/test-utils/runtime";
-import { defineEventHandler, setResponseStatus } from "h3";
+import { createError, defineEventHandler } from "h3";
 import { defineComponent, h } from "vue";
 import { useSchedules } from "~/composables/useSchedules";
 import { ApiError } from "~/utils/api-error";
@@ -9,9 +9,13 @@ import { ApiError } from "~/utils/api-error";
 // and the QueryClient retry predicate are exercised end-to-end.
 registerEndpoint(
   "/schedules",
-  defineEventHandler((event) => {
-    setResponseStatus(event, 404);
-    return { error: { code: "NOT_FOUND", message: "查無資料", details: null } };
+  defineEventHandler(() => {
+    throw createError({
+      statusCode: 404,
+      statusMessage: "Not Found",
+      unhandled: false,
+      data: { error: { code: "NOT_FOUND", message: "查無資料", details: null } },
+    });
   }),
 );
 

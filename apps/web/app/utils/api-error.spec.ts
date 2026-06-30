@@ -15,6 +15,17 @@ describe("envelopeToApiError", () => {
     expect(e.status).toBe(404);
   });
 
+  it("preserves an error envelope nested under h3 error data", () => {
+    const e = envelopeToApiError(
+      { data: { error: { code: "NOT_FOUND", message: "查無資料", details: null } } },
+      "Not Found",
+      404,
+    );
+    expect(e.code).toBe("NOT_FOUND");
+    expect(e.message).toBe("查無資料");
+    expect(e.status).toBe(404);
+  });
+
   it("falls back to UNKNOWN + statusText when the body has no envelope", () => {
     const e = envelopeToApiError(undefined, "Bad Gateway", 502);
     expect(e.code).toBe("UNKNOWN");
