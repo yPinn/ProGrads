@@ -8,7 +8,7 @@ import type {
   QuestionSummary,
   Subject,
 } from "@prograds/shared";
-import { mapSchool, uniqueDepartments } from "../../common/mappers.js";
+import { mapSchool, metaString, uniqueDepartments } from "../../common/mappers.js";
 import { QuestionFilters, QuestionsRepository } from "./questions.repository.js";
 
 interface ChoiceRow {
@@ -79,15 +79,12 @@ export class QuestionsService {
         school: mapSchool(es.exam.school),
       },
       subjects: mapSubjects(es.subjects),
-      questions: es.questions.map((q) => {
-        const m = (q.metadata ?? null) as { group?: unknown } | null;
-        return {
-          externalId: q.externalId,
-          number: q.number,
-          type: q.type,
-          group: m && typeof m.group === "string" ? m.group : null,
-        };
-      }),
+      questions: es.questions.map((q) => ({
+        externalId: q.externalId,
+        number: q.number,
+        type: q.type,
+        group: metaString(q.metadata, "group"),
+      })),
     }));
     return { data, meta: { page, pageSize, total } };
   }
@@ -111,22 +108,18 @@ export class QuestionsService {
     if (!q) {
       throw new NotFoundException(`question not found: ${externalId}`);
     }
-    const meta = (q.metadata ?? null) as { sourceUrl?: unknown; group?: unknown } | null;
-    const sourceUrl = meta && typeof meta.sourceUrl === "string" ? meta.sourceUrl : null;
-    const group = meta && typeof meta.group === "string" ? meta.group : null;
+    const sourceUrl = metaString(q.metadata, "sourceUrl");
+    const group = metaString(q.metadata, "group");
     const es = q.examSubject;
 
-    // 題組: surface the shared passage (held by the group's lead in metadata.passage) so
-    // every member's page can render the clean passage above its own prompt.
-    let groupPassageMd: string | null = null;
-    if (group) {
-      const lead = await this.repo.findGroupLead(q.examSubjectId, group);
-      const leadMeta = (lead?.metadata ?? null) as { passage?: unknown } | null;
-      groupPassageMd = leadMeta && typeof leadMeta.passage === "string" ? leadMeta.passage : null;
-    }
-
-    // 同卷上下題(依題序),供詳情頁前後切換。
-    const { prev, next } = await this.repo.findSiblings(q.examSubjectId, q.order, q.externalId);
+    // 題組共用篇章(lead 的 metadata.passage)與同卷上下題彼此獨立,併發取回:
+    // - 題組: surface the shared passage so every member's page renders it above its own prompt.
+    // - 上下題: same-paper 依題序,供詳情頁前後切換。
+    const [lead, { prev, next }] = await Promise.all([
+      group ? this.repo.findGroupLead(q.examSubjectId, group) : Promise.resolve(null),
+      this.repo.findSiblings(q.examSubjectId, q.order, q.externalId),
+    ]);
+    const groupPassageMd = metaString(lead?.metadata, "passage");
 
     return {
       externalId: q.externalId,
