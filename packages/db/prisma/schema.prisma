@@ -78,6 +78,11 @@ enum ExamMethod {
   interview // 口試
 }
 
+enum ThesisRole {
+  advised // 指導學生論文 (NDLTD)
+  authored // 教授自己發表 (DBLP/OpenAlex)
+}
+
 // ---------- Taxonomy ----------
 
 model Category {
@@ -172,6 +177,7 @@ model Department {
   schedules    AdmissionSchedule[]
   stats        AdmissionStat[]
   groups       AdmissionGroup[]
+  faculty      FacultyMember[]
   metadata     Json?
 
   @@unique([schoolId, slug])
@@ -488,6 +494,46 @@ model AdmissionRoundPaperSubject {
 
   @@id([paperId, subjectId])
   @@index([subjectId])
+}
+
+// ---------- Faculty (系所師資陣容) ----------
+
+// 系所師資: (department, slug) 為身分。researchAreas 為人工彙整的研究方向結論;
+// theses 為佐證 (以指導學生論文 advised 為主, 教授著作 authored 選填)。
+model FacultyMember {
+  id            String          @id @default(cuid())
+  departmentId  String
+  department    Department      @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  slug          String // 人員 slug (英文名/拼音; department 內唯一; (departmentId, slug) 為冪等 upsert key)
+  name          String // 中文姓名
+  nameEn        String?
+  title         String? // 職級, e.g. 教授/副教授/助理教授
+  lab           String? // 實驗室名
+  homepage      String?
+  sourceUrl     String? // 資料來源 (系所師資頁)
+  researchAreas String[] // 研究方向標籤 (自由文字)
+  displayOrder  Int             @default(0)
+  metadata      Json?
+  theses        FacultyThesis[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@unique([departmentId, slug])
+  @@index([departmentId])
+}
+
+// 師資論文佐證: 無自然鍵, sync 時整批取代 (隨 member cascade 刪)。
+model FacultyThesis {
+  id        String        @id @default(cuid())
+  facultyId String
+  faculty   FacultyMember @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  title     String
+  year      Int?
+  role      ThesisRole    @default(advised)
+  url       String?
+  metadata  Json?
+
+  @@index([facultyId])
 }
 
 // Phase 2 (deferred): User / Attempt / ReminderSubscription — see docs/00-product.md.
