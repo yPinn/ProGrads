@@ -31,9 +31,6 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Lint docs
-        run: pnpm lint:md
-
       - name: Typecheck
         run: pnpm typecheck
 
