@@ -1,4 +1,4 @@
-# @prograds/exam-solvers
+# exam-solvers — 計算量大考題的答案驗證
 
 小而可重用的 solver，用來**驗證**計算量大的考題答案（排程、管線、數值）。它們撐起 Tier2 解答的
 `confidence` 欄位：當答案是非平凡計算的產物時，這裡的腳本就是它可重現的證明。

@@ -21,7 +21,7 @@ watch(error, (e) => {
   }
 });
 
-// 主角是考科:title 以卷別領頭,學校年度為出處,提升搜尋性。
+// The paper leads the title (school + year as source) for searchability.
 useSeoMeta({
   title: () =>
     q.value
@@ -29,7 +29,8 @@ useSeoMeta({
       : "題目",
 });
 
-// 同卷上下題:左右方向鍵切換(prev/next 由 detail API 帶入)。忽略修飾鍵 / 已處理事件。
+// Same-paper prev/next via arrow keys (prev/next come from the detail API). Ignore modifier
+// keys / already-handled events.
 function onArrowNav(e: KeyboardEvent) {
   if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.key === "ArrowLeft" && q.value?.prev) navigateTo(`/questions/${q.value.prev.externalId}`);

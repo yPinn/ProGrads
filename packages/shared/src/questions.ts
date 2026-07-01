@@ -40,8 +40,8 @@ export const QuestionSummarySchema = z.object({
 });
 export type QuestionSummary = z.infer<typeof QuestionSummarySchema>;
 
-// Paper-grouped view (考卷為單位): one entry per ExamSubject with its question list,
-// so the 題庫 can list papers and offer an in-paper 題號 selector.
+// Paper-grouped view: one entry per ExamSubject with its question list, so the question
+// bank can list papers and offer an in-paper question-number selector.
 export const PaperQuestionRefSchema = z.object({
   externalId: z.string().describe("題目對外唯一代碼"),
   number: z.string().describe("題號"),
@@ -80,7 +80,7 @@ export const ChoiceSchema = z.object({
 });
 export type Choice = z.infer<typeof ChoiceSchema>;
 
-// Same-paper neighbour for prev/next navigation on the detail page (依題序,同卷).
+// Same-paper neighbour for prev/next navigation on the detail page (by question order).
 export const QuestionNavRefSchema = z.object({
   externalId: z.string().describe("相鄰題目對外唯一代碼"),
   number: z.string().describe("相鄰題目題號"),
@@ -92,7 +92,7 @@ export const QuestionDetailSchema = QuestionSummarySchema.extend({
   sourceUrl: z.string().nullable().describe("原始來源 URL,可能為 null"),
   licenseStatus: LicenseStatus,
   choices: z.array(ChoiceSchema).describe("選項清單;非選擇題為空陣列"),
-  // examSubject detail includes its 合科卷 composition + departments that sat it.
+  // examSubject detail includes its combined-subject composition + departments that sat it.
   examSubject: z
     .object({
       id: z.string(),
@@ -103,13 +103,14 @@ export const QuestionDetailSchema = QuestionSummarySchema.extend({
     })
     .describe("題目所屬卷別(含合科卷組成與採用系所)"),
   explanation: ExplanationSchema.nullable().describe("快取的標準解析;尚未產生為 null"),
-  // 題組(閱讀/克漏字): 同篇 passage 的題目共用一個 group slug; 篇章存於題組首題。
+  // Question group (reading / cloze): questions sharing a passage carry the same group slug; the
+  // passage is stored on the group's lead question.
   group: z.string().nullable().describe("題組 slug;非題組為 null"),
   groupPassageMd: z
     .string()
     .nullable()
     .describe("題組共用篇章(Markdown,取自題組首題);非題組為 null"),
-  // 同卷上下題(依題序);頭/尾題對應端為 null。
+  // Same-paper prev/next (by question order): the first question has no prev, the last has no next.
   prev: QuestionNavRefSchema.nullable().describe("同卷前一題;本卷首題為 null"),
   next: QuestionNavRefSchema.nullable().describe("同卷後一題;本卷末題為 null"),
 });
@@ -133,8 +134,8 @@ export const QuestionQuerySchema = z.object({
 });
 export type QuestionQuery = z.infer<typeof QuestionQuerySchema>;
 
-// Filter facets for the 題庫 dropdowns: only values that actually have questions, so the
-// 考科/學校/年度 selects don't offer dead options (空題庫). See questions list page.
+// Filter facets for the question-bank dropdowns: only values that actually have questions, so
+// the subject/school/year selects don't offer dead options. See questions list page.
 export const SubjectFacetSchema = SubjectSchema.extend({
   paperCount: z.number().int().describe("該考科出現的考卷份數(校×年×卷)"),
 });

@@ -1,11 +1,12 @@
 // Parse a question file path into derived references + the canonical (path-derived) id.
 // Expected: questions/<school>/<year>/<paperSlug>/<qNN>.md
-// 卷脫離系所: 路徑只到 (校,年,卷); 系所改由 frontmatter departments 帶。See docs/03-content-pipeline.md.
+// The paper is decoupled from departments: the path only goes down to (school, year, paper);
+// departments now come from the frontmatter `departments`. See docs/03-content-pipeline.md.
 
 export interface ParsedPath {
   school: string;
   year: number;
-  paperSlug: string; // 整張卷的 slug (含卷別, e.g. dsa-a / co-os)
+  paperSlug: string; // whole-paper slug (e.g. dsa-a / co-os)
   fileStem: string; // e.g. "q03"
   number: string; // display, e.g. "3" / "3a"
   order: number; // sortable: q3 -> 30, q3a -> 31, q4 -> 40

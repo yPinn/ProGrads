@@ -85,7 +85,8 @@ export async function syncFile(
   const standardAnswer = sections.get("標準解答")?.trim() ?? "";
   if (!questionMd) throw new Error(`missing "## 題目" section: ${relPath}`);
   const knowledgeExtension = sections.get("知識點延伸") ?? null;
-  // 題組共用篇章(閱讀/克漏字): 只存於題組首題, 與該題自身題幹(## 題目)分離。
+  // Question-group shared passage (reading / cloze): stored only on the group's lead question,
+  // kept separate from the question's own stem (## 題目).
   const passage = sections.get("題組篇章") ?? null;
 
   // MC: parse choices + answer; derive answerType dynamically.
@@ -202,7 +203,7 @@ export async function syncFile(
 }
 
 // End-of-run: recompute each ExamSubject's subject composition as the union of its
-// questions' granular subjects (合科卷). Stateful, so must run after all files.
+// questions' granular subjects (combined-subject paper). Stateful, so must run after all files.
 export async function reconcileExamSubjects(
   prisma: PrismaClient,
   examSubjectIds: Iterable<string>,

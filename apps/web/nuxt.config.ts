@@ -48,7 +48,7 @@ export default defineNuxtConfig({
     remarkPlugins: { "remark-math": {} },
     rehypePlugins: { "rehype-katex": {} },
     // Shiki bundles only the grammars listed here; others fall back to plain text. Cover our
-    // 資工/資管 paper languages. (Unlabelled blocks need no entry; there is no "plaintext" id.)
+    // CS / info-mgmt paper languages. (Unlabelled blocks need no entry; there is no "plaintext" id.)
     // One theme = a single unified look (colours + font) for every code block; only the blackboard
     // swaps the block background (components.css) so its dark code fits the board.
     highlight: {

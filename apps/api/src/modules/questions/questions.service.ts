@@ -112,9 +112,10 @@ export class QuestionsService {
     const group = metaString(q.metadata, "group");
     const es = q.examSubject;
 
-    // 題組共用篇章(lead 的 metadata.passage)與同卷上下題彼此獨立,併發取回:
-    // - 題組: surface the shared passage so every member's page renders it above its own prompt.
-    // - 上下題: same-paper 依題序,供詳情頁前後切換。
+    // The question-group shared passage (lead's metadata.passage) and the same-paper prev/next
+    // are independent, so fetch them concurrently:
+    // - group: surface the shared passage so every member's page renders it above its own prompt.
+    // - prev/next: same-paper, by question order, for stepping through the detail page.
     const [lead, { prev, next }] = await Promise.all([
       group ? this.repo.findGroupLead(q.examSubjectId, group) : Promise.resolve(null),
       this.repo.findSiblings(q.examSubjectId, q.order, q.externalId),

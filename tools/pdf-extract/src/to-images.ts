@@ -25,7 +25,7 @@ async function main(): Promise<void> {
   mkdirSync(outputDir, { recursive: true });
 
   // Render scale: multiplier on the 72-dpi page size. Default 3.0 (=216 dpi); raise via
-  // PDF_RENDER_SCALE for dense CJK (e.g. 8 for HD proofreading of 招生簡章).
+  // PDF_RENDER_SCALE for dense CJK (e.g. 8 for HD proofreading of admission prospectuses).
   const scale = Number(process.env.PDF_RENDER_SCALE) || 3.0;
   // Optional 1-based page subset for targeted renders, e.g. PDF_RENDER_PAGES="5" or "5,7,9".
   const pagesEnv = process.env.PDF_RENDER_PAGES;

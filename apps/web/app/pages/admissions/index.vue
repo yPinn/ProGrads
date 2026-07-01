@@ -60,7 +60,7 @@ const visibleGroups = computed(() => {
     .filter((g) => g.rounds.length > 0);
 });
 
-// 錄取率 = 錄取 / 報名.
+// Admit rate = admitted / applicants.
 const ratio = (r: AdmissionRound) =>
   r.applicants && r.admitted ? `${((r.admitted / r.applicants) * 100).toFixed(1)}%` : "—";
 

@@ -70,8 +70,8 @@ export class QuestionsRepository {
     return { rows, total };
   }
 
-  // Paper-grouped listing (考卷為單位): ExamSubjects matching the filters, each with its
-  // ordered question refs for an in-paper 題號 selector. Paginated at the paper level.
+  // Paper-grouped listing: ExamSubjects matching the filters, each with its ordered question
+  // refs for an in-paper question-number selector. Paginated at the paper level.
   async findPapers(f: QuestionFilters, page: number, pageSize: number) {
     const examWhere = {
       ...(f.school ? { school: { slug: f.school } } : {}),
@@ -109,9 +109,10 @@ export class QuestionsRepository {
     return { rows, total };
   }
 
-  // Filter facets: subjects/schools/years that actually have content, so the 題庫 dropdowns
-  // never offer empty options. Subjects carry their 考卷份數 (distinct papers, via the paper
-  // composition link) — a sync invariant guarantees每張有題的卷都有對應 subject 連結.
+  // Filter facets: subjects/schools/years that actually have content, so the question-bank
+  // dropdowns never offer empty options. Subjects carry their paper count (distinct papers, via
+  // the paper composition link) — a sync invariant guarantees every paper with questions has a
+  // matching subject link.
   async findFacets() {
     const [subjects, schools, years] = await this.prisma.$transaction([
       this.prisma.subject.findMany({
@@ -144,7 +145,7 @@ export class QuestionsRepository {
     });
   }
 
-  // Same-paper neighbours for prev/next nav. Ordering mirrors the paper's 題序
+  // Same-paper neighbours for prev/next nav. Ordering mirrors the paper's question order
   // (order asc, externalId asc); tuple comparison gives the immediate neighbour.
   async findSiblings(examSubjectId: string, order: number, externalId: string) {
     const [prev, next] = await this.prisma.$transaction([

@@ -6,7 +6,7 @@ import { AdmissionsRepository } from "./admissions.repository.js";
 export class AdmissionsService {
   constructor(private readonly repo: AdmissionsRepository) {}
 
-  // 報名情報：某系所的招生組別，各組含逐年梯次（名額 / 考科 / 日程）。
+  // A department's admission groups, each carrying its per-year rounds (quota / subjects / schedule).
   async getGroups(filters: {
     school: string;
     dept: string;
@@ -50,7 +50,7 @@ export class AdmissionsService {
     }));
   }
 
-  // 行事曆：某招生季（年）的校級事件，攤平含校與時間。
+  // School-level events of one admission season (year), flattened with school + time.
   async getSchedule(filters: {
     year: number;
     school?: string;
