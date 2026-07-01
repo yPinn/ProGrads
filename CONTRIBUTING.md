@@ -43,6 +43,10 @@
 ## 程式碼風格
 
 - TypeScript strict；ESLint + Prettier（自動套用）。每個 app/package 自帶 `eslint.config.mjs`（共用 root `base`，前端 `@nuxt/eslint`、後端 Nest 例外各自覆寫）；root ESLint 只 lint 根層級設定檔。
+- 註解與文件語言：
+  - **程式碼註解一律英文**、精簡、解釋 _why_ 而非 _what_，能連結 `docs/` 就連結。中文僅保留在無法乾淨英譯處：檔案內的字面標記（如 `## 題目`、`## 標準解答`）、考卷/系所官方名稱、被引用的畫面文案，以及 zh-TW 日期格式輸出。Zod `.describe()` 為對外 API 文件字串，維持中文。
+  - **文件與 README 用繁中**；README 標題統一 `# <名稱> — <一句話描述>`。`docs/` 為規格/決策的唯一來源，新增決策補 `docs/06-decisions.md`。
+  - seed 檔（`packages/db/prisma/seed/`）標註中文參照資料，維持中文。
 - 不可變優先、小檔案高內聚、邊界以 Zod 驗證、錯誤完整處理（見 [docs/05-api-conventions.md](docs/05-api-conventions.md)）。
 - 測試：runner 全棧統一 **Vitest**（E2E 用 Playwright），目標 80%（單元 + 整合 + E2E）。指令一律從 root 跑（`pnpm lint` / `typecheck` / `test`，turbo fan-out），見 [docs/06-decisions.md](docs/06-decisions.md) D16。
 

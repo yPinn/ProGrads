@@ -16,9 +16,9 @@ import { readSchoolDepts, readSubjects } from "./seed-refs.js";
 // Per-paper (cross-file invariants that sync handles silently / wrongly):
 //   - exam_subject / admission_type / license_status must agree across every question.
 //     sync upserts ExamSubject.name once per question (last-write-wins), and admission_type
-//     keys the Exam — a divergent value silently splits the卷 into a different Exam.
+//     keys the Exam — a divergent value silently splits the paper into a different Exam.
 //   - departments must agree across the paper (ExamSubject↔Department is the union).
-//   Warning (non-fatal): a 考科 used by only one question — often a mistag.
+//   Warning (non-fatal): a subject used by only one question — often a mistag.
 //
 // Usage: tsx src/validate-questions.ts <questions-dir>
 

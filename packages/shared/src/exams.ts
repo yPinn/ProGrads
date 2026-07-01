@@ -5,10 +5,10 @@ import { DepartmentSchema, SchoolSchema } from "./schools.js";
 import { SubjectSchema } from "./taxonomy.js";
 
 // Exam axis contracts: an exam is a school's session (school × year × admissionType) that
-// bundles physical papers (exam_subjects). A paper maps to 1..n subjects (合科卷) and is
-// taken by 1..n departments (共用卷). See docs/02-data-model.md.
+// bundles physical papers (exam_subjects). A paper maps to 1..n subjects (combined-subject
+// paper) and is taken by 1..n departments (shared paper). See docs/02-data-model.md.
 
-// A physical paper within an exam; bundles subjects (合科卷) + departments that sat it (共用卷).
+// A physical paper within an exam; bundles subjects (combined-subject) + departments that sat it.
 export const ExamSubjectSchema = z.object({
   id: z.string(),
   slug: z.string().describe("卷 slug(含卷別,如 dsa-a)"),

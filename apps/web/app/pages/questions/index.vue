@@ -14,8 +14,9 @@ useSeoMeta({
 
 // "all" sentinel: reka-ui forbids an empty-string option value, so a filter's
 // "no filter" state uses an explicit "all" item, mapped back to undefined in the query.
-// 考科 deep-link: a clickable subject tag elsewhere lands here as ?subject=<slug>
-// (跨校練單科 entry), so the filter初始化自 URL 並回寫,維持可分享狀態。
+// Subject deep-link: a clickable subject tag elsewhere lands here as ?subject=<slug> (the
+// cross-school single-subject entry point), so the filters init from the URL and write back to
+// keep it shareable.
 const route = useRoute();
 const router = useRouter();
 const subject = ref<string>(typeof route.query.subject === "string" ? route.query.subject : "all");
@@ -24,8 +25,9 @@ const year = ref<number | "all">("all");
 const page = ref(1);
 const pageSize = 20;
 
-// Filter options come from facets — only 考科/學校/年度 that actually have questions, so the
-// dropdowns never offer dead options. 考科 shows its考卷份數; 學校 keeps server order; 年度 newest first.
+// Filter options come from facets — only subjects/schools/years that actually have questions, so
+// the dropdowns never offer dead options. Subjects show a paper count; schools keep server order;
+// years are newest first.
 const { data: facets, isLoading: facetsLoading } = useQuestionFacets();
 const subjectItems = computed(() => [
   { label: "全部考科", value: "all" },
@@ -48,7 +50,7 @@ watch([subject, school, year], () => {
   page.value = 1;
 });
 
-// Keep the 考科 filter in the URL so it's shareable and survives reload/back.
+// Keep the subject filter in the URL so it's shareable and survives reload/back.
 watch(subject, (s) => {
   const query = { ...route.query };
   if (s === "all") delete query.subject;
@@ -69,7 +71,7 @@ const { data, isPending, isError, error, refetch, isPlaceholderData } = useQuest
 // Honour OS reduce-motion for the JS-driven stagger (CSS guard can't reach it).
 const prefersReducedMotion = useReducedMotion();
 
-// Cluster consecutive questions sharing a 題組 (passage/cloze set) so the 題號 selector can
+// Cluster consecutive questions sharing a group (passage/cloze set) so the question-number selector can
 // visually bracket them. Questions arrive in paper order, so a single linear pass suffices.
 function groupRuns(
   questions: PaperQuestionRef[],

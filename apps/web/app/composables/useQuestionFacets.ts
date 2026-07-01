@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/vue-query";
 import { QuestionFacetsResponseSchema } from "@prograds/shared";
 
-// GET /questions/facets — 考科/學校/年度 that actually have questions (考科 with counts).
-// Powers the 題庫 filter dropdowns so they never offer empty options. Near-static per session.
+// GET /questions/facets — subjects/schools/years that actually have questions (subjects with counts).
+// Powers the question-bank filter dropdowns so they never offer empty options. Near-static per session.
 export function useQuestionFacets() {
   const { $api } = useNuxtApp();
   return useQuery({

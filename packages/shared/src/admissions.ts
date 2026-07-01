@@ -3,11 +3,11 @@ import { dataResponse } from "./api.js";
 import { AdmissionEvent, AdmissionType, ExamMethod } from "./enums.js";
 import { SubjectSchema } from "./taxonomy.js";
 
-// 招生情報 contracts. department → admission_group → admission_round(年) → papers。
-// 報考單位 = 校×系所×組;穩定身分掛 group,逐年事實掛 round。校級日程見 /schedules。
-// See docs/02-data-model.md.
+// Admissions contracts: department → admission_group → admission_round (year) → papers.
+// The application unit is school × department × group — stable identity lives on the group,
+// per-year facts on the round. School-level schedule lives at /schedules. See docs/02-data-model.md.
 
-// 該梯次的一張卷(合科卷綁多 subject;含佔分/節次)。
+// A paper of the round; a combined-subject paper binds multiple subjects, plus weight + section.
 export const AdmissionRoundPaperSchema = z.object({
   name: z.string().describe("卷/科目顯示名(如 計算機數學)"),
   section: z.number().int().nullable().describe("節次(接校級時間表);無則 null"),
@@ -17,7 +17,7 @@ export const AdmissionRoundPaperSchema = z.object({
 });
 export type AdmissionRoundPaper = z.infer<typeof AdmissionRoundPaperSchema>;
 
-// 招生梯次:某組 × 某年 × 某管道。年度變動事實(名額/考科/採計)的中樞。
+// An admission round: one group × year × channel. Hub for year-varying facts (quota/subjects/scoring).
 export const AdmissionRoundSchema = z.object({
   year: z.number().int().describe("西元學年(如 2025 = 114 學年度)"),
   admissionType: AdmissionType.describe("招生管道"),
@@ -39,7 +39,7 @@ export const AdmissionRoundSchema = z.object({
 });
 export type AdmissionRound = z.infer<typeof AdmissionRoundSchema>;
 
-// 招生組別:報考的真正單位(department + code)。
+// An admission group: the real unit applicants apply to (department + code).
 export const AdmissionGroupSchema = z.object({
   id: z.string(),
   code: z.string().describe("組別代號 a/b/c(＝甲/乙/丙 顯示);空字串=不分組"),
@@ -57,8 +57,9 @@ export const AdmissionQuerySchema = z.object({
 });
 export type AdmissionQuery = z.infer<typeof AdmissionQuerySchema>;
 
-// 行事曆項目:攤平的單一招生事件(供時程瀏覽與 deadline 提醒)。事件為校級(招生季),
-// 故只到校,不含系所/組;各組面試日期等組級事實見 /admissions 的 round。
+// A flattened calendar item: one admission event (for timeline browsing + deadline reminders).
+// Events are school-level (per admission season), so they carry only the school, not the
+// department/group; group-level facts like interview dates live on the /admissions round.
 export const AdmissionScheduleItemSchema = z.object({
   school: z.object({ slug: z.string(), name: z.string() }).describe("學校"),
   year: z.number().int().describe("西元學年"),
