@@ -5,6 +5,8 @@ import type { PrismaClient } from "../../generated/client/client.ts";
 // （資工群→cs、電機群→ee、資管→info-mgmt）。名稱/縮寫 2026-06 逐校官網查證。
 // dept slug 同校內唯一、反映各校官方英文名（故資工系 csie/cs/cse 因校而異）。
 // 政大無工學院故無 ee 群；清大無資管系（isa 歸 cs 群）。
+// 四大(台清交成)管理學院核心系所已納入（師資軸；考科軸暫未涵蓋 → 對應 track 尚未連 subjects）。
+// 既有特例保留：政大覆蓋整個商學院（本無工學院）、中山另有 bm（企管）。
 
 type DeptSeed = { slug: string; name: string; track: string };
 
@@ -21,6 +23,11 @@ const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
       { slug: "comm", name: "電信工程學研究所", track: "ee" },
       { slug: "photonics", name: "光電工程學研究所", track: "ee" },
       { slug: "im", name: "資訊管理學系", track: "info-mgmt" },
+      // 管理學院 (師資軸擴充; 考科軸暫未涵蓋)
+      { slug: "ba", name: "工商管理學系暨商學研究所", track: "business-admin" },
+      { slug: "accounting", name: "會計學系", track: "business-admin" },
+      { slug: "finance", name: "財務金融學系", track: "finance" },
+      { slug: "ib", name: "國際企業學系", track: "intl-business" },
     ],
   },
   {
@@ -34,6 +41,10 @@ const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
       { slug: "elec", name: "電子工程研究所", track: "ee" },
       { slug: "comm", name: "通訊工程研究所", track: "ee" },
       { slug: "photonics", name: "光電工程研究所", track: "ee" },
+      // 科技管理學院 (師資軸擴充; 考科軸暫未涵蓋)
+      { slug: "econ", name: "經濟學系", track: "econ" },
+      { slug: "qfin", name: "計量財務金融學系", track: "finance" },
+      { slug: "tm", name: "科技管理研究所", track: "ind-mgmt" },
     ],
   },
   {
@@ -55,6 +66,10 @@ const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
       { slug: "semi", name: "半導體工程學系", track: "ee" },
       // 管理學院
       { slug: "iim", name: "資訊管理研究所", track: "info-mgmt" },
+      // 管理學院 (師資軸擴充; 考科軸暫未涵蓋)
+      { slug: "ms", name: "管理科學系", track: "business-admin" },
+      { slug: "iem", name: "工業工程與管理學系", track: "ind-mgmt" },
+      { slug: "tlm", name: "運輸與物流管理學系", track: "ind-mgmt" },
     ],
   },
   {
@@ -66,6 +81,13 @@ const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
       { slug: "micro", name: "微電子工程研究所", track: "ee" },
       { slug: "cce", name: "電腦與通信工程研究所", track: "ee" }, // 電機學院；含通訊/計算機考科
       { slug: "iim", name: "資訊管理研究所", track: "info-mgmt" },
+      // 管理學院 (師資軸擴充; 考科軸暫未涵蓋)
+      { slug: "ba", name: "企業管理學系", track: "business-admin" },
+      { slug: "accounting", name: "會計學系", track: "business-admin" },
+      { slug: "finance", name: "財務金融研究所", track: "finance" },
+      { slug: "ib", name: "國際企業研究所", track: "intl-business" },
+      { slug: "stat", name: "統計學系", track: "stat" },
+      { slug: "tm", name: "交通管理科學系", track: "ind-mgmt" },
     ],
   },
   // ── 政大（無工學院 → 無 ee 群）──────────────────────────────
