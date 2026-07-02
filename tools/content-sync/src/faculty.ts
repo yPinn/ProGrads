@@ -47,7 +47,7 @@ export async function syncFaculty(
 
   for (const [index, m] of yml.members.entries()) {
     const memberData = {
-      name: m.name,
+      slug: m.slug ?? null,
       nameEn: m.name_en ?? null,
       title: m.title ?? null,
       lab: m.lab ?? null,
@@ -60,9 +60,9 @@ export async function syncFaculty(
 
     await prisma.$transaction(async (tx) => {
       const member = await tx.facultyMember.upsert({
-        where: { departmentId_slug: { departmentId: department.id, slug: m.slug } },
+        where: { departmentId_name: { departmentId: department.id, name: m.name } },
         update: memberData,
-        create: { departmentId: department.id, slug: m.slug, ...memberData },
+        create: { departmentId: department.id, name: m.name, ...memberData },
       });
 
       await tx.facultyThesis.deleteMany({ where: { facultyId: member.id } });
@@ -86,9 +86,9 @@ export async function syncFaculty(
   // The file is the department's full roster (one faculty file per department), so drop
   // members no longer listed. This reconciles within-file removals on every sync, without
   // waiting for the file-level prune (which only fires when the whole file is deleted).
-  const currentSlugs = yml.members.map((m) => m.slug);
+  const currentNames = yml.members.map((m) => m.name);
   await prisma.facultyMember.deleteMany({
-    where: { departmentId: department.id, slug: { notIn: currentSlugs } },
+    where: { departmentId: department.id, name: { notIn: currentNames } },
   });
 
   return { school: yml.school, dept: yml.dept, members, theses };

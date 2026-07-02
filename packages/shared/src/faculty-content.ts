@@ -25,8 +25,8 @@ export const FacultyThesisYml = z
 
 export const FacultyMemberYml = z
   .object({
-    slug: z.string().min(1), // 人員 slug (英文名/拼音; department 內唯一)
-    name: z.string().min(1), // 中文姓名
+    name: z.string().min(1), // 中文姓名 = 系內身分鍵 (department 內唯一)
+    slug: z.string().min(1).optional(), // 選填 URL handle (官方英文名衍生時才填); 非身分鍵
     name_en: z.string().optional(),
     title: z.string().optional(), // 職級, e.g. 教授/副教授/助理教授
     lab: z.string().optional(),

@@ -20,12 +20,22 @@ describe("faculty path parsing", () => {
 });
 
 describe("FacultyYml contract", () => {
-  const base = { school: "nchu", dept: "cse", members: [{ slug: "wjtsai", name: "蔡文能" }] };
+  const base = { school: "nchu", dept: "cse", members: [{ name: "蔡文能" }] };
 
-  it("accepts a minimal file and applies member defaults", () => {
+  it("accepts a minimal file (name only) and applies member defaults", () => {
     const r = FacultyYml.parse(base);
+    assert.equal(r.members[0]?.slug, undefined);
     assert.deepEqual(r.members[0]?.research_areas, []);
     assert.deepEqual(r.members[0]?.theses, []);
+  });
+
+  it("requires member name", () => {
+    assert.equal(FacultyYml.safeParse({ ...base, members: [{ slug: "wjtsai" }] }).success, false);
+  });
+
+  it("accepts an optional slug", () => {
+    const r = FacultyYml.parse({ ...base, members: [{ name: "蔡文能", slug: "wjtsai" }] });
+    assert.equal(r.members[0]?.slug, "wjtsai");
   });
 
   it("defaults thesis role to advised", () => {

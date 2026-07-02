@@ -76,6 +76,13 @@ function main(): void {
       errors.push(`${rel}: dept "${r.data.dept}" not seeded for school "${r.data.school}"`);
       continue;
     }
+    // name is the department-scoped identity key, so duplicates would silently merge on sync.
+    const seen = new Set<string>();
+    for (const m of r.data.members) {
+      if (seen.has(m.name))
+        errors.push(`${rel}: duplicate member name "${m.name}" (name is the key)`);
+      seen.add(m.name);
+    }
     ok++;
   }
 

@@ -504,8 +504,8 @@ model FacultyMember {
   id            String          @id @default(cuid())
   departmentId  String
   department    Department      @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  slug          String // 人員 slug (英文名/拼音; department 內唯一; (departmentId, slug) 為冪等 upsert key)
-  name          String // 中文姓名
+  name          String // 中文姓名; (departmentId, name) 為身分 + 冪等 upsert key (官網必有, 較拼音穩定/少撞名)
+  slug          String? // 選填 URL handle (官方英文名衍生時才填); 非身分鍵
   nameEn        String?
   title         String? // 職級, e.g. 教授/副教授/助理教授
   lab           String? // 實驗室名
@@ -518,7 +518,7 @@ model FacultyMember {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
-  @@unique([departmentId, slug])
+  @@unique([departmentId, name])
   @@index([departmentId])
 }
 
