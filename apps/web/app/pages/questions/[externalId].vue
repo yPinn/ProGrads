@@ -95,24 +95,33 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onArrowNav));
             <h2 class="text-muted text-caption mb-2 font-semibold">題組共用篇章</h2>
             <!-- Reading surface → Ming serif. prose colours come from --ui-* (components.css),
                  which flip with the theme, so no prose-invert is needed. -->
-            <MDC :value="q.groupPassageMd" class="font-serif prose prose-sm max-w-none" />
+            <RenderBoundary label="題組篇章">
+              <MDC :value="q.groupPassageMd" class="font-serif prose prose-sm max-w-none" />
+            </RenderBoundary>
           </section>
 
           <!-- 題幹呈現為「黑板」:深色面在奶油頁上製造焦點與層次。.board.prose 把 MDC 內文映成粉筆色
                (components.css),兩主題皆然,故不需 prose-invert。 -->
-          <MDC :value="q.contentMd" class="board font-serif prose max-w-none rounded-card p-card" />
+          <RenderBoundary label="題幹">
+            <MDC
+              :value="q.contentMd"
+              class="board font-serif prose max-w-none rounded-card p-card"
+            />
+          </RenderBoundary>
 
-          <ul v-if="q.choices.length" class="mt-4 space-y-2">
-            <li
-              v-for="c in q.choices"
-              :key="c.label"
-              class="flex gap-2"
-              :class="c.isCorrect ? 'text-primary font-medium' : ''"
-            >
-              <span class="shrink-0">({{ c.label }})</span>
-              <MDC :value="c.contentMd" unwrap="p" class="prose prose-sm max-w-none" />
-            </li>
-          </ul>
+          <RenderBoundary v-if="q.choices.length" label="選項">
+            <ul class="mt-4 space-y-2">
+              <li
+                v-for="c in q.choices"
+                :key="c.label"
+                class="flex gap-2"
+                :class="c.isCorrect ? 'text-primary font-medium' : ''"
+              >
+                <span class="shrink-0">({{ c.label }})</span>
+                <MDC :value="c.contentMd" unwrap="p" class="prose prose-sm max-w-none" />
+              </li>
+            </ul>
+          </RenderBoundary>
 
           <section v-if="q.explanation" class="mt-6">
             <div class="mb-2 flex items-center gap-2">
@@ -123,10 +132,12 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onArrowNav));
             </div>
             <!-- Explanation renders on the blackboard too (chalk prose + dark-green code),
                  matching the stem; .board.prose and .board .shiki apply automatically. -->
-            <MDC
-              :value="q.explanation.standardAnswer"
-              class="board font-serif prose prose-sm max-w-none rounded-card p-card"
-            />
+            <RenderBoundary label="解析">
+              <MDC
+                :value="q.explanation.standardAnswer"
+                class="board font-serif prose prose-sm max-w-none rounded-card p-card"
+              />
+            </RenderBoundary>
             <p class="text-muted text-caption mt-3">AI 生成解析,僅供參考。</p>
           </section>
 
