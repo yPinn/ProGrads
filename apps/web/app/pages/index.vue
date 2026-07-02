@@ -4,20 +4,21 @@ useSeoMeta({
   description: "研究所備考作戰中心:報名資訊、考古題、招生日程。",
 });
 
-// Section cards for the landing — the primary navigation into the product.
-// Order mirrors the application journey: where to apply → what to study → when.
+// Section cards for the landing — the primary navigation into the product. Order matches the
+// header nav: by candidate usage frequency (考古題 daily driver → 報名資訊 → 招生日程). 師資陣容 is
+// the lowest-frequency feature and stays off the landing (which is a fixed three-up grid).
 const sections = [
-  {
-    to: "/admissions",
-    label: "報名資訊",
-    en: "Admissions",
-    desc: "各校系所招生組別:名額、報名/錄取人數、採計考科與佔分、面試與簡章。",
-  },
   {
     to: "/questions",
     label: "考古題",
     en: "Question Bank",
     desc: "跨校練單科,依考科、學校、年度、題型檢索研究所歷屆考題。",
+  },
+  {
+    to: "/admissions",
+    label: "報名資訊",
+    en: "Admissions",
+    desc: "各校系所招生組別:名額、報名/錄取人數、採計考科與佔分、面試與簡章。",
   },
   {
     to: "/schedules",

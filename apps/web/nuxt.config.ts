@@ -63,13 +63,16 @@ export default defineNuxtConfig({
     },
   },
   // CF Pages hybrid: content pages prerender at build, dynamic (API-driven) pages render client-side.
-  nitro: { preset: "cloudflare-pages" },
+  // Only build the Cloudflare worker bundle for production builds — in dev it adds ~15s to every
+  // startup for no benefit (dev uses Nitro's own dev server), so fall back to the default preset.
+  nitro: { preset: process.env.NODE_ENV === "production" ? "cloudflare-pages" : undefined },
   routeRules: {
     "/": { prerender: true },
     // API-driven pages render client-side (edge can't reach the origin DB at build time).
     // SEO prerender of question/answer pages comes with the content pipeline (Phase 2).
     "/schedules": { ssr: false },
     "/admissions": { ssr: false },
+    "/faculty": { ssr: false },
     "/questions/**": { ssr: false },
   },
   // All icons are Lucide (Nuxt UI v4 defaults; the app adds none). Client-bundle them so they load

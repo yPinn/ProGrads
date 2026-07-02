@@ -100,7 +100,9 @@ const prefersReducedMotion = useReducedMotion();
         </div>
 
         <ClientOnly>
-          <ScheduleCalendar :key="year" :items="data ?? []" class="lg:sticky lg:top-6" />
+          <RenderBoundary label="行事曆">
+            <ScheduleCalendar :key="year" :items="data ?? []" class="lg:sticky lg:top-6" />
+          </RenderBoundary>
         </ClientOnly>
       </div>
     </QueryState>

@@ -6,6 +6,7 @@ import { HealthModule } from "./health/health.module.js";
 import { PrismaModule } from "./prisma/prisma.module.js";
 import { TaxonomyModule } from "./modules/taxonomy/taxonomy.module.js";
 import { SchoolsModule } from "./modules/schools/schools.module.js";
+import { FacultyModule } from "./modules/faculty/faculty.module.js";
 import { AdmissionsModule } from "./modules/admissions/admissions.module.js";
 import { ExamsModule } from "./modules/exams/exams.module.js";
 import { QuestionsModule } from "./modules/questions/questions.module.js";
@@ -22,6 +23,7 @@ import { QuestionsModule } from "./modules/questions/questions.module.js";
     HealthModule,
     TaxonomyModule,
     SchoolsModule,
+    FacultyModule,
     AdmissionsModule,
     ExamsModule,
     QuestionsModule,

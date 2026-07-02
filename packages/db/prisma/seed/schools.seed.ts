@@ -107,6 +107,7 @@ const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
       { slug: "comm", name: "通訊工程研究所", track: "ee" },
       { slug: "photonics", name: "光電工程學系", track: "ee" },
       { slug: "im", name: "資訊管理學系", track: "info-mgmt" },
+      { slug: "bm", name: "企業管理學系", track: "business-admin" }, // 官方英文 Business Management
     ],
   },
   {

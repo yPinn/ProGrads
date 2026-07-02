@@ -9,6 +9,7 @@ interface SourceSets {
   questionFiles: Set<string>;
   scheduleFiles: Set<string>;
   departmentFiles: Set<string>;
+  facultyFiles: Set<string>;
 }
 
 interface PruneResult {
@@ -18,6 +19,7 @@ interface PruneResult {
   seasons: number;
   rounds: number;
   groups: number;
+  facultyMembers: number;
 }
 
 export function metadataSourcePath(metadata: unknown): string | null {
@@ -92,5 +94,14 @@ export async function pruneSyncedContent(
     .count;
   const exams = (await prisma.exam.deleteMany({ where: { examSubjects: { none: {} } } })).count;
 
-  return { questions, examSubjects, exams, seasons, rounds, groups };
+  const staleFacultyIds = await findStaleIds(
+    prisma.facultyMember.findMany({ select: { id: true, metadata: true } }),
+    sources.facultyFiles,
+  );
+  const facultyMembers =
+    staleFacultyIds.length > 0
+      ? (await prisma.facultyMember.deleteMany({ where: { id: { in: staleFacultyIds } } })).count
+      : 0;
+
+  return { questions, examSubjects, exams, seasons, rounds, groups, facultyMembers };
 }

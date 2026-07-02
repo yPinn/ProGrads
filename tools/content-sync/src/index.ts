@@ -4,6 +4,7 @@ import path from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prograds/db";
 import { syncDepartments, syncSchedule } from "./admissions.js";
+import { syncFaculty } from "./faculty.js";
 import { pruneSyncedContent } from "./prune.js";
 import {
   Resolver,
@@ -49,9 +50,10 @@ async function main(): Promise<void> {
   const files = listFiles(root, "questions", ".md");
   const scheduleFiles = listFiles(root, "admissions", "schedule.yml");
   const departmentFiles = listFiles(root, "admissions", "departments.yml");
+  const facultyFiles = listFiles(root, "faculty", ".yml");
   // eslint-disable-next-line no-console
   console.log(
-    `content-sync: ${files.length} question file(s), ${scheduleFiles.length} schedule.yml, ${departmentFiles.length} departments.yml under ${root}`,
+    `content-sync: ${files.length} question file(s), ${scheduleFiles.length} schedule.yml, ${departmentFiles.length} departments.yml, ${facultyFiles.length} faculty.yml under ${root}`,
   );
 
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
@@ -62,6 +64,7 @@ async function main(): Promise<void> {
   let skipped = 0;
   let seasons = 0;
   let admissionGroups = 0;
+  let facultyMembers = 0;
   const errors: string[] = [];
 
   try {
@@ -105,6 +108,16 @@ async function main(): Promise<void> {
       }
     }
 
+    for (const rel of facultyFiles) {
+      try {
+        const raw = readFileSync(path.join(root, rel), "utf8");
+        const result = await syncFaculty(prisma, resolver, rel, raw);
+        if (!("skipped" in result)) facultyMembers += result.members;
+      } catch (err) {
+        errors.push(`${rel}: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
     const reconciled = await reconcileExamSubjects(prisma, touched);
     const deptLinks = await reconcileExamSubjectDepartments(prisma, deptsByExamSubject);
     const pruned = prune
@@ -112,16 +125,17 @@ async function main(): Promise<void> {
           questionFiles: new Set(files),
           scheduleFiles: new Set(scheduleFiles),
           departmentFiles: new Set(departmentFiles),
+          facultyFiles: new Set(facultyFiles),
         })
       : null;
     // eslint-disable-next-line no-console
     console.log(
-      `content-sync done: synced=${synced} skipped=${skipped} reconciled=${reconciled} deptLinks=${deptLinks} seasons=${seasons} admissionGroups=${admissionGroups}`,
+      `content-sync done: synced=${synced} skipped=${skipped} reconciled=${reconciled} deptLinks=${deptLinks} seasons=${seasons} admissionGroups=${admissionGroups} facultyMembers=${facultyMembers}`,
     );
     if (pruned) {
       // eslint-disable-next-line no-console
       console.log(
-        `content-sync prune: questions=${pruned.questions} examSubjects=${pruned.examSubjects} exams=${pruned.exams} seasons=${pruned.seasons} rounds=${pruned.rounds} groups=${pruned.groups}`,
+        `content-sync prune: questions=${pruned.questions} examSubjects=${pruned.examSubjects} exams=${pruned.exams} seasons=${pruned.seasons} rounds=${pruned.rounds} groups=${pruned.groups} facultyMembers=${pruned.facultyMembers}`,
       );
     }
 
