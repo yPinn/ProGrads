@@ -16,26 +16,29 @@ const isDev = import.meta.dev;
           <img src="/logo.svg" alt="" width="28" height="28" class="size-7" />
           ProGrads
         </NuxtLink>
+        <!-- Order by candidate usage frequency: 考古題 (daily driver) leads; 報名資訊 sits beside it
+             (its 採計考科 deep-links into the question bank); 招生日程 (deadline-critical) follows;
+             師資陣容 (research/甄試-oriented, lowest frequency) trails. -->
         <nav aria-label="主要導覽" class="text-muted text-small flex gap-6">
-          <NuxtLink
-            to="/admissions"
-            class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
-            >報名資訊</NuxtLink
-          >
           <NuxtLink
             to="/questions"
             class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
             >考古題</NuxtLink
           >
           <NuxtLink
-            to="/faculty"
+            to="/admissions"
             class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
-            >師資陣容</NuxtLink
+            >報名資訊</NuxtLink
           >
           <NuxtLink
             to="/schedules"
             class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
             >招生日程</NuxtLink
+          >
+          <NuxtLink
+            to="/faculty"
+            class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
+            >師資陣容</NuxtLink
           >
         </nav>
         <!-- ClientOnly + fixed-size fallback: colour mode is only known on the client, so this
