@@ -1,3 +1,9 @@
+<script setup lang="ts">
+// Dev-only tooling links (styleguide, etc.) surface in the footer's right slot; these pages
+// 404 in production, so the links are gated to dev to avoid dead nav in the shipped build.
+const isDev = import.meta.dev;
+</script>
+
 <template>
   <div class="flex min-h-dvh flex-col">
     <header class="border-default sticky top-0 z-10 border-b bg-default/80 backdrop-blur">
@@ -22,6 +28,11 @@
             >考古題</NuxtLink
           >
           <NuxtLink
+            to="/faculty"
+            class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
+            >師資陣容</NuxtLink
+          >
+          <NuxtLink
             to="/schedules"
             class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
             >招生日程</NuxtLink
@@ -43,8 +54,15 @@
     </main>
 
     <footer class="border-default text-muted mt-16 border-t">
-      <UContainer class="text-small flex h-16 items-center tracking-wide">
-        © {{ new Date().getFullYear() }} ProGrads · 研究所備考資訊平台
+      <UContainer class="text-small flex h-16 items-center justify-between gap-4 tracking-wide">
+        <span>© {{ new Date().getFullYear() }} ProGrads · 研究所備考資訊平台</span>
+        <nav v-if="isDev" aria-label="開發工具" class="flex gap-4">
+          <NuxtLink
+            to="/styleguide"
+            class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
+            >Styleguide</NuxtLink
+          >
+        </nav>
       </UContainer>
     </footer>
   </div>

@@ -70,6 +70,7 @@ export default defineNuxtConfig({
     // SEO prerender of question/answer pages comes with the content pipeline (Phase 2).
     "/schedules": { ssr: false },
     "/admissions": { ssr: false },
+    "/faculty": { ssr: false },
     "/questions/**": { ssr: false },
   },
   // All icons are Lucide (Nuxt UI v4 defaults; the app adds none). Client-bundle them so they load

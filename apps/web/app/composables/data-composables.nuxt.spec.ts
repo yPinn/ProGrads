@@ -6,6 +6,7 @@ import { useQuestions } from "./useQuestions";
 import { useQuestionPapers } from "./useQuestionPapers";
 import { useQuestion } from "./useQuestion";
 import { useAdmissions } from "./useAdmissions";
+import { useFaculty } from "./useFaculty";
 
 // Run a composable inside the real Nuxt app (so $api + QueryClient are wired) and expose
 // its result. Requests hit registerEndpoint() mocks because apiBaseUrl is "" in tests.
@@ -134,6 +135,38 @@ describe("useAdmissions", () => {
     const { result } = await runComposable(() => useAdmissions({ school: "ntu", dept: "csie" }));
     await vi.waitFor(() => expect(result.isSuccess.value).toBe(true));
     expect(result.data.value).toEqual([admissionGroup]);
+  });
+});
+
+const facultyMember = {
+  id: "f1",
+  name: "林智仁",
+  nameEn: "CJ Lin",
+  slug: "cj-lin",
+  title: "特聘教授",
+  lab: null,
+  homepage: null,
+  sourceUrl: null,
+  note: null,
+  researchAreas: ["Machine Learning"],
+  departmentId: "d1",
+  theses: [{ id: "t1", title: "LIBSVM", year: 2011, role: "authored", url: null }],
+  department: {
+    id: "d1",
+    slug: "csie",
+    name: "資訊工程學系",
+    schoolId: "sc1",
+    trackId: null,
+    school: { id: "sc1", slug: "ntu", name: "臺灣大學" },
+  },
+};
+
+describe("useFaculty", () => {
+  it("fetches the faculty roster for a school + dept", async () => {
+    registerEndpoint("/faculty", () => ({ data: [facultyMember] }));
+    const { result } = await runComposable(() => useFaculty({ school: "ntu", dept: "csie" }));
+    await vi.waitFor(() => expect(result.isSuccess.value).toBe(true));
+    expect(result.data.value).toEqual([facultyMember]);
   });
 });
 
