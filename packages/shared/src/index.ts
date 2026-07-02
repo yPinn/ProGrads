@@ -8,3 +8,4 @@ export * from "./questions.js";
 export * from "./content.js";
 export * from "./admission-content.js";
 export * from "./faculty-content.js";
+export * from "./faculty.js";

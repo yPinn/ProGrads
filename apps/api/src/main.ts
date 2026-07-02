@@ -40,6 +40,7 @@ async function bootstrap(): Promise<void> {
     .addTag("subjects", "考科（全域共用題庫）")
     .addTag("schools", "學校")
     .addTag("departments", "系所（跨軸：track ↔ school）")
+    .addTag("faculty", "師資陣容（系所 × 研究方向 × 論文佐證）")
     .addTag("exams", "考卷（school × dept × year；含合科卷）")
     .addTag("questions", "題目（題庫內容；跨校練單科 / 考卷視圖）")
     .addTag("admissions", "招生情報（系所組別 × 逐年梯次：名額 / 考科 / 日程）")

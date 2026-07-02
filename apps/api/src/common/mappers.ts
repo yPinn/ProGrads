@@ -35,6 +35,53 @@ export function metaString(meta: unknown, key: string): string | null {
   return null;
 }
 
+export interface FacultyThesisRow {
+  id: string;
+  title: string;
+  year: number | null;
+  role: "advised" | "authored";
+  url: string | null;
+}
+
+export interface FacultyMemberRow {
+  id: string;
+  name: string;
+  nameEn: string | null;
+  slug: string | null;
+  title: string | null;
+  lab: string | null;
+  homepage: string | null;
+  sourceUrl: string | null;
+  note: string | null;
+  researchAreas: string[];
+  departmentId: string;
+  theses: FacultyThesisRow[];
+  department: DepartmentRow & { school: SchoolRow };
+}
+
+export function mapFacultyThesis(t: FacultyThesisRow) {
+  return { id: t.id, title: t.title, year: t.year, role: t.role, url: t.url };
+}
+
+// Projects a faculty row (+ theses + department/school) to the shared contract shape.
+export function mapFacultyMember(m: FacultyMemberRow) {
+  return {
+    id: m.id,
+    name: m.name,
+    nameEn: m.nameEn,
+    slug: m.slug,
+    title: m.title,
+    lab: m.lab,
+    homepage: m.homepage,
+    sourceUrl: m.sourceUrl,
+    note: m.note,
+    researchAreas: m.researchAreas,
+    departmentId: m.departmentId,
+    theses: m.theses.map(mapFacultyThesis),
+    department: { ...mapDepartment(m.department), school: mapSchool(m.department.school) },
+  };
+}
+
 // Unique departments across {department} link rows (preserves first-seen order).
 export function uniqueDepartments(links: { department: DepartmentRow }[]) {
   const seen = new Map<string, ReturnType<typeof mapDepartment>>();
