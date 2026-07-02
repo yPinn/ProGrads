@@ -511,6 +511,7 @@ model FacultyMember {
   lab           String? // 實驗室名
   homepage      String?
   sourceUrl     String? // 資料來源 (系所師資頁)
+  note          String? // 備註, e.g. 行政職 (系主任/院長) 或借調
   researchAreas String[] // 研究方向標籤 (自由文字)
   displayOrder  Int             @default(0)
   metadata      Json?

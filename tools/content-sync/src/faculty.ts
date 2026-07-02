@@ -53,6 +53,7 @@ export async function syncFaculty(
       lab: m.lab ?? null,
       homepage: m.homepage ?? null,
       sourceUrl: m.source_url ?? yml.source_url ?? null,
+      note: m.note ?? null,
       researchAreas: m.research_areas,
       displayOrder: index,
       metadata: { ...(m.metadata ?? {}), sourcePath: relPath },
