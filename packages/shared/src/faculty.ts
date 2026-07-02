@@ -47,3 +47,27 @@ export const FacultyQuerySchema = z.object({
 export type FacultyQuery = z.infer<typeof FacultyQuerySchema>;
 
 export const FacultyResponseSchema = dataResponse(z.array(FacultyMemberWithDepartmentSchema));
+
+// 職級排序權重 (數字小 = 資深)。骨幹為《大學法》四級: 教授 > 副教授 > 助理教授 > 講師;
+// 講座/特聘/優聘 為疊於「教授」之上的榮譽層 (聲望 講座 > 特聘 > 優聘 > 一般教授)。
+// title 為自由文字, 客座/名譽/榮譽/兼任/專案等修飾詞歸入其基礎職級。
+// 比對順序敏感: 榮譽層與 副/助理教授 皆含「教授」二字, 故須先於「教授」判定。
+const FACULTY_TITLE_TIERS: ReadonlyArray<readonly [RegExp, number]> = [
+  [/講座教授/, 0], // 含 終身/國家/特聘講座
+  [/特聘教授/, 1], // 含 終身特聘
+  [/優聘教授/, 2],
+  [/助理教授/, 5],
+  [/副教授/, 4],
+  [/教授/, 3], // 含 客座/名譽/榮譽教授
+  [/講師/, 6],
+];
+const FACULTY_TITLE_TIER_UNKNOWN = 9; // 研究員 / 其他 / 未填
+
+// Map a free-text faculty title to a seniority tier for roster ordering.
+export function facultyTitleRank(title: string | null | undefined): number {
+  if (!title) return FACULTY_TITLE_TIER_UNKNOWN;
+  for (const [pattern, tier] of FACULTY_TITLE_TIERS) {
+    if (pattern.test(title)) return tier;
+  }
+  return FACULTY_TITLE_TIER_UNKNOWN;
+}

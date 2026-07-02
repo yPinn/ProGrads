@@ -7,6 +7,7 @@ import { useQuestionPapers } from "./useQuestionPapers";
 import { useQuestion } from "./useQuestion";
 import { useAdmissions } from "./useAdmissions";
 import { useFaculty } from "./useFaculty";
+import { useTracks } from "./useTracks";
 
 // Run a composable inside the real Nuxt app (so $api + QueryClient are wired) and expose
 // its result. Requests hit registerEndpoint() mocks because apiBaseUrl is "" in tests.
@@ -167,6 +168,32 @@ describe("useFaculty", () => {
     const { result } = await runComposable(() => useFaculty({ school: "ntu", dept: "csie" }));
     await vi.waitFor(() => expect(result.isSuccess.value).toBe(true));
     expect(result.data.value).toEqual([facultyMember]);
+  });
+
+  it("fetches the cross-school roster for a track alone", async () => {
+    registerEndpoint("/faculty", () => ({ data: [facultyMember] }));
+    const { result } = await runComposable(() => useFaculty({ track: "cs" }));
+    await vi.waitFor(() => expect(result.isSuccess.value).toBe(true));
+    expect(result.data.value).toEqual([facultyMember]);
+  });
+
+  it("stays disabled until an axis is complete", async () => {
+    registerEndpoint("/faculty", () => ({ data: [facultyMember] }));
+    const { result } = await runComposable(() => useFaculty({ school: "ntu" }));
+    expect(result.fetchStatus.value).toBe("idle");
+  });
+});
+
+describe("useTracks", () => {
+  it("fetches and validates the track list", async () => {
+    registerEndpoint("/tracks", () => ({
+      data: [{ id: "t1", slug: "cs", name: "資訊工程", categoryId: "c1" }],
+    }));
+    const { result } = await runComposable(() => useTracks());
+    await vi.waitFor(() => expect(result.isSuccess.value).toBe(true));
+    expect(result.data.value).toEqual([
+      { id: "t1", slug: "cs", name: "資訊工程", categoryId: "c1" },
+    ]);
   });
 });
 
