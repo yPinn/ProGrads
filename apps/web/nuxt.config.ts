@@ -48,7 +48,7 @@ export default defineNuxtConfig({
     remarkPlugins: { "remark-math": {} },
     // KaTeX lacks \textsc (small caps); CLRS-style papers use it for procedure names
     // (e.g. \textsc{Random}). Map it to \text so the name renders instead of red error text.
-    rehypePlugins: { "rehype-katex": { macros: { "\\textsc": "\\text{#1}" } } },
+    rehypePlugins: { "rehype-katex": { options: { macros: { "\\textsc": "\\text{#1}" } } } },
     // Shiki bundles only the grammars listed here; others fall back to plain text. Cover our
     // CS / info-mgmt paper languages. (Unlabelled blocks need no entry; there is no "plaintext" id.)
     // One theme = a single unified look (colours + font) for every code block; only the blackboard
