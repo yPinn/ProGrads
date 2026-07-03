@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { FacultyMemberWithDepartment } from "@prograds/shared";
+import type { FacultyDegree, FacultyMemberWithDepartment, FacultyThesis } from "@prograds/shared";
 
-// One faculty member card: name/title, note/lab, research areas, thesis evidence, homepage.
+// One faculty member card: name/title, note/lab, education, research areas, theses, homepage.
 // Shared by both faculty views (by-school roster and by-track cross-school listing).
 defineProps<{ member: FacultyMemberWithDepartment }>();
 
@@ -13,6 +13,22 @@ const DEGREE_LEVEL_LABELS: Record<string, string> = {
   other: "其他",
 };
 const isHttp = (url: string | null): url is string => !!url && /^https?:\/\//.test(url);
+
+// Compose display strings here (not in-template) so field/year separators are explicit —
+// interpolations glued to element boundaries drop their whitespace under Vue's condense mode.
+// 學歷:「博士 · <校> — <領域> (<年>)」, 領域/年缺省則自然略去。
+function formatDegree(d: FacultyDegree): string {
+  let s = `${DEGREE_LEVEL_LABELS[d.level] ?? d.level} · ${d.institution}`;
+  if (d.field) s += ` — ${d.field}`;
+  if (d.year) s += ` (${d.year})`;
+  return s;
+}
+
+// 論文前綴:「著作 · 2011」/ 年缺省則只留角色「指導論文」。
+function thesisTag(t: FacultyThesis): string {
+  const role = THESIS_ROLE_LABELS[t.role] ?? t.role;
+  return t.year ? `${role} · ${t.year}` : role;
+}
 </script>
 
 <template>
@@ -34,11 +50,7 @@ const isHttp = (url: string | null): url is string => !!url && /^https?:\/\//.te
     </p>
 
     <ul v-if="member.degrees.length" class="text-muted text-small mt-2 space-y-0.5">
-      <li v-for="d in member.degrees" :key="d.id">
-        {{ DEGREE_LEVEL_LABELS[d.level] ?? d.level }} · {{ d.institution
-        }}<span v-if="d.field"> {{ d.field }}</span
-        ><span v-if="d.year"> ({{ d.year }})</span>
-      </li>
+      <li v-for="d in member.degrees" :key="d.id">{{ formatDegree(d) }}</li>
     </ul>
 
     <ul v-if="member.researchAreas.length" class="mt-3 flex flex-wrap gap-1.5">
@@ -51,11 +63,15 @@ const isHttp = (url: string | null): url is string => !!url && /^https?:\/\//.te
       </li>
     </ul>
 
-    <ul v-if="member.theses.length" class="text-small mt-3 space-y-1">
-      <li v-for="t in member.theses" :key="t.id" class="flex gap-2">
-        <span class="text-muted shrink-0"
-          >{{ THESIS_ROLE_LABELS[t.role] ?? t.role }}<span v-if="t.year"> {{ t.year }}</span></span
-        >
+    <!-- 2-col grid: the tag column sizes to the widest label (指導論文 · YYYY), so every
+         thesis title shares one left baseline. `contents` keeps the <ul><li> semantics
+         while letting each row's two cells land in the parent grid. -->
+    <ul
+      v-if="member.theses.length"
+      class="text-small mt-3 grid grid-cols-[max-content_1fr] gap-x-2 gap-y-1"
+    >
+      <li v-for="t in member.theses" :key="t.id" class="contents">
+        <span class="text-muted tabular-nums">{{ thesisTag(t) }}</span>
         <a
           v-if="isHttp(t.url)"
           :href="t.url"
