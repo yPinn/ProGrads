@@ -55,6 +55,8 @@ describe("index page", () => {
   it("renders the landing heading and tagline", async () => {
     const wrapper = await mountSuspended(IndexPage);
     expect(wrapper.text()).toContain("研究所備考作戰中心");
-    expect(wrapper.text()).toContain("一處整合報名資訊");
+    expect(wrapper.text()).toContain("把散落各校的備考資訊收攏於一處");
+    // All four section cards render, 師資陣容 included.
+    expect(wrapper.text()).toContain("師資陣容");
   });
 });
