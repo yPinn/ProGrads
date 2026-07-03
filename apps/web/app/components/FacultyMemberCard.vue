@@ -6,6 +6,12 @@ import type { FacultyMemberWithDepartment } from "@prograds/shared";
 defineProps<{ member: FacultyMemberWithDepartment }>();
 
 const THESIS_ROLE_LABELS: Record<string, string> = { advised: "指導論文", authored: "著作" };
+const DEGREE_LEVEL_LABELS: Record<string, string> = {
+  bachelor: "學士",
+  master: "碩士",
+  phd: "博士",
+  other: "其他",
+};
 const isHttp = (url: string | null): url is string => !!url && /^https?:\/\//.test(url);
 </script>
 
@@ -26,6 +32,14 @@ const isHttp = (url: string | null): url is string => !!url && /^https?:\/\//.te
       <span v-if="member.note && member.lab"> · </span>
       <span v-if="member.lab">{{ member.lab }}</span>
     </p>
+
+    <ul v-if="member.degrees.length" class="text-muted text-small mt-2 space-y-0.5">
+      <li v-for="d in member.degrees" :key="d.id">
+        {{ DEGREE_LEVEL_LABELS[d.level] ?? d.level }} · {{ d.institution
+        }}<span v-if="d.field"> {{ d.field }}</span
+        ><span v-if="d.year"> ({{ d.year }})</span>
+      </li>
+    </ul>
 
     <ul v-if="member.researchAreas.length" class="mt-3 flex flex-wrap gap-1.5">
       <li

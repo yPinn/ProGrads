@@ -43,6 +43,14 @@ export interface FacultyThesisRow {
   url: string | null;
 }
 
+export interface FacultyDegreeRow {
+  id: string;
+  level: "bachelor" | "master" | "phd" | "other";
+  institution: string;
+  field: string | null;
+  year: number | null;
+}
+
 export interface FacultyMemberRow {
   id: string;
   name: string;
@@ -55,12 +63,17 @@ export interface FacultyMemberRow {
   note: string | null;
   researchAreas: string[];
   departmentId: string;
+  degrees: FacultyDegreeRow[];
   theses: FacultyThesisRow[];
   department: DepartmentRow & { school: SchoolRow };
 }
 
 export function mapFacultyThesis(t: FacultyThesisRow) {
   return { id: t.id, title: t.title, year: t.year, role: t.role, url: t.url };
+}
+
+export function mapFacultyDegree(d: FacultyDegreeRow) {
+  return { id: d.id, level: d.level, institution: d.institution, field: d.field, year: d.year };
 }
 
 // Projects a faculty row (+ theses + department/school) to the shared contract shape.
@@ -77,6 +90,7 @@ export function mapFacultyMember(m: FacultyMemberRow) {
     note: m.note,
     researchAreas: m.researchAreas,
     departmentId: m.departmentId,
+    degrees: m.degrees.map(mapFacultyDegree),
     theses: m.theses.map(mapFacultyThesis),
     department: { ...mapDepartment(m.department), school: mapSchool(m.department.school) },
   };

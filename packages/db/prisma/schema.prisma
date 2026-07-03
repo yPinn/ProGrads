@@ -516,6 +516,7 @@ model FacultyMember {
   displayOrder  Int             @default(0)
   metadata      Json?
   theses        FacultyThesis[]
+  degrees       FacultyDegree[]
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
@@ -533,6 +534,29 @@ model FacultyThesis {
   role      ThesisRole    @default(advised)
   url       String?
   metadata  Json?
+
+  @@index([facultyId])
+}
+
+enum DegreeLevel {
+  bachelor // 學士
+  master // 碩士
+  phd // 博士
+  other // 博後 / 雙聯 / 其他
+}
+
+// 師資學歷 (最高學歷 = 依 level 排序後最資深者)。授予校 = 資源訊號。
+// 無自然鍵, sync 時整批取代 (隨 member cascade 刪); order 為顯示序。
+model FacultyDegree {
+  id          String        @id @default(cuid())
+  facultyId   String
+  faculty     FacultyMember @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  level       DegreeLevel
+  institution String // 授予學校
+  field       String? // 系所 / 領域
+  year        Int?
+  order       Int           @default(0)
+  metadata    Json?
 
   @@index([facultyId])
 }

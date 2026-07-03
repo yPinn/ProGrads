@@ -78,6 +78,20 @@ export async function syncFaculty(
           })),
         });
       }
+
+      await tx.facultyDegree.deleteMany({ where: { facultyId: member.id } });
+      if (m.degrees.length > 0) {
+        await tx.facultyDegree.createMany({
+          data: m.degrees.map((d, di) => ({
+            facultyId: member.id,
+            level: d.level,
+            institution: d.institution,
+            field: d.field ?? null,
+            year: d.year ?? null,
+            order: di, // 顯示序 = 檔案內順序
+          })),
+        });
+      }
     });
 
     members++;
