@@ -82,7 +82,7 @@ const prefersReducedMotion = useReducedMotion();
     <div
       class="border-default mb-section flex flex-wrap items-end gap-control rounded-card border p-card"
     >
-      <UButtonGroup aria-label="瀏覽方式">
+      <UFieldGroup aria-label="瀏覽方式">
         <UButton
           v-for="opt in MODES"
           :key="opt.value"
@@ -93,7 +93,7 @@ const prefersReducedMotion = useReducedMotion();
         >
           {{ opt.label }}
         </UButton>
-      </UButtonGroup>
+      </UFieldGroup>
 
       <template v-if="mode === 'school'">
         <USelectMenu
