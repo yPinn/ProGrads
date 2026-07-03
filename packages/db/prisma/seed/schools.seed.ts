@@ -5,8 +5,8 @@ import type { PrismaClient } from "../../generated/client/client.ts";
 // （資工群→cs、電機群→ee、資管→info-mgmt）。名稱/縮寫 2026-06 逐校官網查證。
 // dept slug 同校內唯一、反映各校官方英文名（故資工系 csie/cs/cse 因校而異）。
 // 政大無工學院故無 ee 群；清大無資管系（isa 歸 cs 群）。
-// 四大(台清交成)管理學院核心系所已納入（師資軸；考科軸暫未涵蓋 → 對應 track 尚未連 subjects）。
-// 既有特例保留：政大覆蓋整個商學院（本無工學院）、中山另有 bm（企管）。
+// 管理/商學院核心系所已納入四大(台清交成)+四中(中央/中山/中興/中正)（師資軸；考科軸暫未涵蓋
+// → 對應 track 尚未連 subjects；PAM 等就近歸類 business-admin）。政大覆蓋整個商學院（本無工學院）。
 
 type DeptSeed = { slug: string; name: string; track: string };
 
@@ -118,6 +118,12 @@ const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
       { slug: "ee", name: "電機工程學系", track: "ee" },
       { slug: "comm", name: "通訊工程學系", track: "ee" },
       { slug: "im", name: "資訊管理學系", track: "info-mgmt" },
+      // 管理學院 (師資軸擴充; 考科軸暫未涵蓋)
+      { slug: "ba", name: "企業管理學系", track: "business-admin" },
+      { slug: "finance", name: "財務金融學系", track: "finance" },
+      { slug: "accounting", name: "會計研究所", track: "business-admin" },
+      { slug: "econ", name: "經濟學系", track: "econ" },
+      { slug: "hr", name: "人力資源管理研究所", track: "business-admin" },
     ],
   },
   {
@@ -130,6 +136,11 @@ const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
       { slug: "photonics", name: "光電工程學系", track: "ee" },
       { slug: "im", name: "資訊管理學系", track: "info-mgmt" },
       { slug: "bm", name: "企業管理學系", track: "business-admin" }, // 官方英文 Business Management
+      // 管理學院 (師資軸擴充; 考科軸暫未涵蓋)
+      { slug: "finance", name: "財務管理學系", track: "finance" },
+      { slug: "hr", name: "人力資源管理研究所", track: "business-admin" },
+      { slug: "pam", name: "公共事務管理研究所", track: "business-admin" }, // 就近歸類
+      { slug: "mcm", name: "行銷傳播管理研究所", track: "business-admin" },
     ],
   },
   {
@@ -141,6 +152,12 @@ const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
       { slug: "comm", name: "通訊工程研究所", track: "ee" },
       { slug: "photonics", name: "光電工程研究所", track: "ee" },
       { slug: "im", name: "資訊管理學系", track: "info-mgmt" },
+      // 管理學院 (師資軸擴充; 考科軸暫未涵蓋)
+      { slug: "ba", name: "企業管理學系", track: "business-admin" },
+      { slug: "finance", name: "財務金融學系", track: "finance" },
+      { slug: "accounting", name: "會計學系", track: "business-admin" },
+      { slug: "marketing", name: "行銷學系", track: "business-admin" },
+      { slug: "tm", name: "科技管理研究所", track: "ind-mgmt" },
     ],
   },
   {
@@ -151,6 +168,11 @@ const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
       { slug: "ee", name: "電機工程學系", track: "ee" },
       { slug: "comm", name: "通訊工程學系", track: "ee" },
       { slug: "im", name: "資訊管理學系", track: "info-mgmt" },
+      // 管理學院 (師資軸擴充; 考科軸暫未涵蓋)
+      { slug: "ba", name: "企業管理學系", track: "business-admin" },
+      { slug: "finance", name: "財務金融學系", track: "finance" },
+      { slug: "ait", name: "會計與資訊科技學系", track: "business-admin" }, // 官方英文 Accounting and Information Technology
+      { slug: "econ", name: "經濟學系", track: "econ" },
     ],
   },
   // ── 既有（保留，待後續比照擴充）────────────────────────────
