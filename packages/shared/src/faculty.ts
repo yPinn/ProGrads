@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { dataResponse } from "./api.js";
-import { ThesisRole } from "./faculty-content.js";
+import { DegreeLevel, ThesisRole } from "./faculty-content.js";
 import { DepartmentWithSchoolSchema } from "./schools.js";
 
 // Faculty axis API contracts (read models). Faculty belong to a department; the roster is
@@ -16,6 +16,15 @@ export const FacultyThesisSchema = z.object({
 });
 export type FacultyThesis = z.infer<typeof FacultyThesisSchema>;
 
+export const FacultyDegreeSchema = z.object({
+  id: z.string(),
+  level: DegreeLevel.describe("bachelor/master/phd/other"),
+  institution: z.string().describe("授予學校"),
+  field: z.string().nullable().describe("系所/領域"),
+  year: z.number().int().nullable(),
+});
+export type FacultyDegree = z.infer<typeof FacultyDegreeSchema>;
+
 export const FacultyMemberSchema = z.object({
   id: z.string(),
   name: z.string().describe("中文姓名(系內身分鍵)"),
@@ -28,6 +37,7 @@ export const FacultyMemberSchema = z.object({
   note: z.string().nullable().describe("備註, 如行政職(系主任/院長)或借調"),
   researchAreas: z.array(z.string()).describe("研究方向標籤"),
   departmentId: z.string(),
+  degrees: z.array(FacultyDegreeSchema).describe("學歷(依 level 由高至低)"),
   theses: z.array(FacultyThesisSchema).describe("論文佐證(指導/著作)"),
 });
 export type FacultyMember = z.infer<typeof FacultyMemberSchema>;

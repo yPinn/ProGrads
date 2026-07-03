@@ -24,6 +24,15 @@ const row = {
   displayOrder: 0,
   createdAt: new Date(),
   updatedAt: new Date(),
+  degrees: [
+    {
+      id: "dg1",
+      level: "phd" as const,
+      institution: "University of Michigan",
+      field: null,
+      year: 1998,
+    },
+  ],
   theses: [{ id: "t1", title: "LIBSVM", year: 2011, role: "authored" as const, url: "https://x" }],
   department: { ...department, school },
 };
@@ -84,6 +93,15 @@ describe("FacultyService.getFaculty", () => {
         note: null,
         researchAreas: ["Machine Learning", "Optimization"],
         departmentId: "d1",
+        degrees: [
+          {
+            id: "dg1",
+            level: "phd",
+            institution: "University of Michigan",
+            field: null,
+            year: 1998,
+          },
+        ],
         theses: [{ id: "t1", title: "LIBSVM", year: 2011, role: "authored", url: "https://x" }],
         department: { ...department, school },
       },

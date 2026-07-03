@@ -15,6 +15,7 @@ export class FacultyRepository {
     return this.prisma.facultyMember.findMany({
       where: Object.keys(department).length > 0 ? { department } : {},
       include: {
+        degrees: { orderBy: { order: "asc" } },
         theses: { orderBy: [{ year: "desc" }, { title: "asc" }] },
         department: { include: { school: true } },
       },

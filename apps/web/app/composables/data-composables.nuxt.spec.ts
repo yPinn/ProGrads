@@ -151,6 +151,9 @@ const facultyMember = {
   note: null,
   researchAreas: ["Machine Learning"],
   departmentId: "d1",
+  degrees: [
+    { id: "dg1", level: "phd", institution: "University of Michigan", field: null, year: 1998 },
+  ],
   theses: [{ id: "t1", title: "LIBSVM", year: 2011, role: "authored", url: null }],
   department: {
     id: "d1",

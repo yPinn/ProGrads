@@ -23,6 +23,20 @@ export const FacultyThesisYml = z
   })
   .strict();
 
+// 學位層級, 與 DB DegreeLevel enum 一一對應.
+export const DegreeLevel = z.enum(["bachelor", "master", "phd", "other"]);
+export type DegreeLevel = z.infer<typeof DegreeLevel>;
+
+export const FacultyDegreeYml = z
+  .object({
+    level: DegreeLevel,
+    institution: z.string().min(1), // 授予學校
+    field: z.string().optional(), // 系所 / 領域
+    year: z.number().int().optional(),
+    metadata,
+  })
+  .strict();
+
 export const FacultyMemberYml = z
   .object({
     name: z.string().min(1), // 中文姓名 = 系內身分鍵 (department 內唯一)
@@ -33,6 +47,7 @@ export const FacultyMemberYml = z
     homepage: Url,
     source_url: Url, // 人員層資料來源 (可覆寫檔級)
     research_areas: z.array(z.string()).default([]), // 研究方向標籤 (自由文字)
+    degrees: z.array(FacultyDegreeYml).default([]), // 學歷 (最高學歷 = 依 level 排序後最資深)
     theses: z.array(FacultyThesisYml).default([]),
     note,
     metadata,

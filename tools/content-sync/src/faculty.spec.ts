@@ -27,6 +27,16 @@ describe("FacultyYml contract", () => {
     assert.equal(r.members[0]?.slug, undefined);
     assert.deepEqual(r.members[0]?.research_areas, []);
     assert.deepEqual(r.members[0]?.theses, []);
+    assert.deepEqual(r.members[0]?.degrees, []);
+  });
+
+  it("parses a member's degrees", () => {
+    const r = FacultyYml.parse({
+      ...base,
+      members: [{ name: "蔡文能", degrees: [{ level: "phd", institution: "MIT", year: 1990 }] }],
+    });
+    assert.equal(r.members[0]?.degrees[0]?.level, "phd");
+    assert.equal(r.members[0]?.degrees[0]?.institution, "MIT");
   });
 
   it("requires member name", () => {
