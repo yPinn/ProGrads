@@ -11,6 +11,7 @@
     "validate-questions": "tsx src/validate.ts questions",
     "validate-faculty": "tsx src/validate.ts faculty",
     "report-coverage": "tsx src/report-coverage.ts",
+    "report-admissions": "tsx src/report-admissions.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
