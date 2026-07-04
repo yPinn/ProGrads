@@ -1,5 +1,7 @@
 # 考卷萃取 — 操作規格
 
+> 共用規則（契約=真相、seed slug、寧缺勿假、驗證閘門、日期時區、commit）見 [EXTRACTION.md](./EXTRACTION.md)；本文件只補題目專屬方法學。
+
 ## 工作流程
 
 1. **轉換圖片**：先將 PDF 轉成頁面圖片：
@@ -32,20 +34,7 @@
 
    `question_id` 由路徑推導，必須等於 `{school}-{year}-{paper}-q{NN}`。系所與組別不進路徑；系所寫入 frontmatter `departments`。
 
-5. **驗證**：
-
-   ```bash
-   pnpm --filter @prograds/content-sync sync
-   ```
-
-   sync 失敗 = frontmatter 有誤 → 依錯誤訊息修正後重跑。
-
-6. **Commit**：
-
-   ```bash
-   git add questions/
-   git commit -m "feat(content): {school}-{year}-{paper} Tier1 萃取"
-   ```
+5. **驗證與 Commit**：見 [EXTRACTION.md](./EXTRACTION.md)——`validate questions <dir>`（免 DB）→ `sync`（入庫），commit 訊息 `feat(content): {school}-{year}-{paper} Tier1 萃取`。
 
 ## 注意事項
 

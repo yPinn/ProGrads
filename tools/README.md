@@ -4,15 +4,15 @@ TypeScript + tsx 執行的 workspace 套件。流程見
 [docs/03-content-pipeline.md](../docs/03-content-pipeline.md) 與
 [docs/04-ai-pipeline.md](../docs/04-ai-pipeline.md)。
 
-- **`content-sync`**（`@prograds/content-sync`）：`ProGrads-content` → Postgres 同步（gray-matter + Zod 驗證 + 冪等 upsert + 合科卷 reconcile + 招生 schedule/departments importer）。
-  執行：`pnpm --filter @prograds/content-sync sync`。
+- **`content-sync`**（`@prograds/content-sync`）：`ProGrads-content` → Postgres 同步（gray-matter + Zod 驗證 + 冪等 upsert + 合科卷 reconcile + 招生 schedule/departments importer + 師資 importer）。
+  執行：`pnpm --filter @prograds/content-sync sync`；離線驗證 `validate <questions|admissions|faculty> <dir>`。
+  萃取規格（model-facing）：共用規則 [EXTRACTION.md](./content-sync/EXTRACTION.md)；型別 [題目](./content-sync/PROMPT-questions.md) / [招生](./content-sync/PROMPT-admissions.md) / [師資](./content-sync/PROMPT-faculty.md)。
 - **`ai-pipeline`**（`@prograds/ai-pipeline`）：列出缺少標準解答的題目，批次離線生成解答。
   執行：`pnpm --filter @prograds/ai-pipeline list-pending`。
   工作流程與規格：[PROMPT.md](./ai-pipeline/PROMPT.md)。
-- **`pdf-extract`**（`@prograds/pdf-extract`）：PDF 考卷 → PNG 頁面圖片（供 AI 視覺萃取題目用）。
+- **`pdf-extract`**（`@prograds/pdf-extract`）：PDF → PNG 頁面圖片 / crop（供 AI 視覺萃取用；萃取規格見 content-sync）。
   執行：`pnpm --filter @prograds/pdf-extract to-images <pdf路徑> [output-dir]`。
   輸出請放在 content repo 的 gitignored `images/raw/questions/...` 或 `images/raw/admissions/...`。
-  工作流程與規格：[PROMPT.md](./pdf-extract/PROMPT.md)。
 
 ## 工具腳本標準
 
@@ -40,7 +40,10 @@ CLI 行為需一致：
 
 - `packages/shared` 的 Zod schema 定義 frontmatter/YAML 結構。
 - `tools/content-sync` 的 parser 與單元測試驗證 path、frontmatter、body section 的最小契約。
-- 實際內容品質以 real content repo 驗證：設定 `CONTENT_DIR` 後執行 `pnpm content:check` 與 `pnpm sync`。
+- 實際內容以 real content repo 三段驗證（由輕到重）：
+  1. **格式**：`pnpm content:check`（prettier + markdownlint，純排版）。
+  2. **契約（免 DB）**：`pnpm --filter @prograds/content-sync validate <questions|admissions|faculty> <dir>`——離線 Zod 契約 + slug/路徑一致，commit 前的主閘門。
+  3. **入庫（需 DB）**：設定 `CONTENT_DIR` 後 `pnpm sync`。
 
 若需要測試新 schema，先用極小 inline sample 覆蓋 parser/schema 邊界；不要建立長期維護的平行內容資料集。
 

@@ -16,9 +16,10 @@
    - 更新 frontmatter：`model_used`、`confidence`、`review_status: ai_generated`
    - 寫回檔案（可用 `tools/ai-pipeline/src/patch.ts` 或直接編輯）
 
-3. **完成後同步 DB**：
+3. **完成後驗證並同步**：先離線契約檢查（免 DB），全綠後再入庫（需 DB）：
 
    ```bash
+   pnpm --filter @prograds/content-sync validate questions {content-repo}/questions
    pnpm --filter @prograds/content-sync sync
    ```
 
