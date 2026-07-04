@@ -12,8 +12,9 @@ _case_，餵給 solver 並斷言記錄的答案。
 src/
 ├── <technique>/        可重用 solver——按「技術／題型族」組織，不按科目
 │   └── *.ts            例：scheduling/chain-makespan.ts
-└── cases/              一題一檔，操作某 solver 並斷言其答案
-    └── {school}-{year}-{subject}-q{NN}.ts
+├── cases/              一題一檔，操作某 solver 並斷言其答案
+│   └── {school}-{year}-{subject}-q{NN}.ts
+└── run-cases.ts        `test` 進入點：逐一執行 cases/ 下每個 case（新增 case 自動納入，任一 exit≠0 即 fail）
 ```
 
 為何按技術而非科目：solver 以「它做的數學」聚類，而那會跨科目（一個排程 DP 同時服務 OS 排程與演算法題；

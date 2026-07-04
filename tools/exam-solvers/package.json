@@ -7,7 +7,7 @@
     "solve": "tsx",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "tsx src/cases/ntu-2026-co-os-q11.ts && tsx src/cases/ntu-2026-co-os-q14.ts",
+    "test": "tsx src/run-cases.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
