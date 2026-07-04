@@ -10,7 +10,7 @@
 | [00-product.md](00-product.md)                   | 產品定位、合規內容政策、功能模組與優先級、roadmap                |
 | [01-architecture.md](01-architecture.md)         | 系統架構、前後端分離、部署拓樸、技術配套（BOM）、TypeScript 取捨 |
 | [02-data-model.md](02-data-model.md)             | 分類體系、雙軸資料模型、擴充槓桿、例外驗證與修正                 |
-| [03-content-pipeline.md](03-content-pipeline.md) | 題庫檔案格式、frontmatter schema、同步流程                       |
+| [03-content-pipeline.md](03-content-pipeline.md) | 內容檔格式（題目／招生／師資）、參照解析、驗證與同步流程         |
 | [04-ai-pipeline.md](04-ai-pipeline.md)           | Claude 離線防線、Groq 線上 grounding、self-consistency、成本     |
 | [05-api-conventions.md](05-api-conventions.md)   | REST 慣例、Zod/nestjs-zod、錯誤格式、認證                        |
 | [06-decisions.md](06-decisions.md)               | 決策紀錄（ADR）：每個重大選型的理由                              |

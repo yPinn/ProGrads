@@ -38,6 +38,7 @@ subject 【全域共用題庫】(資料結構/演算法/線代/經濟學…)
 
 school └ department (台大資工系) ──歸屬──> program_track (nullable)
             └ admission_group (招生組別: 甲/乙/丙…)  ← 報考單位; 招生方式/名額/考科 掛勾於此
+            └ faculty_member (師資, 系內 by name)  ← theses(論文佐證) / degrees(學歷)
 
 school └ exam (school + year + admission_type)  ← 某校某年某管道的考試場次 (不含系所)
             └ exam_subject (物理考卷, slug 唯一, 綁 1..n subject)  ← 合科卷, 去重單位
@@ -129,6 +130,13 @@ department (系所, 穩定)
 - `AdmissionEvent` 新增 `enrollment`（報到）。
 - **聯招（台聯大）**：一卷被多 (校,系,組) 共用，打破 `Exam` 1:校系組 → 招生聯盟實體，列為獨立後續 spike（見 03 §聯招）。
 
+**師資增量（schema 已落地；content importer 見 [03](03-content-pipeline.md) §師資資料）**——系所師資陣容，來源 `faculty/<school>/<dept>.yml`：
+
+- **`FacultyMember`**：掛 `Department`（`onDelete: Cascade`），`(departmentId, name)` 為身分＋冪等 upsert 鍵（中文姓名官網必有、較拼音穩定少撞名）。欄位 `slug?`（選填 URL handle，非身分鍵）/`nameEn?`/`title?`（職級）/`lab?`/`homepage?`/`sourceUrl?`/`note?`（行政職等）/`researchAreas String[]`/`displayOrder`/`metadata`。
+- **`FacultyThesis`**（論文佐證，無自然鍵 → 整批取代、隨 member cascade 刪）：`title`/`year?`/`role`（`ThesisRole`）/`url?`。`role` 區分 `advised`（指導學生論文，NDLTD）與 `authored`（教授自著，DBLP/OpenAlex）。
+- **`FacultyDegree`**（學歷，無自然鍵 → 整批取代）：`level`（`DegreeLevel`）/`institution`（授予校＝資源訊號）/`field?`/`year?`/`order`（顯示序）。最高學歷＝依 `level` 排序最資深者。
+- **軸**：師資屬（校,系所）級、非年度循環，故無年份維度（有別於招生的年度軸）；檔即該系所完整 roster，sync 剔除檔中已移除成員。
+
 ## 列舉（放 packages/shared，Zod）
 
 - `license_status`：`national_exam | school_official | unknown`
@@ -136,6 +144,8 @@ department (系所, 穩定)
 - `question_type`：`mc | essay | calc | proof | cloze | listening`
 - `answer_type`：`single_choice | multi_choice | numeric | essay | proof`
 - `review_status`：`ai_generated | human_verified | flagged`
+- `thesis_role`：`advised | authored`（指導學生論文 / 教授自著）
+- `degree_level`：`bachelor | master | phd | other`（學士 / 碩士 / 博士 / 其他）
 
 ## 起步資料（資管/資工）
 
