@@ -9,15 +9,23 @@ import { parse as parseYaml } from "yaml";
 // per (year, school): file presence (prospectus / schedule / departments) plus which EECS seed
 // departments have admission groups vs are still missing. Read-only planning aid to direct
 // gap-filling order — no DB, no writes. Mirrors report-coverage.ts (faculty).
-// Usage: tsx src/report-admissions.ts <admissions-dir> [--gaps] [--md]
-//   --gaps  list only fillable holes: (year, school) with a prospectus but no departments.yml,
-//           and per built file the missing EECS departments
-//   --md    emit a Markdown table instead of the console layout
+// Usage: tsx src/report-admissions.ts <admissions-dir> [--gaps] [--md] [--tracks=<eecs|business|all>]
+//   --gaps    list only fillable holes: (year, school) with a prospectus but no departments.yml,
+//             and per built file the missing in-scope departments
+//   --md      emit a Markdown table instead of the console layout
+//   --tracks  which seed departments count toward coverage (default eecs)
 
-// EECS exam tracks — the axis admissions content actually covers. Business/humanities
-// departments exist in the seed for the faculty axis but are out of admissions scope, so they
-// are not counted as coverage gaps here.
-const EECS_TRACKS = new Set(["cs", "ee", "info-mgmt"]);
+// Track scopes — which seed departments count toward coverage. EECS is the original axis;
+// business covers the 商學院/管理學院 tracks; all counts every seeded department. Select with
+// --tracks=<eecs|business|all> (default eecs). null = every track.
+const TRACK_SCOPES: Record<string, { label: string; tracks: Set<string> | null }> = {
+  eecs: { label: "EECS", tracks: new Set(["cs", "ee", "info-mgmt"]) },
+  business: {
+    label: "商管",
+    tracks: new Set(["business-admin", "intl-business", "econ", "finance", "stat", "ind-mgmt"]),
+  },
+  all: { label: "全部", tracks: null },
+};
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SEED_FILE = path.resolve(HERE, "../../../packages/db/prisma/seed/schools.seed.ts");
@@ -125,9 +133,15 @@ function main(): void {
   const args = process.argv.slice(2);
   const gapsOnly = args.includes("--gaps");
   const asMd = args.includes("--md");
+  const tracksArg = (
+    args.find((a) => a.startsWith("--tracks="))?.split("=")[1] ?? "eecs"
+  ).toLowerCase();
+  const scope = TRACK_SCOPES[tracksArg];
   const dir = args.find((a) => !a.startsWith("--"));
-  if (!dir) {
-    console.error("Usage: tsx src/report-admissions.ts <admissions-dir> [--gaps] [--md]");
+  if (!dir || !scope) {
+    console.error(
+      "Usage: tsx src/report-admissions.ts <admissions-dir> [--gaps] [--md] [--tracks=<eecs|business|all>]",
+    );
     process.exit(2);
   }
   const base = process.env.INIT_CWD ?? process.cwd();
@@ -137,9 +151,11 @@ function main(): void {
   const seedBySlug = new Map(schools.map((s) => [s.slug, s]));
   const units = readUnits(root);
 
-  // EECS seed depts for a school (empty for non-seed schools like ust).
+  // In-scope seed depts for a school (empty for non-seed schools like ust).
   const eecsDepts = (slug: string): Dept[] =>
-    (seedBySlug.get(slug)?.depts ?? []).filter((d) => EECS_TRACKS.has(d.track));
+    (seedBySlug.get(slug)?.depts ?? []).filter(
+      (d) => scope.tracks === null || scope.tracks.has(d.track),
+    );
 
   if (gapsOnly) {
     out("# Admissions gaps\n");
@@ -150,7 +166,9 @@ function main(): void {
       const tag = seedBySlug.has(u.school) ? "" : " [non-seed school]";
       out(`  - ${u.year}/${u.school}${u.season === "exam" ? "" : `/${u.season}`}${tag}`);
     }
-    out("\n## Incomplete: EECS seed departments missing from an existing departments.yml");
+    out(
+      `\n## Incomplete: ${scope.label} seed departments missing from an existing departments.yml`,
+    );
     for (const u of units.filter((x) => x.departments && !x.bad)) {
       const eecs = eecsDepts(u.school);
       if (eecs.length === 0) continue;
@@ -165,7 +183,7 @@ function main(): void {
 
   if (asMd) {
     out("# Admissions coverage\n");
-    out("| Year | School | Prospectus | Schedule | Departments | Groups | EECS depts |");
+    out(`| Year | School | Prospectus | Schedule | Departments | Groups | ${scope.label} depts |`);
     out("|---|---|:-:|:-:|:-:|---:|---|");
     for (const u of units) {
       const eecs = eecsDepts(u.school);
@@ -190,9 +208,9 @@ function main(): void {
     const missing = eecs.filter((d) => !u.coveredDepts.includes(d.slug));
     const eecsCol =
       eecs.length > 0
-        ? `EECS ${eecs.length - missing.length}/${eecs.length}${missing.length > 0 ? ` (缺 ${missing.map((d) => d.slug).join(",")})` : ""}`
+        ? `${scope.label} ${eecs.length - missing.length}/${eecs.length}${missing.length > 0 ? ` (缺 ${missing.map((d) => d.slug).join(",")})` : ""}`
         : seedBySlug.has(u.school)
-          ? "無 EECS 系所"
+          ? `無 ${scope.label} 系所`
           : "非 seed 學校";
     const sch = u.season === "exam" ? u.school : `${u.school}/${u.season}`;
     const files = `prospectus ${mark(u.prospectus)}  schedule ${mark(u.schedule)}  departments ${mark(u.departments)}`;
