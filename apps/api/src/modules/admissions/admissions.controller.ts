@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from "@nestjs/common";
+import { Controller, Get, Header, Query } from "@nestjs/common";
 import type { AdmissionGroup } from "@prograds/shared";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiBadRequest } from "../../common/api-error-responses.js";
@@ -12,6 +12,10 @@ export class AdmissionsController {
   constructor(private readonly service: AdmissionsService) {}
 
   @Get()
+  // Low-churn public data: a short max-age makes re-opening a dept instant within a session;
+  // stale-while-revalidate serves the cached copy for a day while refreshing in the background.
+  // Only speeds up repeat loads — a cold first load still pays full TTFB + download.
+  @Header("Cache-Control", "public, max-age=60, stale-while-revalidate=86400")
   @ApiOperation({
     summary: "取得系所招生情報",
     description:
