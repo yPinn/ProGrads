@@ -12,7 +12,10 @@ const emit = defineEmits<{ retry: [] }>();
 </script>
 
 <template>
-  <Transition name="fade" mode="out-in">
+  <!-- Concurrent fade, not `out-in`: out-in's leave-then-enter gap can wedge open on a fast state
+       flip (data → loading → data when switching school/dept), leaving the view blank until the
+       component remounts. Overlapping enter/leave keeps one branch on screen at all times. -->
+  <Transition name="fade">
     <div v-if="pending" key="loading" role="status" aria-live="polite" aria-busy="true">
       <span class="sr-only">載入中…</span>
       <slot name="loading" />

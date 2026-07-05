@@ -41,6 +41,11 @@ watch(dept, () => {
 const query = computed(() => ({ school: school.value ?? "", dept: dept.value ?? "" }));
 const { data, isLoading, isError, error, refetch } = useAdmissions(query);
 
+// Pending until we have data or an error — covers the frame between enabling the query (dept
+// picked) and vue-query flipping fetchStatus, where isLoading is briefly false with data still
+// undefined and <QueryState> would flash empty instead of the skeleton. Always enabled in State C.
+const pending = computed(() => isLoading.value || (!data.value && !isError.value));
+
 // Year tabs from the loaded groups' rounds, newest first (drives the client-side filter).
 const yearTabs = computed(() => {
   const set = new Set<number>();
@@ -137,7 +142,7 @@ const prefersReducedMotion = useReducedMotion();
       </header>
 
       <QueryState
-        :pending="isLoading"
+        :pending="pending"
         :error="isError ? error : null"
         :empty="!data || data.length === 0"
         @retry="refetch"

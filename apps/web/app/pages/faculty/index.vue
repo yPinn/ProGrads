@@ -47,6 +47,11 @@ const query = computed<FacultyQuery>(() =>
 );
 const { data, isLoading, isError, error, refetch } = useFaculty(query);
 
+// Pending until we have data or an error — covers the frame between completing an axis and
+// vue-query flipping fetchStatus, where isLoading is briefly false with data still undefined and
+// <QueryState> would flash empty instead of the skeleton. Mirrors admissions; always enabled here.
+const pending = computed(() => isLoading.value || (!data.value && !isError.value));
+
 // Cross-school (track) results arrive pre-sorted school → dept → seniority; fold consecutive
 // rows of the same department into groups so each school/dept gets a heading.
 const facultyGroups = computed(() => {
@@ -170,7 +175,7 @@ const prefersReducedMotion = useReducedMotion();
         </header>
 
         <QueryState
-          :pending="isLoading"
+          :pending="pending"
           :error="isError ? error : null"
           :empty="!data || data.length === 0"
           @retry="refetch"
@@ -209,7 +214,7 @@ const prefersReducedMotion = useReducedMotion();
         </header>
 
         <QueryState
-          :pending="isLoading"
+          :pending="pending"
           :error="isError ? error : null"
           :empty="!data || data.length === 0"
           @retry="refetch"

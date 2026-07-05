@@ -65,11 +65,12 @@ watch(
 );
 
 // Schedule-X's Vue wrapper renders into `document.getElementById(id)` inside its own mounted
-// hook. When this calendar first mounts inside an out-in transition (the page transition and
-// QueryState's fade both use mode="out-in"), Vue fires child mounted hooks before the new
+// hook. When this calendar first mounts inside an out-in transition (the route-level page
+// transition uses mode="out-in" — see app.vue), Vue fires child mounted hooks before the new
 // subtree is attached to the document — so getElementById returns null and Preact throws
 // "Cannot read properties of null (reading '__k')". Gate the wrapper until our root is actually
-// connected to the live DOM, so it only mounts once getElementById can find its element.
+// connected to the live DOM, so it only mounts once getElementById can find its element. The
+// guard keys off isConnected, so it holds regardless of which transition wraps the mount.
 const rootEl = ref<HTMLElement | null>(null);
 const ready = ref(false);
 let rafId = 0;

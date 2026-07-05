@@ -6,6 +6,7 @@ const isDev = import.meta.dev;
 
 <template>
   <div class="flex min-h-dvh flex-col">
+    <GlobalFetchingBar />
     <header class="border-default sticky top-0 z-10 border-b bg-default/80 backdrop-blur">
       <UContainer class="flex h-16 items-center gap-8">
         <NuxtLink
