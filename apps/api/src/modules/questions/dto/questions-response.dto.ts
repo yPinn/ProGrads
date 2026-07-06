@@ -1,5 +1,6 @@
 import {
   PapersResponseSchema,
+  PaperTestResponseSchema,
   QuestionFacetsResponseSchema,
   QuestionResponseSchema,
   QuestionsResponseSchema,
@@ -11,3 +12,4 @@ export class QuestionsResponseDto extends createZodDto(QuestionsResponseSchema) 
 export class PapersResponseDto extends createZodDto(PapersResponseSchema) {}
 export class QuestionResponseDto extends createZodDto(QuestionResponseSchema) {}
 export class QuestionFacetsResponseDto extends createZodDto(QuestionFacetsResponseSchema) {}
+export class PaperTestResponseDto extends createZodDto(PaperTestResponseSchema) {}

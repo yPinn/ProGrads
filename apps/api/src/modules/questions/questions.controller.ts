@@ -2,6 +2,7 @@ import { Controller, Get, Param, Query } from "@nestjs/common";
 import type {
   Meta,
   PaperSummary,
+  PaperTest,
   QuestionDetail,
   QuestionFacets,
   QuestionSummary,
@@ -11,6 +12,7 @@ import { ApiBadRequest, ApiNotFound } from "../../common/api-error-responses.js"
 import { QuestionQueryDto } from "./dto/question-query.dto.js";
 import {
   PapersResponseDto,
+  PaperTestResponseDto,
   QuestionFacetsResponseDto,
   QuestionResponseDto,
   QuestionsResponseDto,
@@ -75,6 +77,20 @@ export class QuestionsController {
   @ApiOkResponse({ type: QuestionFacetsResponseDto })
   async facets(): Promise<{ data: QuestionFacets }> {
     return { data: await this.service.getFacets() };
+  }
+
+  // Must precede the ":externalId" catch-all — a two-segment "papers/:id" won't clash with the
+  // single-segment ":externalId", but keep it grouped with the other papers routes for clarity.
+  @Get("papers/:examSubjectId")
+  @ApiOperation({
+    summary: "取得整卷測驗題目",
+    description:
+      "回傳單一考卷（ExamSubject）的所有題目全文，含選項（附正解）與標準解析，供整卷計時測驗。前端於作答前隱藏正解／解析，交卷後才揭曉並批改。",
+  })
+  @ApiOkResponse({ type: PaperTestResponseDto })
+  @ApiNotFound()
+  async paperTest(@Param("examSubjectId") examSubjectId: string): Promise<{ data: PaperTest }> {
+    return { data: await this.service.getPaperTest(examSubjectId) };
   }
 
   @Get(":externalId")

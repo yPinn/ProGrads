@@ -116,6 +116,44 @@ export const QuestionDetailSchema = QuestionSummarySchema.extend({
 });
 export type QuestionDetail = z.infer<typeof QuestionDetailSchema>;
 
+// Whole-paper test mode (整卷測驗): every full question of one paper (ExamSubject) for the timed
+// mock-exam page. Answers (choice.isCorrect) and explanation ride along and are hidden client-side
+// until the user submits (交卷) — a study tool, not a proctored exam, so one-shot delivery is fine.
+export const PaperTestQuestionSchema = z.object({
+  externalId: z.string().describe("題目對外唯一代碼"),
+  number: z.string().describe("題號"),
+  type: QuestionType,
+  subjects: z.array(SubjectSchema).describe("細粒度考科標籤"),
+  contentMd: z.string().describe("題目內容(Markdown)"),
+  choices: z.array(ChoiceSchema).describe("選項(含正解標記;前端作答前隱藏);非選擇題為空陣列"),
+  explanation: ExplanationSchema.nullable().describe("標準解析;尚未產生為 null"),
+  group: z.string().nullable().describe("題組 slug(閱讀/克漏字共用篇章);非題組為 null"),
+  groupPassageMd: z
+    .string()
+    .nullable()
+    .describe("題組共用篇章(Markdown,取自題組首題);非題組為 null"),
+});
+export type PaperTestQuestion = z.infer<typeof PaperTestQuestionSchema>;
+
+export const PaperTestSchema = z.object({
+  examSubject: z.object({
+    id: z.string(),
+    slug: z.string(),
+    name: z.string(),
+    subjects: z.array(SubjectSchema).describe("該卷涵蓋考科(合科卷為多科)"),
+    departments: z.array(DepartmentSchema).describe("考此卷的系所"),
+  }),
+  exam: QuestionExamRefSchema.describe("考卷的精簡資訊(校×年×入學管道)"),
+  durationMinutes: z
+    .number()
+    .int()
+    .positive()
+    .nullable()
+    .describe("整卷作答限制時間(分鐘,來自官方節次時間表);未知為 null,前端退回計時上數"),
+  questions: z.array(PaperTestQuestionSchema).describe("整卷題目(依題序)"),
+});
+export type PaperTest = z.infer<typeof PaperTestSchema>;
+
 // GET /questions?subject=&track=&school=&year=&type=&page=&pageSize=
 export const QuestionQuerySchema = z.object({
   subject: z.string().min(1).optional().describe("以考科 slug 過濾(跨校單科練習)"),
@@ -153,3 +191,4 @@ export const QuestionsResponseSchema = paginatedResponse(QuestionSummarySchema);
 export const PapersResponseSchema = paginatedResponse(PaperSummarySchema);
 export const QuestionResponseSchema = dataResponse(QuestionDetailSchema);
 export const QuestionFacetsResponseSchema = dataResponse(QuestionFacetsSchema);
+export const PaperTestResponseSchema = dataResponse(PaperTestSchema);

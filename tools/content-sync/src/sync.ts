@@ -135,12 +135,17 @@ export async function syncFile(
       },
     });
 
+    // Paper-level time limit (whole-paper fact repeated on each question, like licenseStatus);
+    // stored on ExamSubject.metadata. undefined leaves existing metadata untouched on update.
+    const examSubjectMetadata =
+      fm.exam_minutes != null ? { durationMinutes: fm.exam_minutes } : undefined;
     const examSubject = await tx.examSubject.upsert({
       where: { examId_slug: { examId: exam.id, slug: path.paperSlug } },
       update: {
         name: fm.exam_subject,
         sourceUrl: fm.source_url,
         licenseStatus: fm.license_status,
+        metadata: examSubjectMetadata,
       },
       create: {
         examId: exam.id,
@@ -148,6 +153,7 @@ export async function syncFile(
         name: fm.exam_subject,
         sourceUrl: fm.source_url,
         licenseStatus: fm.license_status,
+        metadata: examSubjectMetadata,
       },
     });
     examSubjectId = examSubject.id;

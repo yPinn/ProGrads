@@ -157,10 +157,24 @@ function groupRuns(
                 {{ s.name }}
               </UBadge>
             </div>
-            <p class="text-muted text-small mb-3">
-              {{ p.exam.school.name }} {{ p.exam.year }} ·
-              {{ ADMISSION_TYPE_LABELS[p.exam.admissionType] }} · {{ p.questions.length }} 題
-            </p>
+            <div class="mb-3 flex items-center justify-between gap-2">
+              <p class="text-muted text-small">
+                {{ p.exam.school.name }} {{ p.exam.year }} ·
+                {{ ADMISSION_TYPE_LABELS[p.exam.admissionType] }} · {{ p.questions.length }} 題
+              </p>
+              <!-- 整卷計時測驗:連續作答、隱藏答案、交卷自動批改。 -->
+              <UButton
+                :to="`/questions/paper/${p.examSubject.id}`"
+                color="primary"
+                variant="soft"
+                size="xs"
+                icon="i-lucide-timer"
+                class="shrink-0"
+                :aria-label="`整卷測驗:${p.examSubject.name}`"
+              >
+                整卷測驗
+              </UButton>
+            </div>
 
             <!-- 題號選擇器:同題組(閱讀/克漏字共用篇章)的題號以底色塊 + 「題組」標示群聚。 -->
             <div class="flex flex-wrap items-start gap-2">
