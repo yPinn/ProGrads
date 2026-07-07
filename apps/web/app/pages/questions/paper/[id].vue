@@ -5,6 +5,7 @@ import { usePaperTest } from "~/composables/usePaperTest";
 import { useStopwatch } from "~/composables/useStopwatch";
 import { QUESTION_TYPE_LABELS } from "~/utils/question-labels";
 import { ADMISSION_TYPE_LABELS } from "~/utils/admission-labels";
+import { icons } from "~/utils/icons";
 import type { PaperTestQuestion } from "@prograds/shared";
 // KaTeX styles this route's MDC-rendered math; scoped here so it code-splits with the page.
 import "katex/dist/katex.min.css";
@@ -168,22 +169,20 @@ function choiceState(
                   :class="timerClass"
                   :aria-label="limitSec === null ? '作答計時' : '剩餘作答時間'"
                 >
-                  <UIcon name="i-lucide-timer" class="mr-1 align-[-2px]" />{{ timerText }}
+                  <UIcon :name="icons.timer" class="mr-1 align-[-2px]" />{{ timerText }}
                 </span>
 
                 <template v-if="!submitted">
                   <span class="text-muted text-caption tabular-nums"
                     >已答 {{ answeredCount }}/{{ gradable.length }}</span
                   >
-                  <UButton color="primary" size="sm" @click="submit">交卷</UButton>
+                  <AppButton intent="primary" size="sm" @click="submit">交卷</AppButton>
                 </template>
                 <template v-else>
                   <UBadge color="primary" variant="soft" size="lg" class="tabular-nums">
                     得分 {{ score }}/{{ gradable.length }}
                   </UBadge>
-                  <UButton color="neutral" variant="soft" size="sm" @click="restart"
-                    >再測一次</UButton
-                  >
+                  <AppButton intent="secondary" size="sm" @click="restart">再測一次</AppButton>
                 </template>
               </div>
             </div>
@@ -194,7 +193,7 @@ function choiceState(
             class="text-error text-small mb-section flex items-center gap-2"
             role="status"
           >
-            <UIcon name="i-lucide-alarm-clock-off" class="shrink-0" aria-hidden="true" />
+            <UIcon :name="icons.overtime" class="shrink-0" aria-hidden="true" />
             已超過本卷限時 {{ paper.durationMinutes }} 分鐘，建議交卷。
           </p>
           <p v-else-if="!submitted" class="text-muted text-caption mb-section">
@@ -219,7 +218,7 @@ function choiceState(
                 <UBadge variant="subtle" size="sm">{{ QUESTION_TYPE_LABELS[q.type] }}</UBadge>
                 <UIcon
                   v-if="submitted && q.choices.length"
-                  :name="isQuestionCorrect(q) ? 'i-lucide-check' : 'i-lucide-x'"
+                  :name="isQuestionCorrect(q) ? icons.correct : icons.wrong"
                   :class="isQuestionCorrect(q) ? 'text-primary' : 'text-error'"
                   aria-hidden="true"
                 />
@@ -267,13 +266,13 @@ function choiceState(
                     <MDC :value="c.contentMd" unwrap="p" class="prose prose-sm max-w-none" />
                     <UIcon
                       v-if="submitted && c.isCorrect"
-                      name="i-lucide-check"
+                      :name="icons.correct"
                       class="text-primary ml-auto shrink-0"
                       aria-label="正解"
                     />
                     <UIcon
                       v-else-if="submitted && isSelected(q.externalId, c.label)"
-                      name="i-lucide-x"
+                      :name="icons.wrong"
                       class="text-error ml-auto shrink-0"
                       aria-label="你的選擇(錯誤)"
                     />
@@ -300,7 +299,7 @@ function choiceState(
           </ol>
 
           <div v-if="!submitted" class="mt-10 flex justify-center">
-            <UButton color="primary" size="lg" @click="submit">交卷並看解析</UButton>
+            <AppButton intent="primary" size="lg" @click="submit">交卷並看解析</AppButton>
           </div>
         </div>
       </QueryState>

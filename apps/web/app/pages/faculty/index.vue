@@ -88,6 +88,10 @@ const prefersReducedMotion = useReducedMotion();
       class="border-default mb-section flex flex-wrap items-end gap-control rounded-card border p-card"
     >
       <UFieldGroup aria-label="瀏覽方式">
+        <!-- Segmented control (a UFieldGroup of toggle buttons), not a single-action button — this
+             is a distinct pattern deferred to a future <AppSegmented>. Kept as raw UButton until
+             then; the button-intent guardrail is waived here on purpose. -->
+        <!-- eslint-disable-next-line vue/no-restricted-syntax -->
         <UButton
           v-for="opt in MODES"
           :key="opt.value"

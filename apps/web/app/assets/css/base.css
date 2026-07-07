@@ -28,4 +28,19 @@
   *::-webkit-scrollbar {
     display: none; /* Chromium/Safari */
   }
+
+  /* Touch/iOS polish: UButton base lacks select-none (tap-hold selects the label) — add it on
+     buttons; drop the grey tap-flash + double-tap-zoom delay. Feedback stays on :active/:focus. */
+  a,
+  button,
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button,
+  [role="button"] {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
 }

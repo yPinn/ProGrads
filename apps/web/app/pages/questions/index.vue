@@ -5,6 +5,7 @@ import { useQuestionPapers } from "~/composables/useQuestionPapers";
 import { useQuestionFacets } from "~/composables/useQuestionFacets";
 import { QUESTION_TYPE_LABELS } from "~/utils/question-labels";
 import { ADMISSION_TYPE_LABELS } from "~/utils/admission-labels";
+import { icons } from "~/utils/icons";
 import type { PaperQuestionRef } from "@prograds/shared";
 
 useSeoMeta({
@@ -162,18 +163,17 @@ function groupRuns(
                 {{ p.exam.school.name }} {{ p.exam.year }} ·
                 {{ ADMISSION_TYPE_LABELS[p.exam.admissionType] }} · {{ p.questions.length }} 題
               </p>
-              <!-- 整卷計時測驗:連續作答、隱藏答案、交卷自動批改。 -->
-              <UButton
+              <!-- 整卷計時測驗:連續作答、隱藏答案、交卷自動批改。卡片次級入口 → secondary。 -->
+              <AppButton
+                intent="secondary"
+                size="sm"
                 :to="`/questions/paper/${p.examSubject.id}`"
-                color="primary"
-                variant="soft"
-                size="xs"
-                icon="i-lucide-timer"
+                :icon="icons.timer"
                 class="shrink-0"
                 :aria-label="`整卷測驗:${p.examSubject.name}`"
               >
                 整卷測驗
-              </UButton>
+              </AppButton>
             </div>
 
             <!-- 題號選擇器:同題組(閱讀/克漏字共用篇章)的題號以底色塊 + 「題組」標示群聚。 -->
@@ -193,18 +193,17 @@ function groupRuns(
                 >
                   題組
                 </UBadge>
-                <UButton
+                <AppButton
                   v-for="qq in run.items"
                   :key="qq.externalId"
+                  intent="secondary"
+                  size="sm"
                   :to="`/questions/${qq.externalId}`"
-                  color="neutral"
-                  variant="soft"
-                  size="xs"
                   class="min-h-touch min-w-touch justify-center"
                   :aria-label="`第 ${qq.number} 題(${QUESTION_TYPE_LABELS[qq.type]})`"
                 >
                   {{ qq.number }}
-                </UButton>
+                </AppButton>
               </div>
             </div>
           </li>
