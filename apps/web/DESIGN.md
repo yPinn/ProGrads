@@ -16,7 +16,7 @@ colors:
   bg-accented: "#e7d9b8"
   bg-inverted: "#433222"
   text: "#433222"
-  text-dimmed: "#96845f"
+  text-dimmed: "#7e6a44"
   text-muted: "#725435"
   text-toned: "#58412b"
   text-highlighted: "#2f2318"
@@ -121,10 +121,13 @@ components:
   button-ghost-hover:
     textColor: "{colors.text}"
   card:
-    backgroundColor: "{colors.bg-elevated}"
+    backgroundColor: "{colors.bg-accented}"
+    borderColor: "{colors.border-accented}"
     textColor: "{colors.text}"
     rounded: "{rounded.card}"
     padding: "{spacing.card}"
+  card-interactive-hover:
+    borderColor: "{colors.border-inverted}"
   list-item-interactive:
     textColor: "{colors.text}"
     padding: 1rem 1.25rem
@@ -206,8 +209,17 @@ the values above are the comfortable-density, base-breakpoint defaults.
 This system is intentionally **flat**: UI chrome (cards, rows, inputs, header) carries no drop
 shadows. Hierarchy is conveyed by **tonal layers** (`bg` → `bg-muted` → `bg-elevated` →
 `bg-accented`), 1px borders, and a sticky header with `backdrop-blur`. Hover on interactive
-rows lifts the surface by compositing `bg-elevated` at ~50% alpha rather than adding a shadow.
-The lone exception is the `board` chalkboard surface, which carries a single soft shadow
+rows lifts the surface by compositing `bg-elevated` at ~50% alpha rather than adding a shadow;
+interactive **cards** sharpen their edge to `border-inverted` on hover — still flat, no shadow.
+
+Cards sit a step below the page via a **`--surface-card`** alias onto the existing surface ramp
+(no new colour): light uses **`bg-accented`** (the deepest paper step) with a **`border-accented`**
+edge, so a card reads as a distinct layer rather than the near-flat 1.14:1 of `bg-elevated`;
+`text-muted` still holds AA (4.94:1). Dark keeps the cool night identity on `bg-muted` — its
+`bg-accented`/`bg-elevated` are _lighter_ than the page and would drop `text-muted` below AA, so
+the card uses a different ramp step per theme. On either fill `text-dimmed` fails AA, so card body
+text stays `text`/`text-muted`.
+The lone shadow exception is the `board` chalkboard surface, which carries a single soft shadow
 (`0 2px 10px` at ~0.18 alpha) so it reads as a physical board.
 
 ## Shapes
@@ -223,9 +235,12 @@ Built on **Nuxt UI v4**; app-owned classes fill the gaps. Patterns:
 - **Buttons** — primary is solid ink-blue with inverted (cream) text, hover/active step to
   primary-600/700. Ghost buttons (nav, icon, inline links) are transparent with muted text
   that resolves to full ink on hover.
-- **Cards** — flat `bg-elevated` panels with 6px radius and `card` padding; separated by
-  tone and border, never shadow.
+- **Cards** — flat panels with 6px radius and `card` padding; separated by fill + a
+  `border-accented` edge, never shadow. Fill is `--surface-card` (an alias onto `bg-accented`
+  light / `bg-muted` dark; see Elevation). The interactive variant sharpens its edge on hover.
+  Use `<AppCard>`.
 - **Interactive list rows** — transparent by default, hover composites `bg-elevated` at 50%.
+  Use `<AppList>` (container) + `<AppListRow>` (row).
 - **Inputs** — `bg` fill, 1px border, 44px tall for tap targets.
 - **Board** — the chalkboard surface (`board` ground, `board-ink` chalk) for worked
   solutions, using the serif reading style.
@@ -246,5 +261,7 @@ app-owned interactive elements (Nuxt UI components ship their own).
   **700** ramp step; **don't** set small text in their base (500) tones on light surfaces
   (2.6–4.4:1, below AA).
 - **Do** set headings in serif Ming and body in Inter; **don't** mix more than these roles.
-- **Do** maintain WCAG AA (4.5:1) for body text on its surface in both themes.
+- **Do** maintain WCAG AA (4.5:1) for body text on its surface in both themes; **don't** set
+  `text-dimmed` on `bg-elevated`/card surfaces — it clears AA only on the base `bg` page
+  (3.97:1 light / 2.36:1 dark on elevated). Use `text`/`text-muted` on cards.
 - **Don't** hard-code ms or cubic-beziers — use the motion tokens (fast/base/slow, standard ease).

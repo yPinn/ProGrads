@@ -54,13 +54,13 @@ const prefersReducedMotion = useReducedMotion();
       @retry="refetch"
     >
       <template #loading>
-        <div class="border-default divide-default divide-y rounded-card border">
+        <AppList as="div">
           <div v-for="n in 5" :key="n" class="flex items-center gap-4 px-5 py-4">
             <USkeleton class="h-4 w-40 shrink-0" />
             <USkeleton class="h-5 w-16" />
             <USkeleton class="h-4 w-48" />
           </div>
-        </div>
+        </AppList>
       </template>
 
       <template #empty>此學年尚無招生事件。</template>
@@ -77,16 +77,19 @@ const prefersReducedMotion = useReducedMotion();
             <h2 class="text-muted text-caption mb-3 font-medium tracking-eyebrow uppercase">
               {{ group.label }}
             </h2>
-            <ul class="border-default divide-default divide-y rounded-card border">
-              <li
+            <AppList>
+              <AppListRow
                 v-for="item in group.items"
                 :key="`${item.school.slug}-${item.event}-${item.at}`"
-                class="hover:bg-elevated/50 flex flex-wrap items-center gap-x-4 gap-y-1.5 px-5 py-4 transition-colors first:rounded-t-card last:rounded-b-card"
+                interactive
+                class="flex flex-wrap items-center gap-x-4 gap-y-1.5 first:rounded-t-card last:rounded-b-card"
               >
                 <span class="text-muted text-small w-44 shrink-0 tabular-nums">{{
                   formatDateRange(item.at, item.endAt)
                 }}</span>
-                <UBadge variant="subtle" size="sm">{{ ADMISSION_EVENT_LABELS[item.event] }}</UBadge>
+                <AppBadge variant="subtle" size="sm">{{
+                  ADMISSION_EVENT_LABELS[item.event]
+                }}</AppBadge>
                 <span class="font-medium">{{ item.school.name }}</span>
                 <span class="text-muted text-small">{{
                   ADMISSION_TYPE_LABELS[item.admissionType]
@@ -94,8 +97,8 @@ const prefersReducedMotion = useReducedMotion();
                 <span v-if="item.location" class="text-muted text-small"
                   >· {{ item.location }}</span
                 >
-              </li>
-            </ul>
+              </AppListRow>
+            </AppList>
           </section>
         </div>
 
