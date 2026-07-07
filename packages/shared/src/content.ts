@@ -13,6 +13,9 @@ export type ContentLicenseStatus = z.infer<typeof ContentLicenseStatus>;
 export const QuestionFrontmatter = z.object({
   question_id: z.string().min(1), // pinned upsert key; validated against the path-derived default
   exam_subject: z.string().min(1), // paper display name (ExamSubject.name)
+  // Whole-paper time limit in minutes (paper-level fact; from the official 節次時間表). Optional —
+  // absent papers fall back to a count-up timer. Sync lifts it to ExamSubject.metadata.durationMinutes.
+  exam_minutes: z.number().int().positive().optional(),
   subjects: z.array(z.string().min(1)).min(1), // granular practice tags (question_subject), by slug
   departments: z.array(z.string().min(1)).min(1), // slugs of departments that sat this paper → ExamSubject↔Department M:N
   question_type: QuestionType,

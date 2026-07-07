@@ -36,6 +36,7 @@
   --spacing-hero: 5rem;
   --spacing-section: 2.5rem;
   --spacing-header: 2.5rem;
+  --spacing-nav: 4rem; /* global nav-bar height → h-nav; single source for bars pinned beneath it (top-nav) */
   --spacing-card: 1.25rem;
   --spacing-control: 0.75rem;
   --spacing-sidebar: 17rem; /* spacing namespace so w-sidebar resolves */

@@ -2,13 +2,27 @@
 // Dev-only tooling links (styleguide, etc.) surface in the footer's right slot; these pages
 // 404 in production, so the links are gated to dev to avoid dead nav in the shipped build.
 const isDev = import.meta.dev;
+
+// Single source of truth for the primary nav, shared by the desktop bar and the mobile slideover
+// so the two never drift. Order by candidate usage frequency: 考古題 (daily driver) leads; 報名資訊
+// sits beside it (its 採計考科 deep-links into the question bank); 招生日程 (deadline-critical)
+// follows; 師資陣容 (research/甄試-oriented, lowest frequency) trails.
+const navLinks = [
+  { to: "/questions", label: "考古題" },
+  { to: "/admissions", label: "報名資訊" },
+  { to: "/schedules", label: "招生日程" },
+  { to: "/faculty", label: "師資陣容" },
+] as const;
+
+// The desktop nav overflows the h-16 bar on phones, so below md it collapses into a slideover.
+const mobileNavOpen = ref(false);
 </script>
 
 <template>
   <div class="flex min-h-dvh flex-col">
     <GlobalFetchingBar />
     <header class="border-default sticky top-0 z-10 border-b bg-default/80 backdrop-blur">
-      <UContainer class="flex h-16 items-center gap-8">
+      <UContainer class="flex h-nav items-center gap-8">
         <NuxtLink
           to="/"
           class="focus-ring inline-flex min-h-touch items-center gap-2 font-serif text-title-sm tracking-tight"
@@ -17,29 +31,13 @@ const isDev = import.meta.dev;
           <img src="/logo.svg" alt="" width="28" height="28" class="size-7" />
           ProGrads
         </NuxtLink>
-        <!-- Order by candidate usage frequency: 考古題 (daily driver) leads; 報名資訊 sits beside it
-             (its 採計考科 deep-links into the question bank); 招生日程 (deadline-critical) follows;
-             師資陣容 (research/甄試-oriented, lowest frequency) trails. -->
-        <nav aria-label="主要導覽" class="text-muted text-small flex gap-6">
+        <nav aria-label="主要導覽" class="text-muted text-small hidden gap-6 md:flex">
           <NuxtLink
-            to="/questions"
+            v-for="link in navLinks"
+            :key="link.to"
+            :to="link.to"
             class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
-            >考古題</NuxtLink
-          >
-          <NuxtLink
-            to="/admissions"
-            class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
-            >報名資訊</NuxtLink
-          >
-          <NuxtLink
-            to="/schedules"
-            class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
-            >招生日程</NuxtLink
-          >
-          <NuxtLink
-            to="/faculty"
-            class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
-            >師資陣容</NuxtLink
+            >{{ link.label }}</NuxtLink
           >
         </nav>
         <!-- ClientOnly + fixed-size fallback: colour mode is only known on the client, so this
@@ -50,8 +48,32 @@ const isDev = import.meta.dev;
             <div class="ml-auto size-8" />
           </template>
         </ClientOnly>
+        <!-- Mobile-only trigger; the desktop nav above covers md and up. -->
+        <UButton
+          icon="i-lucide-menu"
+          color="neutral"
+          variant="ghost"
+          aria-label="開啟主要導覽選單"
+          class="md:hidden"
+          @click="mobileNavOpen = true"
+        />
       </UContainer>
     </header>
+
+    <USlideover v-model:open="mobileNavOpen" title="主要導覽" side="left">
+      <template #body>
+        <nav aria-label="主要導覽" class="flex flex-col">
+          <NuxtLink
+            v-for="link in navLinks"
+            :key="link.to"
+            :to="link.to"
+            class="focus-ring text-muted hover:text-default inline-flex min-h-touch items-center border-b border-default text-body transition-colors"
+            @click="mobileNavOpen = false"
+            >{{ link.label }}</NuxtLink
+          >
+        </nav>
+      </template>
+    </USlideover>
 
     <main class="flex-1">
       <slot />

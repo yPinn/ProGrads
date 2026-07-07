@@ -35,6 +35,15 @@ export function metaString(meta: unknown, key: string): string | null {
   return null;
 }
 
+// As metaString, but for a finite number field (e.g. ExamSubject.metadata.durationMinutes).
+export function metaNumber(meta: unknown, key: string): number | null {
+  if (meta && typeof meta === "object" && !Array.isArray(meta)) {
+    const value = (meta as Record<string, unknown>)[key];
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+  }
+  return null;
+}
+
 export interface FacultyThesisRow {
   id: string;
   title: string;

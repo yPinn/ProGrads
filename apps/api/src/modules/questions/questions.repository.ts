@@ -169,6 +169,27 @@ export class QuestionsRepository {
     return { prev, next };
   }
 
+  // Whole paper (整卷測驗): one ExamSubject with all its questions in order, each with full
+  // content, choices (incl. isCorrect) and explanation — everything the timed test page needs.
+  findPaperById(examSubjectId: string) {
+    return this.prisma.examSubject.findUnique({
+      where: { id: examSubjectId },
+      include: {
+        subjects: { include: { subject: true } },
+        departments: { include: { department: true } },
+        exam: { include: { school: true } },
+        questions: {
+          include: {
+            subjects: { include: { subject: true } },
+            choices: { orderBy: { label: "asc" } },
+            explanation: true,
+          },
+          orderBy: [{ order: "asc" }, { externalId: "asc" }],
+        },
+      },
+    });
+  }
+
   findByExternalId(externalId: string) {
     return this.prisma.question.findUnique({
       where: { externalId },

@@ -62,6 +62,7 @@ ProGrads-content/
 ---
 question_id: ntu-2025-dsa-q03 # 釘選，唯一鍵（<school>-<year>-<paper>-<qNN>）
 exam_subject: 資料結構與演算法 # 卷的顯示名（ExamSubject.name；合科卷可多 subject）
+exam_minutes: 100 # 選填；整卷限時（分，官方節次時間表）→ sync 掛 ExamSubject.metadata.durationMinutes，供整卷測驗倒數
 subjects: [algo] # granular 練習標記（question_subject），用 slug
 departments: [csie, mmng] # 考此卷的系所 slugs → exam_subject ↔ department M:N（共用卷列多系）
 question_type: essay # mc | essay | calc | proof | cloze | listening
@@ -109,6 +110,8 @@ B
 
 - **參照資料（須先存在，由 seed 管）**：category / track / subject / school / department → sync **只解析、不建立**；缺則 red（逼先補 seed/PR）。frontmatter `subjects`/`departments` 皆以 slug 引用既有列。
 - **內容資料（sync 建立/更新）**：exam / exam_subject / question / choice / explanation / question_subject / exam_subject_department。
+- **coverage 規劃輔助**（唯讀、無 DB）：`pnpm --filter @prograds/content-sync report-questions <questions-dir> [--gaps] [--md]`——逐（校,年,卷）列題數、題型組成與 AI 解題完成度（答案／標準解答／知識點），並標出尚無題目的 seed 學校,導引補題順序。
+- **考科趨勢 phase-0（離線,無 DB）**：`report-trends <questions-dir> [--paper=<slug>] [--school=<slug>] [--top=N] [--by-points] [--md]`——直接由 frontmatter `knowledge_points`／`question_type` 樞紐出「考點×年」「題型×年」「考點×校」矩陣,驗證趨勢概念並導引「同校同科多年份」補題縱深。趨勢的產品化(入庫＋API＋UI)屬 phase 2,前置是 knowledge-point 受控詞彙表(見 [subject slug 慣例](#slug-命名慣例)類比)。
 
 ## 合規與顯示閘門
 

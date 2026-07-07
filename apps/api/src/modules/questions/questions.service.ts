@@ -3,12 +3,13 @@ import type {
   Choice,
   Meta,
   PaperSummary,
+  PaperTest,
   QuestionDetail,
   QuestionFacets,
   QuestionSummary,
   Subject,
 } from "@prograds/shared";
-import { mapSchool, metaString, uniqueDepartments } from "../../common/mappers.js";
+import { mapSchool, metaNumber, metaString, uniqueDepartments } from "../../common/mappers.js";
 import { QuestionFilters, QuestionsRepository } from "./questions.repository.js";
 
 interface ChoiceRow {
@@ -100,6 +101,59 @@ export class QuestionsService {
       })),
       schools: schools.map((s) => ({ id: s.id, slug: s.slug, name: s.name })),
       years: years.map((e) => e.year),
+    };
+  }
+
+  // Whole-paper test: all questions of one paper (full content + choices + explanation), ordered.
+  // The shared 題組 passage lives in the group lead's metadata.passage; since questions come in
+  // order, the first question seen per group is its lead — resolve passages in one in-memory pass.
+  async getPaperTest(examSubjectId: string): Promise<PaperTest> {
+    const es = await this.repo.findPaperById(examSubjectId);
+    if (!es) {
+      throw new NotFoundException(`paper not found: ${examSubjectId}`);
+    }
+    const groupPassage = new Map<string, string | null>();
+    for (const q of es.questions) {
+      const g = metaString(q.metadata, "group");
+      if (g && !groupPassage.has(g)) groupPassage.set(g, metaString(q.metadata, "passage"));
+    }
+    return {
+      examSubject: {
+        id: es.id,
+        slug: es.slug,
+        name: es.name,
+        subjects: mapSubjects(es.subjects),
+        departments: uniqueDepartments(es.departments),
+      },
+      exam: {
+        id: es.exam.id,
+        year: es.exam.year,
+        admissionType: es.exam.admissionType,
+        school: mapSchool(es.exam.school),
+      },
+      durationMinutes: metaNumber(es.metadata, "durationMinutes"),
+      questions: es.questions.map((q) => {
+        const group = metaString(q.metadata, "group");
+        return {
+          externalId: q.externalId,
+          number: q.number,
+          type: q.type,
+          subjects: mapSubjects(q.subjects),
+          contentMd: q.contentMd,
+          choices: mapChoices(q.choices),
+          explanation: q.explanation
+            ? {
+                standardAnswer: q.explanation.standardAnswer,
+                answerType: q.explanation.answerType,
+                confidence: q.explanation.confidence,
+                reviewStatus: q.explanation.reviewStatus,
+                modelUsed: q.explanation.modelUsed,
+              }
+            : null,
+          group,
+          groupPassageMd: group ? (groupPassage.get(group) ?? null) : null,
+        };
+      }),
     };
   }
 

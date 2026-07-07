@@ -98,6 +98,110 @@ describe("QuestionsService.getFacets", () => {
   });
 });
 
+describe("QuestionsService.getPaperTest", () => {
+  function paperRow() {
+    return {
+      id: "es1",
+      slug: "dsa-2024",
+      name: "資料結構與演算法",
+      metadata: { durationMinutes: 100 },
+      subjects: [subjectLink],
+      departments: [{ department: dept }, { department: dept }],
+      exam: { id: "e1", year: 2024, admissionType: "MASTER", school },
+      questions: [
+        {
+          externalId: "Q-1",
+          number: "1",
+          type: "SINGLE",
+          contentMd: "題幹一",
+          metadata: { group: "clozeA", passage: "克漏字篇章" },
+          choices: [
+            { label: "A", contentMd: "甲", isCorrect: true },
+            { label: "B", contentMd: "乙", isCorrect: false },
+          ],
+          subjects: [subjectLink],
+          explanation: {
+            standardAnswer: "A",
+            answerType: "SINGLE",
+            confidence: 0.9,
+            reviewStatus: "APPROVED",
+            modelUsed: "claude",
+          },
+        },
+        {
+          externalId: "Q-2",
+          number: "2",
+          type: "SINGLE",
+          contentMd: "題幹二",
+          // Same group, but only the lead carries the passage — this member inherits it.
+          metadata: { group: "clozeA" },
+          choices: [{ label: "A", contentMd: "甲", isCorrect: false }],
+          subjects: [subjectLink],
+          explanation: null,
+        },
+        {
+          externalId: "Q-3",
+          number: "3",
+          type: "ESSAY",
+          contentMd: "申論題",
+          metadata: null,
+          choices: [],
+          subjects: [subjectLink],
+          explanation: null,
+        },
+      ],
+    };
+  }
+
+  it("throws NotFoundException when the paper is absent", async () => {
+    const findPaperById = vi.fn().mockResolvedValue(null);
+    const service = makeService({ findPaperById });
+    await expect(service.getPaperTest("missing")).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it("maps every question and inherits the group passage from the lead", async () => {
+    const findPaperById = vi.fn().mockResolvedValue(paperRow());
+    const service = makeService({ findPaperById });
+
+    const paper = await service.getPaperTest("es1");
+
+    expect(findPaperById).toHaveBeenCalledWith("es1");
+    expect(paper.examSubject.name).toBe("資料結構與演算法");
+    expect(paper.durationMinutes).toBe(100); // lifted from ExamSubject.metadata
+
+    // duplicate department links collapse to one
+    expect(paper.examSubject.departments).toHaveLength(1);
+    expect(paper.exam.school).toEqual(school);
+    expect(paper.questions).toHaveLength(3);
+
+    // both members of clozeA carry the lead's passage; the essay has none
+    expect(paper.questions[0]?.groupPassageMd).toBe("克漏字篇章");
+    expect(paper.questions[1]?.group).toBe("clozeA");
+    expect(paper.questions[1]?.groupPassageMd).toBe("克漏字篇章");
+    expect(paper.questions[2]?.group).toBeNull();
+    expect(paper.questions[2]?.groupPassageMd).toBeNull();
+
+    // answers ride along (hidden client-side); explanation nullable
+    expect(paper.questions[0]?.choices).toEqual([
+      { label: "A", contentMd: "甲", isCorrect: true },
+      { label: "B", contentMd: "乙", isCorrect: false },
+    ]);
+    expect(paper.questions[0]?.explanation?.standardAnswer).toBe("A");
+    expect(paper.questions[1]?.explanation).toBeNull();
+    expect(paper.questions[2]?.choices).toEqual([]);
+  });
+
+  it("nulls durationMinutes when the paper has no metadata limit", async () => {
+    const row = paperRow();
+    row.metadata = null as unknown as { durationMinutes: number };
+    const findPaperById = vi.fn().mockResolvedValue(row);
+    const service = makeService({ findPaperById });
+
+    const paper = await service.getPaperTest("es1");
+    expect(paper.durationMinutes).toBeNull();
+  });
+});
+
 describe("QuestionsService.getQuestion", () => {
   function detailRow(overrides: Record<string, unknown> = {}) {
     return {
