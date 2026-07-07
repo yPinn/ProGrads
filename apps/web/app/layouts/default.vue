@@ -45,9 +45,9 @@ const mobileNavOpen = ref(false);
         <!-- ClientOnly + fixed-size fallback: colour mode is only known on the client, so this
              avoids a hydration mismatch / layout shift on the prerendered home page. -->
         <ClientOnly>
-          <UColorModeButton class="ml-auto" />
+          <ColorModeToggle class="ml-auto" />
           <template #fallback>
-            <div class="ml-auto size-8" />
+            <div class="ml-auto size-touch" />
           </template>
         </ClientOnly>
         <!-- Mobile-only trigger; the desktop nav above covers md and up. -->

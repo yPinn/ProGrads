@@ -7,6 +7,9 @@ export const icons = {
   next: "i-lucide-arrow-right",
   menu: "i-lucide-menu",
   search: "i-lucide-search",
+  // theme
+  light: "i-lucide-sun",
+  dark: "i-lucide-moon",
   // question / test
   timer: "i-lucide-timer",
   overtime: "i-lucide-alarm-clock-off",

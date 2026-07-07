@@ -37,6 +37,13 @@ export default withNuxt(
             "改用 <AppButton> / <IconButton>,勿直接用 <UButton>(見 components/AppButton.vue)。",
         },
         {
+          // UColorModeButton is a compound wrapper (not UButton), so the rule above misses it; it
+          // slipped past the guardrail as a raw icon button. Route the theme switch through
+          // <ColorModeToggle> (→ IconButton) so it inherits the design system too.
+          selector: "VElement[rawName='UColorModeButton']",
+          message: "改用 <ColorModeToggle>(走 IconButton 設計系統),勿直接用 <UColorModeButton>。",
+        },
+        {
           selector: 'VLiteral[value=/^"?i-lucide-/]',
           message: "改用 icons 登記表(icons.*),勿在模板寫 i-lucide-* 字串(見 utils/icons.ts)。",
         },
