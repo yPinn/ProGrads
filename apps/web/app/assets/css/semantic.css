@@ -35,7 +35,7 @@
   --ui-bg-elevated: #ece0c2;
   --ui-bg-accented: #e7d9b8;
   --ui-bg-inverted: #433222;
-  --ui-text-dimmed: #96845f;
+  --ui-text-dimmed: #7e6a44; /* 4.52:1 on --ui-bg — meets WCAG AA (was #96845f, 3.16:1); still the faintest tier below muted (6.01:1). Dark dimmed already passes (4.81:1). */
   --ui-text-muted: #725435;
   --ui-text-toned: #58412b;
   --ui-text: #433222;
