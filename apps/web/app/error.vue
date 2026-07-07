@@ -12,7 +12,7 @@ const handleClear = () => clearError({ redirect: "/" });
     <UContainer class="flex min-h-dvh flex-col items-center justify-center gap-4 text-center">
       <h1 class="font-serif text-title-lg tracking-tight">{{ error.status }}</h1>
       <p class="text-muted text-body">{{ error.statusText || "發生未預期的錯誤" }}</p>
-      <UButton @click="handleClear">回到首頁</UButton>
+      <AppButton @click="handleClear">回到首頁</AppButton>
     </UContainer>
   </UApp>
 </template>

@@ -15,6 +15,7 @@
 | [05-api-conventions.md](05-api-conventions.md)   | REST 慣例、Zod/nestjs-zod、錯誤格式、認證                        |
 | [06-decisions.md](06-decisions.md)               | 決策紀錄（ADR）：每個重大選型的理由                              |
 | [07-trends.md](07-trends.md)                     | 考科趨勢（規劃）：資料相依、分階段落地、指標定義、SWOT 與風險    |
+| [08-design-system.md](08-design-system.md)       | 前端設計系統：token 分層、按鈕 intent、icon 登記、eslint 護欄    |
 
 ## 一句話定案
 

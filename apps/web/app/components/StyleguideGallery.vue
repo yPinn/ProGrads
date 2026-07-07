@@ -4,6 +4,8 @@
 // wrapper) so every component can be eyeballed in both themes side by side. No theme logic
 // lives here — the surrounding `.dark` class re-scopes the --ui-* tokens via the cascade.
 import { ref } from "vue";
+import { icons } from "~/utils/icons";
+import type { ButtonIntent, ButtonSize } from "~/utils/button-intents";
 
 const selectItems = [
   { label: "資訊聯招", value: "cs" },
@@ -14,7 +16,13 @@ const selectVal = ref("cs");
 const menuVal = ref("cs");
 const page = ref(2);
 
-const buttonVariants = ["solid", "outline", "soft", "subtle", "ghost", "link"] as const;
+// Canonical button hierarchy (see utils/button-intents): callers pick an intent + size, never
+// raw color/variant. This gallery is the visual source of truth for the migration.
+const buttonIntents: ButtonIntent[] = ["primary", "secondary", "ghost", "danger", "link"];
+const buttonSizes: ButtonSize[] = ["sm", "md", "lg"];
+const iconEntries = Object.entries(icons) as [string, string][];
+// Interactive selected-state demo (aria-pressed): 選中 = primary, 未選 = ghost.
+const demoSel = ref<"列表" | "卡片" | "樹狀">("列表");
 const badgeColors = [
   "primary",
   "secondary",
@@ -35,25 +43,76 @@ const demoState = ref<(typeof demoStates)[number]>("data");
 
 <template>
   <div class="bg-default text-default space-y-section p-card">
-    <!-- Buttons -->
+    <!-- Buttons — canonical intent × size reference. App code uses <AppButton>/<IconButton>,
+         never raw <UButton>; this section is the visual source of truth for the hierarchy. -->
     <section class="space-y-3">
-      <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Buttons</h3>
-      <div class="flex flex-wrap items-center gap-2">
-        <UButton v-for="v in buttonVariants" :key="v" :variant="v">{{ v }}</UButton>
+      <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">
+        Buttons · AppButton intents
+      </h3>
+      <!-- intents × states: default / disabled / loading side by side (spot faint states).
+           hover · focus · active are interactive — hover / Tab / press each to check. -->
+      <div v-for="intent in buttonIntents" :key="intent" class="flex flex-wrap items-center gap-2">
+        <span class="text-dimmed text-caption w-20 shrink-0">{{ intent }}</span>
+        <AppButton :intent="intent">default</AppButton>
+        <AppButton :intent="intent" disabled>disabled</AppButton>
+        <AppButton :intent="intent" loading>loading</AppButton>
       </div>
-      <div class="flex flex-wrap items-center gap-2">
-        <UButton color="neutral" variant="ghost">ghost</UButton>
-        <UButton color="neutral" variant="subtle">neutral</UButton>
-        <UButton disabled>disabled</UButton>
-        <UButton loading>loading</UButton>
-        <UButton icon="i-lucide-search" />
+      <!-- size scale — orthogonal to intent, so shown once (on primary) -->
+      <div class="flex flex-wrap items-center gap-2 pt-1">
+        <span class="text-dimmed text-caption w-20 shrink-0">size</span>
+        <AppButton v-for="s in buttonSizes" :key="s" :size="s">{{ s }}</AppButton>
+        <span class="text-dimmed text-caption">hover · focus(Tab)· active 為互動態</span>
       </div>
-      <div class="flex flex-wrap items-center gap-2">
-        <UButton v-for="s in ['xs', 'sm', 'md', 'lg', 'xl']" :key="s" :size="s">{{ s }}</UButton>
+
+      <!-- selected (aria-pressed): interactive toggle so the 選中 vs 未選 contrast is visible. -->
+      <div class="flex flex-wrap items-center gap-2 pt-1">
+        <span class="text-dimmed text-caption w-20 shrink-0">選取態</span>
+        <AppButton
+          v-for="opt in ['列表', '卡片', '樹狀'] as const"
+          :key="opt"
+          :intent="demoSel === opt ? 'primary' : 'ghost'"
+          :aria-pressed="demoSel === opt"
+          @click="demoSel = opt"
+        >
+          {{ opt }}
+        </AppButton>
+        <span class="text-dimmed text-caption">選中 = primary、未選 = ghost(點擊切換)</span>
       </div>
+
+      <!-- leading / trailing icon -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-dimmed text-caption w-20 shrink-0">icon</span>
+        <AppButton :icon="icons.search">leading</AppButton>
+        <AppButton intent="ghost" :trailing-icon="icons.next">trailing</AppButton>
+      </div>
+
+      <!-- icon-only buttons (label → aria-label, required) -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-dimmed text-caption w-20 shrink-0">IconButton</span>
+        <IconButton :icon="icons.menu" label="選單" />
+        <IconButton :icon="icons.close" label="關閉" intent="secondary" />
+        <IconButton :icon="icons.search" label="搜尋" intent="primary" />
+      </div>
+
       <!-- App-owned focus ring (Tab to a link to see outline-primary). -->
       <a href="#" class="focus-ring text-primary text-small inline-block">app link · .focus-ring</a>
-      <p class="text-dimmed text-caption">hover 上方按鈕、Tab 聚焦此連結即見互動態。</p>
+    </section>
+
+    <!-- Icon registry — the semantic names app code references (utils/icons). -->
+    <section class="space-y-3">
+      <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">
+        Icons · registry
+      </h3>
+      <div class="flex flex-wrap gap-3">
+        <div
+          v-for="[name] in iconEntries"
+          :key="name"
+          class="border-default flex min-w-20 flex-col items-center gap-1 rounded-card border p-control"
+        >
+          <UIcon :name="icons[name as keyof typeof icons]" class="text-title-sm" />
+          <span class="text-dimmed text-caption">{{ name }}</span>
+        </div>
+      </div>
     </section>
 
     <!-- Badges -->
@@ -186,7 +245,7 @@ const demoState = ref<(typeof demoStates)[number]>("data");
       <p class="font-serif text-title-sm tracking-tight">標題 title-sm · 明體</p>
       <p class="text-body">內文 body · Inter，研究所備考資訊平台。</p>
       <p class="text-muted text-small">small muted · 次要說明文字。</p>
-      <p class="text-dimmed text-small">small dimmed · 最低強度（已調至 ~3.2:1）。</p>
+      <p class="text-dimmed text-small">small dimmed · 最低強度（~4.5:1，達 WCAG AA）。</p>
     </section>
 
     <!-- Prose (MDC content) — the @tailwindcss/typography mapping recoloured to --ui-* roles.

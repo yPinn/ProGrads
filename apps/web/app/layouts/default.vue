@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { icons } from "~/utils/icons";
+
 // Dev-only tooling links (styleguide, etc.) surface in the footer's right slot; these pages
 // 404 in production, so the links are gated to dev to avoid dead nav in the shipped build.
 const isDev = import.meta.dev;
@@ -49,11 +51,9 @@ const mobileNavOpen = ref(false);
           </template>
         </ClientOnly>
         <!-- Mobile-only trigger; the desktop nav above covers md and up. -->
-        <UButton
-          icon="i-lucide-menu"
-          color="neutral"
-          variant="ghost"
-          aria-label="開啟主要導覽選單"
+        <IconButton
+          :icon="icons.menu"
+          label="開啟主要導覽選單"
           class="md:hidden"
           @click="mobileNavOpen = true"
         />

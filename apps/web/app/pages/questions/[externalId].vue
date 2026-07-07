@@ -5,6 +5,7 @@ import { useQuestion } from "~/composables/useQuestion";
 import { ApiError } from "~/utils/api-error";
 import { QUESTION_TYPE_LABELS, REVIEW_STATUS_LABELS } from "~/utils/question-labels";
 import { ADMISSION_TYPE_LABELS } from "~/utils/admission-labels";
+import { icons } from "~/utils/icons";
 // KaTeX styles only this page's MDC-rendered math; scoped here so it code-splits with the route.
 import "katex/dist/katex.min.css";
 
@@ -147,26 +148,24 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onArrowNav));
             class="border-default mt-8 flex items-center justify-between gap-3 border-t pt-4"
             aria-label="同卷題目切換"
           >
-            <UButton
+            <AppButton
+              intent="ghost"
               :to="q.prev ? `/questions/${q.prev.externalId}` : undefined"
               :disabled="!q.prev"
-              color="neutral"
-              variant="ghost"
-              icon="i-lucide-arrow-left"
+              :icon="icons.prev"
               :aria-label="q.prev ? `上一題:第 ${q.prev.number} 題` : '已是本卷首題'"
             >
               上一題<span v-if="q.prev" class="text-muted ml-1">第 {{ q.prev.number }} 題</span>
-            </UButton>
-            <UButton
+            </AppButton>
+            <AppButton
+              intent="ghost"
               :to="q.next ? `/questions/${q.next.externalId}` : undefined"
               :disabled="!q.next"
-              color="neutral"
-              variant="ghost"
-              trailing-icon="i-lucide-arrow-right"
+              :trailing-icon="icons.next"
               :aria-label="q.next ? `下一題:第 ${q.next.number} 題` : '已是本卷末題'"
             >
               <span v-if="q.next" class="text-muted mr-1">第 {{ q.next.number }} 題</span>下一題
-            </UButton>
+            </AppButton>
           </nav>
         </article>
       </QueryState>

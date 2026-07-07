@@ -2,6 +2,8 @@
 // <QueryState>/<ErrorState>; a background refetch failure leaves stale data on screen, so it
 // surfaces as a toast instead. Returns the toast to show, or null to stay silent. Kept pure
 // (no Nuxt context) so the convention is unit-testable; the plugin owns the runWithContext glue.
+import { icons } from "~/utils/icons";
+
 export interface RefetchToast {
   title: string;
   description: string;
@@ -18,6 +20,6 @@ export function backgroundRefetchToast(
     title: "資料更新失敗",
     description: error instanceof Error ? error.message : "請稍後再試。",
     color: "error",
-    icon: "i-lucide-triangle-alert",
+    icon: icons.warning,
   };
 }
