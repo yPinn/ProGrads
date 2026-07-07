@@ -5,7 +5,7 @@ export type ButtonSize = "sm" | "md" | "lg";
 
 export const BUTTON_INTENT = {
   primary: { color: "primary", variant: "solid" }, // high emphasis — the one main action
-  secondary: { color: "neutral", variant: "soft" }, // medium — supporting actions
+  secondary: { color: "neutral", variant: "outline" }, // medium — supporting; bordered so it stays legible on elevated card fills (soft's tint blends into bg-elevated)
   ghost: { color: "neutral", variant: "ghost" }, // low — toolbar / nav / icon buttons
   danger: { color: "error", variant: "solid" }, // destructive
   link: { color: "primary", variant: "link" }, // inline text-link action

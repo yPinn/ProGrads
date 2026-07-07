@@ -52,6 +52,12 @@
   --ui-warning: #b5781c;
   --ui-error: #bd483c;
 
+  /* Card surface (consumed by <AppCard>) — a semantic alias onto the EXISTING surface ramp, not a
+     new colour: light uses bg-accented (the deepest paper step) so a card sits a step below the page
+     rather than the near-flat 1.14:1 of bg-elevated; text-muted still holds AA (4.94:1). Depth is
+     completed by a border-accented edge (semantic.css → AppCard). */
+  --surface-card: var(--ui-bg-accented);
+
   /* blackboard surface (consumed by .board) — light */
   --board: #243b30;
   --board-ink: #edefe4;
@@ -81,6 +87,11 @@
   --ui-info: #a9b8d7;
   --ui-warning: #cda152;
   --ui-error: #d0685c;
+
+  /* Card surface (dark) — bg-muted, one step above the page yet dark enough that card text-muted
+     holds AA (4.96:1). (Dark's bg-accented/elevated are LIGHTER than the page, so they can't be the
+     resting card fill without dropping text below AA — hence a different ramp step than light.) */
+  --surface-card: var(--ui-bg-muted);
 
   /* blackboard — darker than the night page so it still reads as a board */
   --board: #15231c;

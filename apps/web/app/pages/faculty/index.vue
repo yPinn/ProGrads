@@ -84,9 +84,7 @@ const prefersReducedMotion = useReducedMotion();
     title="師資陣容"
     description="各校系所師資:職級、研究方向、實驗室與代表論文佐證。"
   >
-    <div
-      class="border-default mb-section flex flex-wrap items-end gap-control rounded-card border p-card"
-    >
+    <AppCard class="mb-section flex flex-wrap items-end gap-control">
       <UFieldGroup aria-label="瀏覽方式">
         <!-- Segmented control (a UFieldGroup of toggle buttons), not a single-action button — this
              is a distinct pattern deferred to a future <AppSegmented>. Kept as raw UButton until
@@ -136,7 +134,7 @@ const prefersReducedMotion = useReducedMotion();
         placeholder="選擇所別"
         class="w-full sm:w-64"
       />
-    </div>
+    </AppCard>
 
     <!-- By school: school → dept → roster. -->
     <template v-if="mode === 'school'">
@@ -147,28 +145,30 @@ const prefersReducedMotion = useReducedMotion();
       <section v-else-if="!dept">
         <h2 class="font-serif text-title-sm mb-3 tracking-tight">{{ schoolName }} · 系所</h2>
 
-        <div v-if="deptsLoading" class="border-default divide-default divide-y rounded-card border">
+        <AppList v-if="deptsLoading" as="div">
           <USkeleton v-for="n in 6" :key="n" class="mx-5 my-4 h-5 w-48" />
-        </div>
+        </AppList>
 
         <EmptyState v-else-if="!deptItems.length">該校尚無系所資料。</EmptyState>
 
-        <ul v-else class="border-default divide-default divide-y rounded-card border">
+        <AppList v-else>
           <li
             v-for="(d, di) in deptItems"
             :key="d.value"
             v-motion="motionFadeUp(di, prefersReducedMotion)"
           >
-            <button
+            <AppListRow
+              as="button"
+              interactive
               type="button"
-              class="focus-ring hover:bg-elevated/50 flex min-h-touch w-full items-center justify-between px-5 py-4 text-left transition-colors"
+              class="flex w-full items-center justify-between text-left"
               @click="dept = d.value"
             >
               <span>{{ d.label }}</span>
               <span class="text-muted">→</span>
-            </button>
+            </AppListRow>
           </li>
-        </ul>
+        </AppList>
       </section>
 
       <!-- State C: dept chosen — the roster. -->

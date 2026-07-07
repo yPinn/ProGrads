@@ -179,9 +179,9 @@ function choiceState(
                   <AppButton intent="primary" size="sm" @click="submit">交卷</AppButton>
                 </template>
                 <template v-else>
-                  <UBadge color="primary" variant="soft" size="lg" class="tabular-nums">
+                  <AppBadge color="primary" variant="soft" size="lg" class="tabular-nums">
                     得分 {{ score }}/{{ gradable.length }}
-                  </UBadge>
+                  </AppBadge>
                   <AppButton intent="secondary" size="sm" @click="restart">再測一次</AppButton>
                 </template>
               </div>
@@ -215,7 +215,7 @@ function choiceState(
 
               <div class="mb-2 flex items-center gap-2">
                 <span class="font-serif text-title-sm tracking-tight">第 {{ q.number }} 題</span>
-                <UBadge variant="subtle" size="sm">{{ QUESTION_TYPE_LABELS[q.type] }}</UBadge>
+                <AppBadge variant="subtle" size="sm">{{ QUESTION_TYPE_LABELS[q.type] }}</AppBadge>
                 <UIcon
                   v-if="submitted && q.choices.length"
                   :name="isQuestionCorrect(q) ? icons.correct : icons.wrong"
@@ -225,10 +225,7 @@ function choiceState(
               </div>
 
               <RenderBoundary label="題幹">
-                <MDC
-                  :value="q.contentMd"
-                  class="board font-serif prose max-w-none rounded-card p-card"
-                />
+                <AppBoard :value="q.contentMd" />
               </RenderBoundary>
 
               <!-- 選項:作答前可點選(複選以多次點擊切換);交卷後標示正解與作答對錯。 -->
@@ -284,10 +281,7 @@ function choiceState(
               <section v-if="submitted && q.explanation" class="mt-4">
                 <h3 class="font-serif text-body mb-2 tracking-tight">標準解析</h3>
                 <RenderBoundary label="解析">
-                  <MDC
-                    :value="q.explanation.standardAnswer"
-                    class="board font-serif prose prose-sm max-w-none rounded-card p-card"
-                  />
+                  <AppBoard :value="q.explanation.standardAnswer" size="sm" />
                 </RenderBoundary>
                 <p class="text-muted text-caption mt-2">
                   AI 生成解析,僅供參考。<span v-if="!q.choices.length"

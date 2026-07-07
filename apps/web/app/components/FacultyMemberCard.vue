@@ -32,7 +32,7 @@ function thesisTag(t: FacultyThesis): string {
 </script>
 
 <template>
-  <article class="border-default rounded-card border p-card">
+  <AppCard as="article">
     <div class="flex items-baseline justify-between gap-2">
       <h3 class="font-serif text-title-sm tracking-tight">
         {{ member.name }}
@@ -57,7 +57,7 @@ function thesisTag(t: FacultyThesis): string {
       <li
         v-for="area in member.researchAreas"
         :key="area"
-        class="border-default text-muted text-caption rounded-full border px-2 py-0.5"
+        class="border-accented text-muted text-caption rounded-full border px-2 py-0.5"
       >
         {{ area }}
       </li>
@@ -93,5 +93,5 @@ function thesisTag(t: FacultyThesis): string {
     >
       個人/實驗室頁 →
     </a>
-  </article>
+  </AppCard>
 </template>

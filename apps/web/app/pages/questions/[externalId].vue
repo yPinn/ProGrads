@@ -65,7 +65,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onArrowNav));
             <p class="text-muted text-caption mb-1 tracking-eyebrow uppercase">卷別</p>
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
               <h1 class="font-serif text-title-md tracking-tight">{{ q.examSubject.name }}</h1>
-              <UBadge variant="subtle">{{ QUESTION_TYPE_LABELS[q.type] }}</UBadge>
+              <AppBadge variant="subtle">{{ QUESTION_TYPE_LABELS[q.type] }}</AppBadge>
             </div>
             <p class="text-muted text-small mt-1">
               {{ q.exam.school.name }} {{ q.exam.year }} ·
@@ -76,17 +76,17 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onArrowNav));
           <!-- 考科練習標籤:點擊跳到該考科的跨校題庫(跨校練單科入口)。 -->
           <div v-if="q.subjects.length" class="mb-3 flex flex-wrap items-center gap-1.5">
             <span class="text-muted text-caption">考科</span>
-            <UBadge
+            <AppBadge
               v-for="s in q.subjects"
               :key="s.slug"
               :to="`/questions?subject=${s.slug}`"
               color="neutral"
-              variant="soft"
+              variant="outline"
               class="focus-ring hover:bg-elevated transition-colors"
               :aria-label="`練習考科:${s.name}(跨校)`"
             >
               {{ s.name }}
-            </UBadge>
+            </AppBadge>
           </div>
 
           <!-- 題組(閱讀/克漏字)共用篇章:存於題組首題的 metadata.passage,組內每題皆呈現。 -->
@@ -102,13 +102,10 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onArrowNav));
             </RenderBoundary>
           </section>
 
-          <!-- 題幹呈現為「黑板」:深色面在奶油頁上製造焦點與層次。.board.prose 把 MDC 內文映成粉筆色
-               (components.css),兩主題皆然,故不需 prose-invert。 -->
+          <!-- 題幹呈現為「黑板」:深色面在奶油頁上製造焦點與層次。<AppBoard> 把 MDC 內文映成粉筆色,
+               兩主題皆然,故不需 prose-invert。 -->
           <RenderBoundary label="題幹">
-            <MDC
-              :value="q.contentMd"
-              class="board font-serif prose max-w-none rounded-card p-card"
-            />
+            <AppBoard :value="q.contentMd" />
           </RenderBoundary>
 
           <RenderBoundary v-if="q.choices.length" label="選項">
@@ -128,17 +125,14 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onArrowNav));
           <section v-if="q.explanation" class="mt-6">
             <div class="mb-2 flex items-center gap-2">
               <h2 class="font-serif text-title-sm tracking-tight">標準解析</h2>
-              <UBadge variant="subtle">{{
+              <AppBadge variant="subtle">{{
                 REVIEW_STATUS_LABELS[q.explanation.reviewStatus]
-              }}</UBadge>
+              }}</AppBadge>
             </div>
             <!-- Explanation renders on the blackboard too (chalk prose + dark-green code),
-                 matching the stem; .board.prose and .board .shiki apply automatically. -->
+                 matching the stem; <AppBoard> applies the same treatment. -->
             <RenderBoundary label="解析">
-              <MDC
-                :value="q.explanation.standardAnswer"
-                class="board font-serif prose prose-sm max-w-none rounded-card p-card"
-              />
+              <AppBoard :value="q.explanation.standardAnswer" size="sm" />
             </RenderBoundary>
             <p class="text-muted text-caption mt-3">AI 生成解析,僅供參考。</p>
           </section>
