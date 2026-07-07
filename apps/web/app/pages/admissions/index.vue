@@ -79,9 +79,7 @@ const prefersReducedMotion = useReducedMotion();
     title="報名資訊"
     description="各校系所招生組別:名額、報名/錄取人數、採計考科與佔分、面試與簡章。"
   >
-    <div
-      class="border-default mb-section flex flex-wrap items-end gap-control rounded-card border p-card"
-    >
+    <AppCard class="mb-section flex flex-wrap items-end gap-control">
       <USelectMenu
         v-model="school"
         :items="schoolItems"
@@ -101,7 +99,7 @@ const prefersReducedMotion = useReducedMotion();
         placeholder="選擇系所"
         class="w-full sm:w-64"
       />
-    </div>
+    </AppCard>
 
     <!-- State A: no school chosen yet. -->
     <EmptyState v-if="!school">選擇學校開始瀏覽各系所招生組別。</EmptyState>
@@ -110,28 +108,30 @@ const prefersReducedMotion = useReducedMotion();
     <section v-else-if="!dept">
       <h2 class="font-serif text-title-sm mb-3 tracking-tight">{{ schoolName }} · 系所</h2>
 
-      <div v-if="deptsLoading" class="border-default divide-default divide-y rounded-card border">
+      <AppList v-if="deptsLoading" as="div">
         <USkeleton v-for="n in 6" :key="n" class="mx-5 my-4 h-5 w-48" />
-      </div>
+      </AppList>
 
       <EmptyState v-else-if="!deptItems.length">該校尚無系所資料。</EmptyState>
 
-      <ul v-else class="border-default divide-default divide-y rounded-card border">
+      <AppList v-else>
         <li
           v-for="(d, di) in deptItems"
           :key="d.value"
           v-motion="motionFadeUp(di, prefersReducedMotion)"
         >
-          <button
+          <AppListRow
+            as="button"
+            interactive
             type="button"
-            class="focus-ring hover:bg-elevated/50 flex min-h-touch w-full items-center justify-between px-5 py-4 text-left transition-colors"
+            class="flex w-full items-center justify-between text-left"
             @click="dept = d.value"
           >
             <span>{{ d.label }}</span>
             <span class="text-muted">→</span>
-          </button>
+          </AppListRow>
         </li>
-      </ul>
+      </AppList>
     </section>
 
     <!-- State C: dept chosen — admissions with a year tab slot. -->
@@ -189,11 +189,7 @@ const prefersReducedMotion = useReducedMotion();
             {{ g.name || "不分組" }}<span v-if="g.code" class="text-muted"> · {{ g.code }} 組</span>
           </h3>
 
-          <div
-            v-for="r in g.rounds"
-            :key="`${r.year}-${r.admissionType}`"
-            class="border-default mt-3 rounded-card border p-card"
-          >
+          <AppCard v-for="r in g.rounds" :key="`${r.year}-${r.admissionType}`" class="mt-3">
             <div class="font-medium">
               {{ r.year }} 學年 · {{ ADMISSION_TYPE_LABELS[r.admissionType] }}
               <span v-if="r.admissionCode" class="text-muted">· 代碼 {{ r.admissionCode }}</span>
@@ -236,7 +232,7 @@ const prefersReducedMotion = useReducedMotion();
             >
               簡章連結
             </a>
-          </div>
+          </AppCard>
         </section>
       </QueryState>
     </template>
