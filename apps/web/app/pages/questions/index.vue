@@ -3,10 +3,6 @@ import { ref, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuestionPapers } from "~/composables/useQuestionPapers";
 import { useQuestionFacets } from "~/composables/useQuestionFacets";
-import { QUESTION_TYPE_LABELS } from "~/utils/question-labels";
-import { ADMISSION_TYPE_LABELS } from "~/utils/admission-labels";
-import { icons } from "~/utils/icons";
-import type { PaperQuestionRef } from "@prograds/shared";
 
 useSeoMeta({
   title: "考古題",
@@ -71,21 +67,6 @@ const { data, isPending, isError, error, refetch, isPlaceholderData } = useQuest
 
 // Honour OS reduce-motion for the JS-driven stagger (CSS guard can't reach it).
 const prefersReducedMotion = useReducedMotion();
-
-// Cluster consecutive questions sharing a group (passage/cloze set) so the question-number selector can
-// visually bracket them. Questions arrive in paper order, so a single linear pass suffices.
-function groupRuns(
-  questions: PaperQuestionRef[],
-): { group: string | null; items: PaperQuestionRef[] }[] {
-  const runs: { group: string | null; items: PaperQuestionRef[] }[] = [];
-  for (const q of questions) {
-    const g = q.group ?? null;
-    const last = runs[runs.length - 1];
-    if (last && last.group === g) last.items.push(q);
-    else runs.push({ group: g, items: [q] });
-  }
-  return runs;
-}
 </script>
 
 <template>
@@ -137,76 +118,14 @@ function groupRuns(
       <template #empty>查無符合條件的考卷。試試放寬考科、學校或年度。</template>
 
       <div v-if="data">
-        <!-- 以考卷為單位:每張卷一張卡,內含題號選擇器(點題號進該題)。 -->
+        <!-- 每張考卷一張 <PaperCard>(票券版面);列表頁只管排列與進場交錯動畫。 -->
         <ul class="space-y-4" :class="{ 'opacity-60': isPlaceholderData }">
-          <li
+          <PaperCard
             v-for="(p, pi) in data.items"
             :key="p.examSubject.id"
             v-motion="motionFadeUp(pi, prefersReducedMotion)"
-            class="border-default hover:border-default/80 rounded-card border p-card transition-colors"
-          >
-            <!-- 主角是考科(卷別);學校年度為出處,降為 muted。 -->
-            <div class="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-              <span class="font-serif text-body tracking-tight">{{ p.examSubject.name }}</span>
-              <UBadge
-                v-for="s in p.subjects"
-                :key="s.slug"
-                color="neutral"
-                variant="soft"
-                size="sm"
-              >
-                {{ s.name }}
-              </UBadge>
-            </div>
-            <div class="mb-3 flex items-center justify-between gap-2">
-              <p class="text-muted text-small">
-                {{ p.exam.school.name }} {{ p.exam.year }} ·
-                {{ ADMISSION_TYPE_LABELS[p.exam.admissionType] }} · {{ p.questions.length }} 題
-              </p>
-              <!-- 整卷計時測驗:連續作答、隱藏答案、交卷自動批改。卡片次級入口 → secondary。 -->
-              <AppButton
-                intent="secondary"
-                size="sm"
-                :to="`/questions/paper/${p.examSubject.id}`"
-                :icon="icons.timer"
-                class="shrink-0"
-                :aria-label="`整卷測驗:${p.examSubject.name}`"
-              >
-                整卷測驗
-              </AppButton>
-            </div>
-
-            <!-- 題號選擇器:同題組(閱讀/克漏字共用篇章)的題號以底色塊 + 「題組」標示群聚。 -->
-            <div class="flex flex-wrap items-start gap-2">
-              <div
-                v-for="(run, i) in groupRuns(p.questions)"
-                :key="i"
-                class="flex flex-wrap items-center gap-1.5"
-                :class="run.group ? 'bg-primary/5 rounded-md px-2 py-1.5' : ''"
-              >
-                <UBadge
-                  v-if="run.group"
-                  color="primary"
-                  variant="soft"
-                  size="xs"
-                  :title="run.group"
-                >
-                  題組
-                </UBadge>
-                <AppButton
-                  v-for="qq in run.items"
-                  :key="qq.externalId"
-                  intent="secondary"
-                  size="sm"
-                  :to="`/questions/${qq.externalId}`"
-                  class="min-h-touch min-w-touch justify-center"
-                  :aria-label="`第 ${qq.number} 題(${QUESTION_TYPE_LABELS[qq.type]})`"
-                >
-                  {{ qq.number }}
-                </AppButton>
-              </div>
-            </div>
-          </li>
+            :paper="p"
+          />
         </ul>
 
         <div v-if="data.meta.total > pageSize" class="mt-6 flex justify-center">

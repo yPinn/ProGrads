@@ -1,11 +1,39 @@
 <script setup lang="ts">
-// Base-component gallery for the /styleguide route. Theme-agnostic: it renders the common
-// Nuxt UI + app-owned components once; the page renders it twice (light column + a `.dark`
-// wrapper) so every component can be eyeballed in both themes side by side. No theme logic
-// lives here — the surrounding `.dark` class re-scopes the --ui-* tokens via the cascade.
+// Colour-token + base-component gallery for /styleguide. No theme logic here — renders in the
+// active colour mode, so the nav theme switch flips every swatch/component. Zones: Colors →
+// Typography → Buttons → Icons → Badges → Forms → Feedback → States → Surfaces → Navigation → Prose.
 import { ref } from "vue";
 import { icons } from "~/utils/icons";
 import type { ButtonIntent, ButtonSize } from "~/utils/button-intents";
+
+// Colour tokens as swatches — the palette source of truth (semantic.css). Classes are literal so
+// Tailwind's scanner emits them; roles/ink use the --ui-* / --surface-card vars directly.
+const surfaceSwatches = [
+  { name: "default", cls: "bg-default" },
+  { name: "muted", cls: "bg-muted" },
+  { name: "elevated", cls: "bg-elevated" },
+  { name: "accented", cls: "bg-accented" },
+  { name: "card", cls: "bg-(--surface-card)" },
+  { name: "inverted", cls: "bg-inverted" },
+];
+const roleSwatches = [
+  { name: "primary", cls: "bg-(--ui-primary)" },
+  { name: "secondary", cls: "bg-(--ui-secondary)" },
+  { name: "success", cls: "bg-(--ui-success)" },
+  { name: "info", cls: "bg-(--ui-info)" },
+  { name: "warning", cls: "bg-(--ui-warning)" },
+  { name: "error", cls: "bg-(--ui-error)" },
+];
+const borderSwatches = [
+  { name: "default", cls: "border-default" },
+  { name: "accented", cls: "border-accented" },
+];
+const inkTiers = [
+  { name: "text", cls: "text-default" },
+  { name: "toned", cls: "text-(--ui-text-toned)" },
+  { name: "muted", cls: "text-muted" },
+  { name: "dimmed", cls: "text-dimmed" },
+];
 
 const selectItems = [
   { label: "資訊聯招", value: "cs" },
@@ -42,9 +70,50 @@ const demoState = ref<(typeof demoStates)[number]>("data");
 </script>
 
 <template>
-  <div class="bg-default text-default space-y-section p-card">
-    <!-- Buttons — canonical intent × size reference. App code uses <AppButton>/<IconButton>,
-         never raw <UButton>; this section is the visual source of truth for the hierarchy. -->
+  <div class="text-default space-y-section">
+    <!-- Colors — the palette (semantic.css tokens) as swatches. -->
+    <section class="space-y-4">
+      <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Colors · 色票</h3>
+
+      <div class="space-y-1.5">
+        <p class="text-dimmed text-caption">Surfaces 紙面階（背景由淺到深，末為 inverted 墨底）</p>
+        <div class="flex flex-wrap gap-3">
+          <div v-for="s in surfaceSwatches" :key="s.name" class="space-y-1">
+            <div class="border-default size-14 rounded-card border" :class="s.cls" />
+            <p class="text-dimmed text-caption text-center">{{ s.name }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <p class="text-dimmed text-caption">Roles 語義色（solid）</p>
+        <div class="flex flex-wrap gap-3">
+          <div v-for="r in roleSwatches" :key="r.name" class="space-y-1">
+            <div class="size-14 rounded-card" :class="r.cls" />
+            <p class="text-dimmed text-caption text-center">{{ r.name }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <p class="text-dimmed text-caption">Borders 邊框</p>
+        <div class="flex flex-wrap gap-3">
+          <div v-for="b in borderSwatches" :key="b.name" class="space-y-1">
+            <div class="bg-default size-14 rounded-card border-2" :class="b.cls" />
+            <p class="text-dimmed text-caption text-center">{{ b.name }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-0.5">
+        <p class="text-dimmed text-caption">Ink 墨階（文字強度，均須達 WCAG AA）</p>
+        <p v-for="t in inkTiers" :key="t.name" class="text-body" :class="t.cls">
+          {{ t.name }} · 研究所備考資訊平台 Aa 123
+        </p>
+      </div>
+    </section>
+
+    <!-- Buttons — AppButton intent × size; source of truth for the hierarchy. -->
     <section class="space-y-3">
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">
         Buttons · AppButton intents
@@ -119,11 +188,11 @@ const demoState = ref<(typeof demoStates)[number]>("data");
     <section class="space-y-3">
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Badges</h3>
       <div class="flex flex-wrap items-center gap-2">
-        <UBadge v-for="c in badgeColors" :key="c" :color="c" variant="subtle">{{ c }}</UBadge>
+        <AppBadge v-for="c in badgeColors" :key="c" :color="c" variant="subtle">{{ c }}</AppBadge>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <UBadge v-for="v in ['solid', 'soft', 'subtle', 'outline']" :key="v" :variant="v"
-          >primary {{ v }}</UBadge
+        <AppBadge v-for="v in ['solid', 'soft', 'subtle', 'outline']" :key="v" :variant="v"
+          >primary {{ v }}</AppBadge
         >
       </div>
     </section>
@@ -213,29 +282,33 @@ const demoState = ref<(typeof demoStates)[number]>("data");
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Navigation</h3>
       <div class="flex flex-wrap items-center gap-4">
         <UPagination v-model:page="page" :total="120" :items-per-page="20" />
-        <UColorModeButton />
+        <ColorModeToggle />
       </div>
     </section>
 
     <!-- Surfaces -->
     <section class="space-y-3">
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Surfaces</h3>
-      <div class="bg-elevated text-default rounded-card p-card">
-        <p class="font-medium">Card · bg-elevated</p>
-        <p class="text-muted text-small">扁平面板，靠色調層 + 1px 邊框，無陰影。</p>
-      </div>
-      <ul class="border-default divide-default divide-y rounded-card border">
-        <li
-          v-for="n in 2"
-          :key="n"
-          class="hover:bg-elevated/50 flex min-h-touch items-center px-5 py-3 transition-colors"
-        >
+      <!-- AppCard: 靜態面板。填色 --surface-card(亮 bg-accented / 暗 bg-muted)+ border-accented 銳邊,
+           內文限 text/text-muted。 -->
+      <AppCard>
+        <p class="font-medium">AppCard · 靜態</p>
+        <p class="text-muted text-small">扁平面板,靠色調層 + 1px 邊框,無陰影。</p>
+      </AppCard>
+      <!-- interactive: hover 銳化邊框(border-inverted),仍無陰影。 -->
+      <AppCard interactive>
+        <p class="font-medium">AppCard · interactive</p>
+        <p class="text-muted text-small">hover 邊框轉為 inverted 墨線。</p>
+      </AppCard>
+      <!-- AppList + AppListRow: 容器透明 + hairline 分隔;列自帶 hover。 -->
+      <AppList>
+        <AppListRow v-for="n in 2" :key="n" interactive class="flex items-center">
           互動清單列 {{ n }} · hover 提亮
-        </li>
-      </ul>
-      <div class="board font-serif rounded-card p-card">
+        </AppListRow>
+      </AppList>
+      <AppBoard :prose="false">
         <p>Board 黑板面 · board-ink 粉筆字（解題題幹用）</p>
-      </div>
+      </AppBoard>
     </section>
 
     <!-- Typography -->
@@ -244,8 +317,8 @@ const demoState = ref<(typeof demoStates)[number]>("data");
       <p class="font-serif text-title-lg tracking-tight">標題 title-lg · 明體</p>
       <p class="font-serif text-title-sm tracking-tight">標題 title-sm · 明體</p>
       <p class="text-body">內文 body · Inter，研究所備考資訊平台。</p>
-      <p class="text-muted text-small">small muted · 次要說明文字。</p>
-      <p class="text-dimmed text-small">small dimmed · 最低強度（~4.5:1，達 WCAG AA）。</p>
+      <p class="text-muted text-small">說明 small · 次要文字（墨階見 Colors）。</p>
+      <p class="text-caption">caption · 最小級（eyebrow / 標註）。</p>
     </section>
 
     <!-- Prose (MDC content) — the @tailwindcss/typography mapping recoloured to --ui-* roles.
@@ -263,10 +336,10 @@ const demoState = ref<(typeof demoStates)[number]>("data");
         </ul>
         <blockquote>引用區塊範例。</blockquote>
       </div>
-      <!-- Same prose on the blackboard surface → chalk text + chalk links (.board.prose). -->
-      <div class="board font-serif prose prose-sm max-w-none rounded-card p-card">
+      <!-- Same prose on the blackboard surface → chalk text + chalk links (Board's .board.prose). -->
+      <AppBoard size="sm">
         <p>黑板題幹：<a href="#">連結</a> 與 <code>code</code> 在粉筆色下的呈現。</p>
-      </div>
+      </AppBoard>
     </section>
   </div>
 </template>
