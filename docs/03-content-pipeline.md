@@ -62,6 +62,7 @@ ProGrads-content/
 ---
 question_id: ntu-2025-dsa-q03 # 釘選，唯一鍵（<school>-<year>-<paper>-<qNN>）
 exam_subject: 資料結構與演算法 # 卷的顯示名（ExamSubject.name；合科卷可多 subject）
+exam_minutes: 100 # 選填；整卷限時（分，官方節次時間表）→ sync 掛 ExamSubject.metadata.durationMinutes，供整卷測驗倒數
 subjects: [algo] # granular 練習標記（question_subject），用 slug
 departments: [csie, mmng] # 考此卷的系所 slugs → exam_subject ↔ department M:N（共用卷列多系）
 question_type: essay # mc | essay | calc | proof | cloze | listening
