@@ -7,9 +7,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+TC:wght@400;500;600&family=Fira+Code&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code&display=swap"
       rel="stylesheet"
     />
+    <!-- Real product serif: the app's self-hosted GenWanMin2 TW subset (not a Noto Serif TC stand-in).
+         Its url()s resolve relative to result.css, so the woff2 chunks load by relative path. -->
+    <link rel="stylesheet" href="../../public/fonts/genwanmin/result.css" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -39,7 +42,10 @@
       </div>
 
       <div class="vt">
-        <h3>設定值核對（變更者標色）</h3>
+        <h3>設定值核對 · 品牌／中性（變更者標色）</h3>
+        <p class="vt-note">
+          狀態燈號（success / warning / error / info）為固定螢光筆組、不隨主題變，故不列於下表。
+        </p>
         <table>
           <thead>
             <tr>
