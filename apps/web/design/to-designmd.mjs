@@ -179,21 +179,27 @@ disabled under \`prefers-reduced-motion\`.
 
 ## Colors
 
-Primary is a tuned **ink-blue** (\`primary\` #566a93, darkened for WCAG AA on cream) used for
-actions, links, and focus.
-Secondary is a **warm gold** (#a9944a) and neutral a **stone-brown** (#725435), both used
-sparingly as flat accents rather than full interactive ramps. \`success\`, \`warning\`,
-\`error\`, and \`info\` are single applied roles; a tuned 50–950 ramp for every role lives in
-\`design/tokens.json\` for future use, but only the primary ramp surfaces here (its 600/700
-steps drive button hover/active).
+Colours split into two tiers by convention.
+
+**Brand — per-theme.** Primary is a tuned **ink-blue** (\`primary\` #566a93, darkened for WCAG AA
+on cream) for actions, links, and focus; secondary a **warm gold** (#a9944a), neutral a
+**stone-brown** (#725435) — used sparingly as flat accents. Only the primary ramp surfaces here
+(its 600/700 steps drive button hover/active). These change with the painting theme.
+
+**Status — fixed, theme-independent (手帳 highlighter 燈號).** \`success\` #5fa85a, \`warning\` #e0a92e,
+\`error\` #e5556b, \`info\` #3fa2c4 are one highlighter set held constant across themes, so "red = error"
+stays learnable. The **marker** is for fills/washes/dots/rings/icon tint; meaning is carried by icon
+shape + ink text, never colour alone (WCAG 1.4.1), so on cream it is deliberately low-contrast. Coloured
+status *text* uses the paired **-ink** step (\`error-ink\` #a83648 etc., ≥4.5:1; text-/bg-/border-{role}-ink).
 
 Surfaces map onto warm paper tones — \`bg\` #f8eeda (paper), \`bg-elevated\` #ece0c2 (raised),
 text \`text\` #433222 (ink) with dimmed/muted/toned/highlighted variants. The \`board\` tokens
 (#243b30 ground, #edefe4 chalk) style the chalkboard surface used for worked solutions.
 
 **Dark theme** (\`.dark\`) re-grounds everything on cool blue: \`bg\` #1c2330, \`text\` #f4debc
-(cream), primary brightened to #a9b8d7, board #15231c. Both themes target WCAG AA (4.5:1)
-for body text on their surfaces.
+(cream), primary brightened to #a9b8d7, board #15231c; status markers brighten (success #86c47e,
+error #ef7a86 …) and already clear text contrast on the night ground. Both themes target WCAG AA
+(4.5:1) for body text on their surfaces.
 
 ## Typography
 
@@ -267,13 +273,14 @@ app-owned interactive elements (Nuxt UI components ship their own).
 - **Do** keep \`primary\` for the single most important action, links, and focus per view.
 - **Do** convey depth with tone and borders; **don't** add drop shadows to UI chrome — this
   system is flat (the \`board\` surface is the sole exception).
-- **Do** use \`secondary\`/\`success\`/\`warning\`/\`error\` as sparse flat accents; **don't** build
-  multi-step interactive ramps from them in UI without pulling the tuned ramp from tokens.json.
-- **Do** keep coloured *text* (badges, links, alert titles) to \`primary\`/\`neutral\` — the only
-  roles that clear WCAG AA on the cream surface in light mode. For \`secondary\`/\`success\`/
-  \`warning\`/\`error\` semantics at text size, convey them with solid fills + icons or the role's
-  **700** ramp step; **don't** set small text in their base (500) tones on light surfaces
-  (2.6–4.4:1, below AA).
+- **Do** treat \`success\`/\`warning\`/\`error\`/\`info\` as the **fixed status set** — the same
+  highlighter markers under every theme (never re-tint them per painting scheme); reach for them
+  for fills/washes/dots/rings/icon tint, and always pair with an icon + ink text (never colour
+  alone). **Don't** vary status hues by theme or set status meaning by colour only.
+- **Do** keep coloured *text* (badges, links, alert titles) to \`primary\`/\`neutral\`, or use the
+  status **-ink** step (\`text-error-ink\` etc., ≥4.5:1) for coloured status text; **don't** set
+  status **markers** as small text on cream — they are deliberately soft (1.8–3.1:1) for the
+  highlighter look and fail AA as text.
 - **Do** set headings in serif Ming and body in Inter; **don't** mix more than these roles.
 - **Do** maintain WCAG AA (4.5:1) for body text on its surface in both themes; **don't** set
   \`text-dimmed\` on \`bg-elevated\`/card surfaces — it clears AA only on the base \`bg\` page

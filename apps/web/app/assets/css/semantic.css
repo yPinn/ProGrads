@@ -29,9 +29,12 @@
   --ui-color-primary-900: var(--color-primary-900);
   --ui-color-primary-950: var(--color-primary-950);
 
-  /* surfaces / text / borders / roles — light = 筆記本紙質 */
+  /* surfaces / text / borders / roles — light = 筆記本紙質.
+     Ramp is monotonic-DARKER from the page (bg lightest → accented deepest); muted sits BELOW bg,
+     not above — the cream page is near-white, so depth only exists downward. ~1.07:1 per step
+     (page→accented 1.21:1); text-muted holds AA on every step (≥4.95:1). */
   --ui-bg: #f8eeda;
-  --ui-bg-muted: #fbf2e1;
+  --ui-bg-muted: #f2e7cd;
   --ui-bg-elevated: #ece0c2;
   --ui-bg-accented: #e7d9b8;
   --ui-bg-inverted: #433222;
@@ -45,12 +48,21 @@
   --ui-border-muted: #ece0c2;
   --ui-border-accented: #c6b798;
   --ui-border-inverted: #433222;
+  /* brand — per-theme (from the active painting scheme) */
   --ui-primary: #566a93;
   --ui-secondary: #a9944a;
-  --ui-success: #5a7a4e;
-  --ui-info: #566a93;
-  --ui-warning: #b5781c;
-  --ui-error: #bd483c;
+
+  /* Status · 螢光筆燈號 — FIXED across every painting scheme (only light/dark differ). marker =
+     highlighter fill/dot/ring/icon; meaning always via icon + ink text, never colour alone (1.4.1),
+     so it is intentionally soft on cream. Coloured status TEXT uses the -ink step (≥4.5:1, @theme below). */
+  --ui-success: #5fa85a;
+  --ui-warning: #e0a92e;
+  --ui-error: #e5556b;
+  --ui-info: #3fa2c4;
+  --ui-success-ink: #3f6a3a;
+  --ui-warning-ink: #8a5a12;
+  --ui-error-ink: #a83648;
+  --ui-info-ink: #2a6c88;
 
   /* Card surface (consumed by <AppCard>) — a semantic alias onto the EXISTING surface ramp, not a
      new colour: light uses bg-accented (the deepest paper step) so a card sits a step below the page
@@ -81,12 +93,19 @@
   --ui-border-muted: #495367;
   --ui-border-accented: #6b768a;
   --ui-border-inverted: #f4debc;
+  /* brand — per-theme */
   --ui-primary: #a9b8d7;
   --ui-secondary: #c7b272;
-  --ui-success: #84a87e;
-  --ui-info: #a9b8d7;
-  --ui-warning: #cda152;
-  --ui-error: #d0685c;
+
+  /* Status · 螢光筆燈號 — FIXED (dark tuning); markers clear ≥5.8:1 on night, so -ink = marker. */
+  --ui-success: #86c47e;
+  --ui-warning: #e6c260;
+  --ui-error: #ef7a86;
+  --ui-info: #74c2de;
+  --ui-success-ink: #86c47e;
+  --ui-warning-ink: #e6c260;
+  --ui-error-ink: #ef7a86;
+  --ui-info-ink: #74c2de;
 
   /* Card surface (dark) — bg-muted, one step above the page yet dark enough that card text-muted
      holds AA (4.96:1). (Dark's bg-accented/elevated are LIGHTER than the page, so they can't be the
@@ -97,4 +116,13 @@
   --board: #15231c;
   --board-ink: #edefe4;
   --board-line: #2c4034;
+}
+
+/* text-/bg-/border-{role}-ink utilities for coloured status TEXT (bare text-{role} stays the
+   marker). Reference the runtime --ui-*-ink vars so they switch with light/dark. */
+@theme {
+  --color-success-ink: var(--ui-success-ink);
+  --color-warning-ink: var(--ui-warning-ink);
+  --color-error-ink: var(--ui-error-ink);
+  --color-info-ink: var(--ui-info-ink);
 }

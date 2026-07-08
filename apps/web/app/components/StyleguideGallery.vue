@@ -16,13 +16,17 @@ const surfaceSwatches = [
   { name: "card", cls: "bg-(--surface-card)" },
   { name: "inverted", cls: "bg-inverted" },
 ];
-const roleSwatches = [
+// Brand roles — per-theme (from the painting scheme).
+const brandSwatches = [
   { name: "primary", cls: "bg-(--ui-primary)" },
   { name: "secondary", cls: "bg-(--ui-secondary)" },
-  { name: "success", cls: "bg-(--ui-success)" },
-  { name: "info", cls: "bg-(--ui-info)" },
-  { name: "warning", cls: "bg-(--ui-warning)" },
-  { name: "error", cls: "bg-(--ui-error)" },
+];
+// Status roles — FIXED highlighter markers; each pairs a marker (fill/icon) with a -ink text step.
+const statusSwatches = [
+  { name: "success", cls: "bg-(--ui-success)", ink: "text-success-ink" },
+  { name: "warning", cls: "bg-(--ui-warning)", ink: "text-warning-ink" },
+  { name: "error", cls: "bg-(--ui-error)", ink: "text-error-ink" },
+  { name: "info", cls: "bg-(--ui-info)", ink: "text-info-ink" },
 ];
 const borderSwatches = [
   { name: "default", cls: "border-default" },
@@ -70,10 +74,28 @@ const demoState = ref<(typeof demoStates)[number]>("data");
 </script>
 
 <template>
-  <div class="text-default space-y-section">
+  <!-- Two-band grid: Foundations (token layer) then Components (UI). Wide zones span both columns;
+       compact zones pair two-across. Span order tiles gap-free without reordering, so the reading
+       sequence stays system → UI. Bands are col-span-full hairline dividers. -->
+  <div class="text-default grid grid-cols-1 gap-x-8 gap-y-section lg:grid-cols-2">
+    <!-- ── Foundations · 系統層 ── colour + type tokens, paired to fill the width. -->
+    <p class="col-span-full text-dimmed text-caption font-medium tracking-eyebrow uppercase">
+      Foundations · 系統層
+    </p>
+
     <!-- Colors — the palette (semantic.css tokens) as swatches. -->
     <section class="space-y-4">
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Colors · 色票</h3>
+
+      <div class="space-y-1.5">
+        <p class="text-dimmed text-caption">Brand 品牌色（隨主題 · primary + secondary）</p>
+        <div class="flex flex-wrap gap-3">
+          <div v-for="r in brandSwatches" :key="r.name" class="space-y-1">
+            <div class="size-14 rounded-card" :class="r.cls" />
+            <p class="text-dimmed text-caption text-center">{{ r.name }}</p>
+          </div>
+        </div>
+      </div>
 
       <div class="space-y-1.5">
         <p class="text-dimmed text-caption">Surfaces 紙面階（背景由淺到深，末為 inverted 墨底）</p>
@@ -81,16 +103,6 @@ const demoState = ref<(typeof demoStates)[number]>("data");
           <div v-for="s in surfaceSwatches" :key="s.name" class="space-y-1">
             <div class="border-default size-14 rounded-card border" :class="s.cls" />
             <p class="text-dimmed text-caption text-center">{{ s.name }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="space-y-1.5">
-        <p class="text-dimmed text-caption">Roles 語義色（solid）</p>
-        <div class="flex flex-wrap gap-3">
-          <div v-for="r in roleSwatches" :key="r.name" class="space-y-1">
-            <div class="size-14 rounded-card" :class="r.cls" />
-            <p class="text-dimmed text-caption text-center">{{ r.name }}</p>
           </div>
         </div>
       </div>
@@ -105,6 +117,31 @@ const demoState = ref<(typeof demoStates)[number]>("data");
         </div>
       </div>
 
+      <div class="space-y-1.5">
+        <p class="text-dimmed text-caption">
+          Status 狀態燈號（螢光筆 · 固定，不隨主題）— marker 為填色/圖示；文字用 -ink 深階
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <div v-for="s in statusSwatches" :key="s.name" class="space-y-1">
+            <div class="size-14 rounded-card" :class="s.cls" />
+            <p class="text-caption text-center" :class="s.ink">{{ s.name }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Typography + Ink — text foundations grouped in the right cell; the left cell stays pure
+         colour blocks. -->
+    <section class="space-y-4">
+      <div class="space-y-2">
+        <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Typography</h3>
+        <p class="font-serif text-title-lg tracking-tight">標題 title-lg · 明體</p>
+        <p class="font-serif text-title-sm tracking-tight">標題 title-sm · 明體</p>
+        <p class="text-body">內文 body · Inter，研究所備考資訊平台。</p>
+        <p class="text-muted text-small">說明 small · 次要文字（墨階見下方 Ink）。</p>
+        <p class="text-caption">caption · 最小級（eyebrow / 標註）。</p>
+      </div>
+
       <div class="space-y-0.5">
         <p class="text-dimmed text-caption">Ink 墨階（文字強度，均須達 WCAG AA）</p>
         <p v-for="t in inkTiers" :key="t.name" class="text-body" :class="t.cls">
@@ -113,8 +150,15 @@ const demoState = ref<(typeof demoStates)[number]>("data");
       </div>
     </section>
 
+    <!-- ── Components · UI 元件 ── built on the tokens above; wide zones span both columns. -->
+    <p
+      class="col-span-full border-t border-default pt-6 text-dimmed text-caption font-medium tracking-eyebrow uppercase"
+    >
+      Components · UI 元件
+    </p>
+
     <!-- Buttons — AppButton intent × size; source of truth for the hierarchy. -->
-    <section class="space-y-3">
+    <section class="space-y-3 lg:col-span-2">
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">
         Buttons · AppButton intents
       </h3>
@@ -168,7 +212,7 @@ const demoState = ref<(typeof demoStates)[number]>("data");
     </section>
 
     <!-- Icon registry — the semantic names app code references (utils/icons). -->
-    <section class="space-y-3">
+    <section class="space-y-3 lg:col-span-2">
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">
         Icons · registry
       </h3>
@@ -277,15 +321,6 @@ const demoState = ref<(typeof demoStates)[number]>("data");
       </QueryState>
     </section>
 
-    <!-- Navigation -->
-    <section class="space-y-3">
-      <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Navigation</h3>
-      <div class="flex flex-wrap items-center gap-4">
-        <UPagination v-model:page="page" :total="120" :items-per-page="20" />
-        <ColorModeToggle />
-      </div>
-    </section>
-
     <!-- Surfaces -->
     <section class="space-y-3">
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Surfaces</h3>
@@ -311,19 +346,18 @@ const demoState = ref<(typeof demoStates)[number]>("data");
       </AppBoard>
     </section>
 
-    <!-- Typography -->
-    <section class="space-y-2">
-      <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Typography</h3>
-      <p class="font-serif text-title-lg tracking-tight">標題 title-lg · 明體</p>
-      <p class="font-serif text-title-sm tracking-tight">標題 title-sm · 明體</p>
-      <p class="text-body">內文 body · Inter，研究所備考資訊平台。</p>
-      <p class="text-muted text-small">說明 small · 次要文字（墨階見 Colors）。</p>
-      <p class="text-caption">caption · 最小級（eyebrow / 標註）。</p>
+    <!-- Navigation -->
+    <section class="space-y-3">
+      <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Navigation</h3>
+      <div class="flex flex-wrap items-center gap-4">
+        <UPagination v-model:page="page" :total="120" :items-per-page="20" />
+        <ColorModeToggle />
+      </div>
     </section>
 
     <!-- Prose (MDC content) — the @tailwindcss/typography mapping recoloured to --ui-* roles.
          Mirrors how question stems/choices/explanations render markdown. -->
-    <section class="space-y-3">
+    <section class="space-y-3 lg:col-span-2">
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Prose (MDC)</h3>
       <div class="prose prose-sm max-w-none">
         <h4>標題範例</h4>

@@ -789,6 +789,11 @@
       "touch": {
         "value": "2.75rem",
         "type": "spacing"
+      },
+      "nav": {
+        "value": "4rem",
+        "type": "spacing",
+        "description": "global nav-bar height (→ h-nav)"
       }
     },
     "radius": {
@@ -857,19 +862,35 @@
         "type": "color"
       },
       "success": {
-        "value": "#5a7a4e",
+        "value": "#5fa85a",
         "type": "color"
       },
       "info": {
-        "value": "#566a93",
+        "value": "#3fa2c4",
         "type": "color"
       },
       "warning": {
-        "value": "#b5781c",
+        "value": "#e0a92e",
         "type": "color"
       },
       "error": {
-        "value": "#bd483c",
+        "value": "#e5556b",
+        "type": "color"
+      },
+      "success-ink": {
+        "value": "#3f6a3a",
+        "type": "color"
+      },
+      "warning-ink": {
+        "value": "#8a5a12",
+        "type": "color"
+      },
+      "error-ink": {
+        "value": "#a83648",
+        "type": "color"
+      },
+      "info-ink": {
+        "value": "#2a6c88",
         "type": "color"
       },
       "neutral": {
@@ -881,7 +902,7 @@
         "type": "color"
       },
       "bg-muted": {
-        "value": "#fbf2e1",
+        "value": "#f2e7cd",
         "type": "color"
       },
       "bg-elevated": {
@@ -901,7 +922,7 @@
         "type": "color"
       },
       "text-dimmed": {
-        "value": "#96845f",
+        "value": "#7e6a44",
         "type": "color"
       },
       "text-muted": {
@@ -961,19 +982,35 @@
         "type": "color"
       },
       "success": {
-        "value": "#84a87e",
+        "value": "#86c47e",
         "type": "color"
       },
       "info": {
-        "value": "#a9b8d7",
+        "value": "#74c2de",
         "type": "color"
       },
       "warning": {
-        "value": "#cda152",
+        "value": "#e6c260",
         "type": "color"
       },
       "error": {
-        "value": "#d0685c",
+        "value": "#ef7a86",
+        "type": "color"
+      },
+      "success-ink": {
+        "value": "#86c47e",
+        "type": "color"
+      },
+      "warning-ink": {
+        "value": "#e6c260",
+        "type": "color"
+      },
+      "error-ink": {
+        "value": "#ef7a86",
+        "type": "color"
+      },
+      "info-ink": {
+        "value": "#74c2de",
         "type": "color"
       },
       "neutral": {
