@@ -862,35 +862,35 @@
         "type": "color"
       },
       "success": {
-        "value": "#5fa85a",
+        "value": "#93d07d",
         "type": "color"
       },
       "info": {
-        "value": "#3fa2c4",
+        "value": "#7cc4ef",
         "type": "color"
       },
       "warning": {
-        "value": "#e0a92e",
+        "value": "#e6c85c",
         "type": "color"
       },
       "error": {
-        "value": "#e5556b",
+        "value": "#f16f83",
         "type": "color"
       },
       "success-ink": {
-        "value": "#3f6a3a",
+        "value": "#47703a",
         "type": "color"
       },
       "warning-ink": {
-        "value": "#8a5a12",
+        "value": "#876320",
         "type": "color"
       },
       "error-ink": {
-        "value": "#a83648",
+        "value": "#af4744",
         "type": "color"
       },
       "info-ink": {
-        "value": "#2a6c88",
+        "value": "#2f6d90",
         "type": "color"
       },
       "neutral": {
@@ -898,31 +898,36 @@
         "type": "color"
       },
       "bg": {
-        "value": "#f8eeda",
+        "value": "#f0eee9",
         "type": "color"
       },
       "bg-muted": {
-        "value": "#f2e7cd",
+        "value": "#e9e6df",
         "type": "color"
       },
       "bg-elevated": {
-        "value": "#ece0c2",
+        "value": "#e3e0d7",
         "type": "color"
       },
       "bg-accented": {
-        "value": "#e7d9b8",
+        "value": "#dad6ca",
         "type": "color"
       },
       "bg-inverted": {
         "value": "#433222",
         "type": "color"
       },
+      "surface-card": {
+        "value": "#faf9f5",
+        "type": "color",
+        "description": "Raised card fill (<AppCard> via --surface-card); light lifts it near-white ABOVE the page for figure-ground."
+      },
       "text": {
         "value": "#433222",
         "type": "color"
       },
       "text-dimmed": {
-        "value": "#7e6a44",
+        "value": "#7b6740",
         "type": "color"
       },
       "text-muted": {
@@ -938,19 +943,19 @@
         "type": "color"
       },
       "text-inverted": {
-        "value": "#f8eeda",
+        "value": "#f0eee9",
         "type": "color"
       },
       "border": {
-        "value": "#e3d4b2",
+        "value": "#d7d3c9",
         "type": "color"
       },
       "border-muted": {
-        "value": "#ece0c2",
+        "value": "#e6e2d8",
         "type": "color"
       },
       "border-accented": {
-        "value": "#c6b798",
+        "value": "#c3beb0",
         "type": "color"
       },
       "border-inverted": {
@@ -982,35 +987,35 @@
         "type": "color"
       },
       "success": {
-        "value": "#86c47e",
+        "value": "#b0e7a3",
         "type": "color"
       },
       "info": {
-        "value": "#74c2de",
+        "value": "#a2dffe",
         "type": "color"
       },
       "warning": {
-        "value": "#e6c260",
+        "value": "#ecd679",
         "type": "color"
       },
       "error": {
-        "value": "#ef7a86",
+        "value": "#f4617c",
         "type": "color"
       },
       "success-ink": {
-        "value": "#86c47e",
+        "value": "#b0e7a3",
         "type": "color"
       },
       "warning-ink": {
-        "value": "#e6c260",
+        "value": "#ecd679",
         "type": "color"
       },
       "error-ink": {
-        "value": "#ef7a86",
+        "value": "#f4617c",
         "type": "color"
       },
       "info-ink": {
-        "value": "#74c2de",
+        "value": "#a2dffe",
         "type": "color"
       },
       "neutral": {
@@ -1036,6 +1041,11 @@
       "bg-inverted": {
         "value": "#dcc8a9",
         "type": "color"
+      },
+      "surface-card": {
+        "value": "#363f4f",
+        "type": "color",
+        "description": "Raised card fill (<AppCard> via --surface-card); dark rests it at bg-muted, dark enough that card text-muted holds AA."
       },
       "text": {
         "value": "#f4debc",

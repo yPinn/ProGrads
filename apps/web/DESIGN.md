@@ -5,29 +5,30 @@ description: Graduate-admissions study platform. Homer «A Basket of Clams» the
 colors:
   primary: "#566a93"
   secondary: "#a9944a"
-  success: "#5fa85a"
-  info: "#3fa2c4"
-  warning: "#e0a92e"
-  error: "#e5556b"
-  success-ink: "#3f6a3a"
-  warning-ink: "#8a5a12"
-  error-ink: "#a83648"
-  info-ink: "#2a6c88"
+  success: "#93d07d"
+  info: "#7cc4ef"
+  warning: "#e6c85c"
+  error: "#f16f83"
+  success-ink: "#47703a"
+  warning-ink: "#876320"
+  error-ink: "#af4744"
+  info-ink: "#2f6d90"
   neutral: "#725435"
-  bg: "#f8eeda"
-  bg-muted: "#f2e7cd"
-  bg-elevated: "#ece0c2"
-  bg-accented: "#e7d9b8"
+  bg: "#f0eee9"
+  bg-muted: "#e9e6df"
+  bg-elevated: "#e3e0d7"
+  bg-accented: "#dad6ca"
   bg-inverted: "#433222"
+  surface-card: "#faf9f5"
   text: "#433222"
-  text-dimmed: "#7e6a44"
+  text-dimmed: "#7b6740"
   text-muted: "#725435"
   text-toned: "#58412b"
   text-highlighted: "#2f2318"
-  text-inverted: "#f8eeda"
-  border: "#e3d4b2"
-  border-muted: "#ece0c2"
-  border-accented: "#c6b798"
+  text-inverted: "#f0eee9"
+  border: "#d7d3c9"
+  border-muted: "#e6e2d8"
+  border-accented: "#c3beb0"
   border-inverted: "#433222"
   board: "#243b30"
   board-ink: "#edefe4"
@@ -126,7 +127,7 @@ components:
   button-ghost-hover:
     textColor: "{colors.text}"
   card:
-    backgroundColor: "{colors.bg-accented}"
+    backgroundColor: "{colors.surface-card}"
     borderColor: "{colors.border-accented}"
     textColor: "{colors.text}"
     rounded: "{rounded.card}"
@@ -173,18 +174,22 @@ disabled under `prefers-reduced-motion`.
 Colours split into two tiers by convention.
 
 **Brand — per-theme.** Primary is a tuned **ink-blue** (`primary` #566a93, darkened for WCAG AA
-on cream) for actions, links, and focus; secondary a **warm gold** (#a9944a), neutral a
+on the light paper) for actions, links, and focus; secondary a **warm gold** (#a9944a), neutral a
 **stone-brown** (#725435) — used sparingly as flat accents. Only the primary ramp surfaces here
 (its 600/700 steps drive button hover/active). These change with the painting theme.
 
-**Status — fixed, theme-independent (手帳 highlighter 燈號).** `success` #5fa85a, `warning` #e0a92e,
-`error` #e5556b, `info` #3fa2c4 are one highlighter set held constant across themes, so "red = error"
-stays learnable. The **marker** is for fills/washes/dots/rings/icon tint; meaning is carried by icon
-shape + ink text, never colour alone (WCAG 1.4.1), so on cream it is deliberately low-contrast. Coloured
-status _text_ uses the paired **-ink** step (`error-ink` #a83648 etc., ≥4.5:1; text-/bg-/border-{role}-ink).
+**Status — fixed, theme-independent (Zebra Mildliner highlighter 燈號).** Sampled from four Mildliner
+soft pens: `success` = Mild Green, `warning` = Mild Gold, `error` = Mild Red, `info` = Mild Blue —
+one highlighter set held constant across themes, so "red = error" stays learnable. Light keeps each
+pen's hue but drops lightness a touch (`success` #93d07d, `warning` #e6c85c, `error` #f16f83,
+`info` #7cc4ef); dark uses the authentic pens as-is (#b0e7a3 / #ecd679 / #f4617c / #a2dffe). The
+**marker** is for fills/washes/dots/rings/icon tint; meaning is carried by icon shape + ink text,
+never colour alone (WCAG 1.4.1), so on the light page it is deliberately low-contrast. Coloured
+status _text_ uses the paired **-ink** step (`error-ink` #af4744 etc., ≥4.5:1; text-/bg-/border-{role}-ink).
 
-Surfaces map onto warm paper tones — `bg` #f8eeda (paper), `bg-elevated` #ece0c2 (raised),
-text `text` #433222 (ink) with dimmed/muted/toned/highlighted variants. The `board` tokens
+Surfaces map onto warm off-white paper — `bg` #f0eee9 (Cloud Dancer page), `surface-card` #faf9f5
+(raised near-white card), `bg-muted`→`bg-accented` warm-neutral recessed fills; text `text` #433222
+(ink) with dimmed/muted/toned/highlighted variants. The `board` tokens
 (#243b30 ground, #edefe4 chalk) style the chalkboard surface used for worked solutions.
 
 **Dark theme** (`.dark`) re-grounds everything on cool blue: `bg` #1c2330, `text` #f4debc
@@ -223,13 +228,14 @@ shadows. Hierarchy is conveyed by **tonal layers** (`bg` → `bg-muted` → `bg-
 rows lifts the surface by compositing `bg-elevated` at ~50% alpha rather than adding a shadow;
 interactive **cards** sharpen their edge to `border-inverted` on hover — still flat, no shadow.
 
-Cards sit a step below the page via a **`--surface-card`** alias onto the existing surface ramp
-(no new colour): light uses **`bg-accented`** (the deepest paper step) with a **`border-accented`**
-edge, so a card reads as a distinct layer rather than the near-flat 1.14:1 of `bg-elevated`;
-`text-muted` still holds AA (4.94:1). Dark keeps the cool night identity on `bg-muted` — its
-`bg-accented`/`bg-elevated` are _lighter_ than the page and would drop `text-muted` below AA, so
-the card uses a different ramp step per theme. On either fill `text-dimmed` fails AA, so card body
-text stays `text`/`text-muted`.
+Cards read as a distinct layer via the **`--surface-card`** token. Light **raises** the card to a
+near-white **`surface-card`** #faf9f5 ABOVE the Cloud Dancer page (#f0eee9), so the brighter fill
+gives real figure-ground (page→card 1.10:1 the bright way) on a ground that is itself a notch below
+pure white — the recessed cream steps of the old page were near-flat (1.14:1) and read as no card at
+all. Dark instead **rests** the card on **`bg-muted`** #363f4f, one step above the night page: dark's
+`bg-accented`/`bg-elevated` are _lighter_ than the page and would drop `text-muted` below AA, so the
+card uses a different ramp direction per theme. Both fills hold `text-muted` at AA (light 6.57:1, dark
+4.96:1); a **`border-accented`** edge completes the depth.
 The lone shadow exception is the `board` chalkboard surface, which carries a single soft shadow
 (`0 2px 10px` at ~0.18 alpha) so it reads as a physical board.
 
@@ -247,7 +253,7 @@ Built on **Nuxt UI v4**; app-owned classes fill the gaps. Patterns:
   primary-600/700. Ghost buttons (nav, icon, inline links) are transparent with muted text
   that resolves to full ink on hover.
 - **Cards** — flat panels with 6px radius and `card` padding; separated by fill + a
-  `border-accented` edge, never shadow. Fill is `--surface-card` (an alias onto `bg-accented`
+  `border-accented` edge, never shadow. Fill is `--surface-card` (raised near-white #faf9f5
   light / `bg-muted` dark; see Elevation). The interactive variant sharpens its edge on hover.
   Use `<AppCard>`.
 - **Interactive list rows** — transparent by default, hover composites `bg-elevated` at 50%.
@@ -270,10 +276,11 @@ app-owned interactive elements (Nuxt UI components ship their own).
   alone). **Don't** vary status hues by theme or set status meaning by colour only.
 - **Do** keep coloured _text_ (badges, links, alert titles) to `primary`/`neutral`, or use the
   status **-ink** step (`text-error-ink` etc., ≥4.5:1) for coloured status text; **don't** set
-  status **markers** as small text on cream — they are deliberately soft (1.8–3.1:1) for the
+  status **markers** as small text on the light page — they are deliberately soft (1.4–2.5:1) for the
   highlighter look and fail AA as text.
 - **Do** set headings in serif Ming and body in Inter; **don't** mix more than these roles.
 - **Do** maintain WCAG AA (4.5:1) for body text on its surface in both themes; **don't** set
-  `text-dimmed` on `bg-elevated`/card surfaces — it clears AA only on the base `bg` page
-  (3.97:1 light / 2.36:1 dark on elevated). Use `text`/`text-muted` on cards.
+  `text-dimmed` on the recessed `bg-muted`/`bg-elevated`/`bg-accented` fills — it clears AA on the
+  base `bg` page (4.70:1) and the raised card (5.17:1) but not the recessed steps (4.13:1 light /
+  2.36:1 dark on elevated). Use `text`/`text-muted` there.
 - **Don't** hard-code ms or cubic-beziers — use the motion tokens (fast/base/slow, standard ease).

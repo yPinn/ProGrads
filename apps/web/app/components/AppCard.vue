@@ -14,9 +14,8 @@ const tag = computed(() => (props.to ? resolveComponent("NuxtLink") : props.as))
 </script>
 
 <template>
-  <!-- Fill = --surface-card: light bg-accented (a step below the page), dark bg-muted (dark's
-       lighter steps drop text-muted <AA); border-accented for a crisp edge. Body text stays
-       text/text-muted (text-dimmed fails AA). Interactive → border-inverted on hover. -->
+  <!-- Fill = --surface-card: light near-white raised ABOVE the page, dark bg-muted; a border-accented
+       edge for depth, no shadow. Body text stays text/text-muted. Interactive → border-inverted on hover. -->
   <component
     :is="tag"
     :to="to"

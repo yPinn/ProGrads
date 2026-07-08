@@ -54,9 +54,21 @@ const check = (label, expect, actual, { family = false } = {}) => {
   }
 };
 
-// --- 1) semantic colours: every tokens.json semantic key must match its --ui-* / --board* var ---
-const cssColorVar = (key, vars) =>
-  key.startsWith("board") ? vars[`--${key}`] : vars[`--ui-${key}`];
+// --- 1) semantic colours: every tokens.json semantic key must match its --ui-* / --board* /
+// --surface-* var. Values may be a var() alias (e.g. dark surface-card → var(--ui-bg-muted),
+// kept DRY); resolve one level against the same theme so the literal token still verifies. ---
+const resolveVar = (val, vars) => {
+  const m = /^var\((--[a-z0-9-]+)\)$/.exec((val || "").trim());
+  return m ? vars[m[1]] : val;
+};
+const cssColorVar = (key, vars) => {
+  const name = key.startsWith("board")
+    ? `--${key}`
+    : key.startsWith("surface")
+      ? `--${key}`
+      : `--ui-${key}`;
+  return resolveVar(vars[name], vars);
+};
 for (const [set, vars, name] of [
   ["semantic-light", light, "light"],
   ["semantic-dark", dark, "dark"],
