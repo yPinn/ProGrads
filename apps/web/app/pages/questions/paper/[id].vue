@@ -86,7 +86,7 @@ const timerText = computed(() => {
     : `剩餘 ${fmtClock(remainingSec.value)}`;
 });
 const timerClass = computed(() =>
-  submitted.value ? "text-muted" : overtime.value ? "text-error" : "text-default",
+  submitted.value ? "text-muted" : overtime.value ? "text-error-ink" : "text-default",
 );
 
 function submit(): void {
@@ -190,7 +190,7 @@ function choiceState(
 
           <p
             v-if="!submitted && overtime"
-            class="text-error text-small mb-section flex items-center gap-2"
+            class="text-error-ink text-small mb-section flex items-center gap-2"
             role="status"
           >
             <UIcon :name="icons.overtime" class="shrink-0" aria-hidden="true" />
@@ -255,7 +255,7 @@ function choiceState(
                       :class="[
                         submitted && c.isCorrect ? 'text-primary' : '',
                         submitted && choiceState(q, c.label, c.isCorrect) === 'wrong'
-                          ? 'text-error'
+                          ? 'text-error-ink'
                           : '',
                       ]"
                       >({{ c.label }})</span

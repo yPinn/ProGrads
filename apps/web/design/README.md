@@ -1,15 +1,15 @@
 # Design tokens pipeline
 
-`tokens.json` (DTCG) is the **source of truth** for the design system. Three artifacts are
+`tokens.json` (DTCG) is the **source of truth** for the design system. Two artifacts are
 generated from it (run together via `pnpm tokens:build`); the app's runtime CSS is mirrored
 by hand against it.
 
 ```text
 tokens.json  (DTCG, source of truth)
-  ├─ to-legacy.mjs    → tokens.legacy.json       (Figma / Tokens Studio)
-  ├─ to-designmd.mjs  → ../DESIGN.md             (agent-facing spec)
-  ├─ styleguide.mjs   → design/styleguide.html   (token preview sheet)
-  └─ (hand-mirrored)  → ../app/assets/css/*       (Tailwind v4 runtime)
+  ├─ to-legacy.mjs      → tokens.legacy.json       (Figma / Tokens Studio)
+  ├─ to-designmd.mjs    → ../DESIGN.md             (agent-facing spec)
+  ├─ (hand-mirrored)    → ../app/assets/css/*       (Tailwind v4 runtime)
+  └─ verify-tokens.mjs  ← asserts the hand mirror matches (fails on drift)
 ```
 
 - **`node design/to-legacy.mjs`** → `tokens.legacy.json` for the Figma Tokens Studio plugin.
@@ -18,15 +18,20 @@ tokens.json  (DTCG, source of truth)
   alpha): the single agent-facing description of the system. Single-theme, so the **light**
   theme is canonical and dark is described in prose. Validate with:
   `npx @google/design.md lint ../DESIGN.md`.
-- **`node design/styleguide.mjs`** → `design/styleguide.html`, a static token-preview sheet
-  (colour ramps, semantic light/dark, type, foundations). Interactive components are previewed
-  separately in the dev-only `/styleguide` route.
-- **`app/assets/css/{tokens,semantic}.css`** is the live Tailwind v4 source. It is **not**
-  generated from `tokens.json` yet — keep the two in sync by hand when changing values
-  (a `tokens.json → CSS` generator is the proper long-term fix; see tasks/todo.md backlog).
+- Tokens and interactive components are previewed together in the dev-only `/styleguide` route
+  (real CSS, follows the light/dark theme switch).
+- **`app/assets/css/{tokens,semantic}.css`** is the live Tailwind v4 source, **hand-mirrored** from
+  `tokens.json` (no `tokens.json → CSS` generator yet). `tokens.css` `@theme` mirrors the `primitive`
+  foundations; `semantic.css` `:root`/`.dark` mirror the `semantic-light`/`semantic-dark` colour sets
+  (`--ui-*`, plus `--board*`). Edit both sides together.
+- **`node design/verify-tokens.mjs`** (`pnpm tokens:verify`) asserts the mirror is in sync and **fails
+  on any drift** — every semantic colour (both themes) and foundation value must match. It runs at the
+  end of `tokens:build` and in lint-staged when `tokens.json` or the mirrored CSS is committed.
+  Intentional exceptions (not mirrored to `--ui-*`) are documented in the script: `neutral` (Nuxt UI
+  `app.config` `stone` ramp), `fontWeight` (Tailwind utilities), `letterSpacing.normal`.
 
-After editing `tokens.json`, run `pnpm tokens:build` to regenerate all three outputs and
-re-run the lint before committing.
+After editing `tokens.json` **and its CSS mirror**, run `pnpm tokens:build` (regenerates both outputs
+and verifies the mirror) and re-run the lint before committing.
 
 ## Contrast notes
 

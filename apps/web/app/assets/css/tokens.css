@@ -40,8 +40,10 @@
   --spacing-card: 1.25rem;
   --spacing-control: 0.75rem;
   --spacing-touch: 2.75rem; /* 44px iOS tap target → size-touch / min-h-touch */
+  --spacing-sidebar: 17rem;
 
   --container-reading: 52rem;
+  --container-page: 80rem;
   --radius-card: 0.375rem; /* aligned with Nuxt UI's --ui-radius */
 
   /* Motion tokens — single source for all animation timing. Consumed by Tailwind

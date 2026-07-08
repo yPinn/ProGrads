@@ -29,34 +29,47 @@
   --ui-color-primary-900: var(--color-primary-900);
   --ui-color-primary-950: var(--color-primary-950);
 
-  /* surfaces / text / borders / roles — light = 筆記本紙質 */
-  --ui-bg: #f8eeda;
-  --ui-bg-muted: #fbf2e1;
-  --ui-bg-elevated: #ece0c2;
-  --ui-bg-accented: #e7d9b8;
+  /* surfaces / text / borders — light = 筆記本紙質 (Cloud Dancer #f0eee9, Pantone 2026). Page sits a
+     notch below pure white, so the raised card (--surface-card) floats ABOVE it while bg-muted→accented
+     recede BELOW as warm-neutral fills (inputs, hover, code). Ink stays warm-brown. text-muted holds AA
+     on every step; text-dimmed only on the base bg. */
+  --ui-bg: #f0eee9;
+  --ui-bg-muted: #e9e6df;
+  --ui-bg-elevated: #e3e0d7;
+  --ui-bg-accented: #dad6ca;
   --ui-bg-inverted: #433222;
-  --ui-text-dimmed: #7e6a44; /* 4.52:1 on --ui-bg — meets WCAG AA (was #96845f, 3.16:1); still the faintest tier below muted (6.01:1). Dark dimmed already passes (4.81:1). */
+  --ui-text-dimmed: #7b6740; /* faintest ink tier; clears WCAG AA (4.5:1) only on the base --ui-bg */
   --ui-text-muted: #725435;
   --ui-text-toned: #58412b;
   --ui-text: #433222;
   --ui-text-highlighted: #2f2318;
-  --ui-text-inverted: #f8eeda;
-  --ui-border: #e3d4b2;
-  --ui-border-muted: #ece0c2;
-  --ui-border-accented: #c6b798;
+  --ui-text-inverted: #f0eee9;
+  --ui-border: #d7d3c9;
+  --ui-border-muted: #e6e2d8;
+  --ui-border-accented: #c3beb0;
   --ui-border-inverted: #433222;
+  /* brand — per-theme (from the active painting scheme) */
   --ui-primary: #566a93;
   --ui-secondary: #a9944a;
-  --ui-success: #5a7a4e;
-  --ui-info: #566a93;
-  --ui-warning: #b5781c;
-  --ui-error: #bd483c;
 
-  /* Card surface (consumed by <AppCard>) — a semantic alias onto the EXISTING surface ramp, not a
-     new colour: light uses bg-accented (the deepest paper step) so a card sits a step below the page
-     rather than the near-flat 1.14:1 of bg-elevated; text-muted still holds AA (4.94:1). Depth is
-     completed by a border-accented edge (semantic.css → AppCard). */
-  --surface-card: var(--ui-bg-accented);
+  /* Status · 螢光筆燈號 — FIXED across painting schemes (only light/dark differ). Sampled from Zebra
+     Mildliner soft pens (success=Mild Green, warning=Mild Gold, error=Mild Red, info=Mild Blue).
+     marker = fill/dot/ring/icon; meaning always via icon + ink text, never colour alone (1.4.1), so
+     light keeps each pen's hue but drops lightness to stay visible as dots. Coloured status TEXT uses
+     the -ink step (AA ≥4.5:1, @theme below). */
+  --ui-success: #93d07d;
+  --ui-warning: #e6c85c;
+  --ui-error: #f16f83;
+  --ui-info: #7cc4ef;
+  --ui-success-ink: #47703a;
+  --ui-warning-ink: #876320;
+  --ui-error-ink: #af4744;
+  --ui-info-ink: #2f6d90;
+
+  /* Card surface (consumed by <AppCard>) — light raises the card near-white (#faf9f5) ABOVE the page,
+     so the brighter fill gives figure-ground on the off-white ground; a border-accented edge completes
+     it. text-muted holds AA on the card. */
+  --surface-card: #faf9f5;
 
   /* blackboard surface (consumed by .board) — light */
   --board: #243b30;
@@ -81,12 +94,20 @@
   --ui-border-muted: #495367;
   --ui-border-accented: #6b768a;
   --ui-border-inverted: #f4debc;
+  /* brand — per-theme */
   --ui-primary: #a9b8d7;
   --ui-secondary: #c7b272;
-  --ui-success: #84a87e;
-  --ui-info: #a9b8d7;
-  --ui-warning: #cda152;
-  --ui-error: #d0685c;
+
+  /* Status · 螢光筆燈號 — FIXED. Dark uses the authentic Mildliner pens as-is: the pale inks pop on
+     the night ground (AA ≥5:1, so -ink = marker). */
+  --ui-success: #b0e7a3;
+  --ui-warning: #ecd679;
+  --ui-error: #f4617c;
+  --ui-info: #a2dffe;
+  --ui-success-ink: #b0e7a3;
+  --ui-warning-ink: #ecd679;
+  --ui-error-ink: #f4617c;
+  --ui-info-ink: #a2dffe;
 
   /* Card surface (dark) — bg-muted, one step above the page yet dark enough that card text-muted
      holds AA (4.96:1). (Dark's bg-accented/elevated are LIGHTER than the page, so they can't be the
@@ -97,4 +118,13 @@
   --board: #15231c;
   --board-ink: #edefe4;
   --board-line: #2c4034;
+}
+
+/* text-/bg-/border-{role}-ink utilities for coloured status TEXT (bare text-{role} stays the
+   marker). Reference the runtime --ui-*-ink vars so they switch with light/dark. */
+@theme {
+  --color-success-ink: var(--ui-success-ink);
+  --color-warning-ink: var(--ui-warning-ink);
+  --color-error-ink: var(--ui-error-ink);
+  --color-info-ink: var(--ui-info-ink);
 }

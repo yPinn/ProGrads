@@ -3,8 +3,10 @@
 // declares the --token custom properties. Switching only flips data-scheme /
 // data-variant on .stage; the cascade does the rest (no inline element styles).
 
-// VARS is the single token contract. KEY = header-strip subset; ROWS = table order.
-const VARS = [
+// Two contracts: SCHEME_VARS = brand + neutrals, per-theme (schemes.js); STATUS_KEYS = the FIXED
+// highlighter set (window.STATUS), shared by every scheme so status never re-tints per theme.
+// KEY = header-strip subset; ROWS = per-scheme table order.
+const SCHEME_VARS = [
   "bg",
   "card",
   "elevated",
@@ -20,9 +22,6 @@ const VARS = [
   "accent-soft",
   "board",
   "board-ink",
-  "success",
-  "warning",
-  "error",
   "d1",
   "d2",
   "d3",
@@ -30,7 +29,17 @@ const VARS = [
   "d5",
   "shadow",
 ];
-const KEY = ["primary", "accent", "bg", "card", "ink", "board", "success", "warning", "error"];
+const STATUS_KEYS = [
+  "success",
+  "warning",
+  "error",
+  "info",
+  "success-ink",
+  "warning-ink",
+  "error-ink",
+  "info-ink",
+];
+const KEY = ["primary", "accent", "bg", "card", "ink", "board"];
 const ROWS = [
   "primary",
   "primary-deep",
@@ -42,9 +51,6 @@ const ROWS = [
   "border",
   "ink",
   "muted",
-  "success",
-  "warning",
-  "error",
 ];
 
 // --- TUNED pass: RAW + small hue-preserving contrast/elevation tune ---
@@ -94,19 +100,24 @@ const tune = (raw, mode) =>
       };
 
 const S = window.SCHEMES || [];
+const STATUS = window.STATUS || { light: {}, dark: {} };
 
-// Dev-time guard: every scheme/mode must declare exactly the VARS contract, or the
-// generated CSS silently emits `--x:undefined`. Warns by id so multi-theme stays safe.
+// Dev-time guard: each scheme/mode must declare exactly SCHEME_VARS, and STATUS each mode must
+// declare STATUS_KEYS — else the generated CSS silently emits `--x:undefined`. Warns by id.
 function validate() {
-  const want = new Set(VARS);
+  const want = new Set(SCHEME_VARS);
   for (const s of S)
     for (const mode of ["light", "dark"]) {
       const got = new Set(Object.keys(s[mode] || {}));
-      const missing = VARS.filter((k) => !got.has(k));
+      const missing = SCHEME_VARS.filter((k) => !got.has(k));
       const extra = [...got].filter((k) => !want.has(k));
       if (missing.length || extra.length)
         console.warn(`[palette] ${s.id}·${mode} — missing:[${missing}] extra:[${extra}]`);
     }
+  for (const mode of ["light", "dark"]) {
+    const missing = STATUS_KEYS.filter((k) => !(k in (STATUS[mode] || {})));
+    if (missing.length) console.warn(`[palette] STATUS·${mode} — missing:[${missing}]`);
+  }
 }
 
 // Resolve raw+tuned for both modes once per scheme; reused by the sheet and the table.
@@ -115,19 +126,23 @@ const VM = S.map((s) => ({
   tuned: { light: tune(s.light, "light"), dark: tune(s.dark, "dark") },
 }));
 
-// --- token stylesheet: one CSS rule per scheme × variant × mode ---
-const declare = (m) => VARS.map((k) => `--${k}:${m[k]}`).join(";");
+// --- token stylesheet ---
+const declare = (obj, keys) => keys.map((k) => `--${k}:${obj[k]}`).join(";");
+// Per-scheme brand/neutral vars (change with scheme + RAW/TUNED).
 const rule = (id, variant, mode, m) =>
-  `.stage[data-scheme="${id}"][data-variant="${variant}"] .${mode}{${declare(m)}}`;
+  `.stage[data-scheme="${id}"][data-variant="${variant}"] .${mode}{${declare(m, SCHEME_VARS)}}`;
+// FIXED status vars — one rule per mode for every panel; disjoint var set from the scheme rules.
+const statusRule = (mode) => `.stage .${mode}{${declare(STATUS[mode] || {}, STATUS_KEYS)}}`;
 function buildTokenSheet() {
-  const css = S.flatMap((s, i) =>
+  const scheme = S.flatMap((s, i) =>
     ["raw", "tuned"].flatMap((variant) =>
       ["light", "dark"].map((mode) => rule(s.id, variant, mode, VM[i][variant][mode])),
     ),
   ).join("\n");
+  const status = ["light", "dark"].map(statusRule).join("\n");
   const el = document.createElement("style");
   el.id = "scheme-tokens";
-  el.textContent = css;
+  el.textContent = status + "\n" + scheme;
   document.head.appendChild(el);
 }
 
@@ -139,17 +154,25 @@ const panelHTML = (mode, tag) => {
     <div class="body">
       <p class="eyebrow">Graduate Exam Prep · 研究所備考</p>
       <h2 class="display">研究所備考作戰中心</h2>
-      <p class="lede">一處整合報名資訊、考古題與招生日程，讓備考的每一步都有依據。</p>
-      <div class="cta-row"><button class="btn btn-primary">開始練題 →</button><button class="btn btn-ghost">瀏覽考古題</button><a class="gold-link" href="#">★ 上榜計畫</a></div>
+      <p class="lede">把散落各校的備考資訊收攏於一處，讓備考的每一步都有依據。</p>
+      <div class="cta-row"><button class="btn btn-primary">前往考古題 →</button><button class="btn btn-ghost">報名資訊</button><a class="gold-link" href="#">招生日程</a></div>
+      <div class="form-row"><input class="field" type="text" placeholder="搜尋考科、學校、年度…" /><select class="field"><option>資訊聯招</option><option>電機甲組</option><option>光電所</option></select></div>
       <nav class="nav">
-        <a href="#"><span class="en">Admissions</span><h3>報名資訊 <span class="ar">→</span></h3><p>名額、報名/錄取、採計考科。</p></a>
-        <a href="#"><span class="en">Question Bank</span><h3>考古題 <span class="ar">→</span></h3><p>依考科、學校、年度檢索。</p></a>
-        <a href="#"><span class="en">Schedule</span><h3>招生日程 <span class="ar">→</span></h3><p>報名、筆試、面試、放榜。</p></a>
+        <div class="nav-grid">
+          <a href="#"><span class="en">Question Bank</span><h3>考古題 <span class="ar">→</span></h3><p>依考科、學校、年度、題型檢索歷屆考題。</p></a>
+          <a href="#"><span class="en">Admissions</span><h3>報名資訊 <span class="ar">→</span></h3><p>名額、報名/錄取、採計考科與佔分、簡章。</p></a>
+          <a href="#"><span class="en">Schedule</span><h3>招生日程 <span class="ar">→</span></h3><p>報名起訖、筆試、面試與放榜。</p></a>
+          <a href="#"><span class="en">Faculty</span><h3>師資陣容 <span class="ar">→</span></h3><p>研究方向、實驗室、最高學歷與著作。</p></a>
+        </div>
       </nav>
-      <div class="board-band"><div class="k">Deadline · 報名倒數</div><div class="v">臺大 資管所 — 還有 <span class="d">12 天</span></div></div>
-      <div class="status"><span><i style="background:var(--success)"></i>已完成</span><span><i style="background:var(--warning)"></i>即將截止</span><span><i style="background:var(--error)"></i>報名失敗</span></div>
-      <div class="data"><div class="lh">趨勢 · 主色單色階</div><div class="ramp"><span style="background:var(--d1)"></span><span style="background:var(--d2)"></span><span style="background:var(--d3)"></span><span style="background:var(--d4)"></span><span style="background:var(--d5)"></span></div></div>
-      <div class="swatch">${sw("primary")}${sw("accent")}${sw("bg")}${sw("ink")}${sw("error")}</div>
+      <div class="tags"><span class="tag" style="--r:var(--primary)">資訊聯招</span><span class="tag" style="--r:var(--accent)">甄試</span><span class="tag" style="--r:var(--success)">報名中</span><span class="tag" style="--r:var(--warning)">即將截止</span><span class="tag" style="--r:var(--error)">已額滿</span></div>
+      <div class="board-band"><div class="k">Deadline · 報名倒數</div><div class="v">臺大 電機所 甲組 — 還有 <span class="d">9 天</span></div></div>
+      <p class="fixed-note">狀態燈號 · 固定螢光筆（不隨主題 · 語意靠圖示＋墨字）</p>
+      <div class="alert" style="--r:var(--error)"><div class="alert-title">簡章尚未公告</div><div class="alert-body">此系所本年度招生簡章尚未釋出，資料暫以去年為準。</div></div>
+      <div class="status"><span><i style="background:var(--success)"></i>報名中</span><span><i style="background:var(--warning)"></i>即將截止</span><span><i style="background:var(--error)"></i>已截止</span><span><i style="background:var(--info)"></i>資訊</span></div>
+      <div class="ink-tiers"><p class="t-ink">Ink 墨 · 研究所備考資訊平台 Aa 123</p><p class="t-muted">Muted 次要 · 研究所備考資訊平台 Aa 123</p><p class="t-dim">Dim 提示 · 研究所備考資訊平台 Aa 123</p></div>
+      <div class="data"><div class="lh">報名趨勢 · 主色階</div><div class="ramp"><span style="background:var(--d1)"></span><span style="background:var(--d2)"></span><span style="background:var(--d3)"></span><span style="background:var(--d4)"></span><span style="background:var(--d5)"></span></div></div>
+      <div class="swatch">${sw("primary")}${sw("accent")}${sw("bg")}${sw("ink")}${sw("board")}</div>
     </div>
     <div class="panel-foot"><span>${mode === "light" ? "Light" : "Dark"}</span><span class="vmode">RAW</span></div>`;
 };

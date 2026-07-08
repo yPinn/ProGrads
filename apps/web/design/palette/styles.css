@@ -7,7 +7,8 @@
 :root {
   /* font families (tokens.json · primitive.fontFamily) */
   --font-ui: "Inter", "Noto Sans TC", ui-sans-serif, system-ui, sans-serif;
-  --font-content: "GenWanMin2 TW", "Noto Serif TC", ui-serif, Georgia, serif;
+  /* Serif stack matches the app's --font-serif exactly (GenWanMin2 TW loaded via index.html). */
+  --font-content: "GenWanMin2 TW", ui-serif, Georgia, serif;
   --font-mono: "Fira Code", ui-monospace, monospace;
   /* type scale (tokens.json · fontSize) */
   --text-caption: 0.75rem;
@@ -302,26 +303,103 @@ header p {
   color: var(--accent-ink);
   font-weight: var(--fw-medium);
 }
+/* Form fields — bg fill, 1px resting border (the system's known low-contrast spot), dim placeholder. */
+.form-row {
+  display: flex;
+  gap: var(--space-control);
+  margin-top: var(--space-card);
+  flex-wrap: wrap;
+}
+.field {
+  font-family: var(--font-ui);
+  font-size: var(--text-small);
+  height: 40px;
+  padding: 0 var(--space-control);
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  flex: 1;
+  min-width: 140px;
+}
+.field::placeholder {
+  color: var(--dim);
+}
+/* Role badges (subtle) — role wash + text + edge; shows if small role text reads. --r = role token. */
+.tags {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: var(--space-card);
+}
+.tag {
+  font-size: var(--text-caption);
+  font-weight: var(--fw-medium);
+  padding: 2px 9px;
+  border-radius: 999px;
+  color: var(--r);
+  background: color-mix(in srgb, var(--r) 14%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--r) 32%, var(--card));
+}
+/* Alert (subtle) — role tints fill + left rule only; title/body stay ink/muted (role text fails AA on cream). */
+.alert {
+  margin-top: var(--space-card);
+  padding: 11px 14px;
+  border-radius: var(--radius-card);
+  border-left: 3px solid var(--r);
+  background: color-mix(in srgb, var(--r) 10%, var(--card));
+}
+.alert-title {
+  font-weight: var(--fw-semibold);
+  font-size: var(--text-small);
+  color: var(--ink);
+}
+.alert-body {
+  font-size: var(--text-caption);
+  color: var(--muted);
+  margin-top: 3px;
+  line-height: var(--lh-body);
+}
+/* Ink tiers — text / muted / dim on the page, to read the text hierarchy at body size. */
+.ink-tiers {
+  margin-top: var(--space-card);
+}
+.ink-tiers p {
+  font-size: var(--text-small);
+  margin: 2px 0;
+}
+.ink-tiers .t-ink {
+  color: var(--ink);
+}
+.ink-tiers .t-muted {
+  color: var(--muted);
+}
+.ink-tiers .t-dim {
+  color: var(--dim);
+}
 .nav {
   margin-top: var(--space-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   overflow: hidden;
+}
+/* Self-drawing dividers: each cell owns its top + left border; the -1px offset tucks the outermost
+   ones under the frame (overflow:hidden). Mirrors the shipped home nav; 2 cols suit four sections. */
+.nav-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  margin: -1px 0 0 -1px;
 }
 .nav a {
   padding: var(--space-control);
   text-decoration: none;
   color: inherit;
   background: var(--card);
-  border-right: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 5px;
-}
-.nav a:last-child {
-  border-right: 0;
 }
 .nav a:hover {
   background: var(--elevated);
@@ -367,6 +445,13 @@ header p {
 }
 .board-band .v .d {
   color: var(--accent);
+}
+/* Caption marking the fixed status group (theme-independent highlighter 燈號). */
+.fixed-note {
+  font-size: var(--text-caption);
+  color: var(--dim);
+  margin: var(--space-card) 0 -2px;
+  letter-spacing: 0.02em;
 }
 .status {
   display: flex;
@@ -456,6 +541,11 @@ header p {
   font-family: var(--font-content);
   font-size: var(--text-body);
   margin: 0 0 10px;
+}
+.vt-note {
+  font-size: var(--text-caption);
+  color: var(--sh-muted);
+  margin: 0 0 12px;
 }
 .vt table {
   width: 100%;

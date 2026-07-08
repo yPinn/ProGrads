@@ -98,8 +98,9 @@ const components = {
   },
   "button-ghost-hover": { textColor: "{colors.text}" },
   card: {
-    // Light card fill = the deepest paper surface step (dark uses bg-muted; see Elevation prose).
-    backgroundColor: "{colors.bg-accented}",
+    // Card fill = the raised --surface-card surface (light near-white above the page; dark bg-muted;
+    // see Elevation prose). Distinct token, not a bg-* step, since light now lifts rather than recesses.
+    backgroundColor: "{colors.surface-card}",
     borderColor: "{colors.border-accented}",
     textColor: "{colors.text}",
     rounded: "{rounded.card}",
@@ -179,21 +180,31 @@ disabled under \`prefers-reduced-motion\`.
 
 ## Colors
 
-Primary is a tuned **ink-blue** (\`primary\` #566a93, darkened for WCAG AA on cream) used for
-actions, links, and focus.
-Secondary is a **warm gold** (#a9944a) and neutral a **stone-brown** (#725435), both used
-sparingly as flat accents rather than full interactive ramps. \`success\`, \`warning\`,
-\`error\`, and \`info\` are single applied roles; a tuned 50–950 ramp for every role lives in
-\`design/tokens.json\` for future use, but only the primary ramp surfaces here (its 600/700
-steps drive button hover/active).
+Colours split into two tiers by convention.
 
-Surfaces map onto warm paper tones — \`bg\` #f8eeda (paper), \`bg-elevated\` #ece0c2 (raised),
-text \`text\` #433222 (ink) with dimmed/muted/toned/highlighted variants. The \`board\` tokens
+**Brand — per-theme.** Primary is a tuned **ink-blue** (\`primary\` #566a93, darkened for WCAG AA
+on the light paper) for actions, links, and focus; secondary a **warm gold** (#a9944a), neutral a
+**stone-brown** (#725435) — used sparingly as flat accents. Only the primary ramp surfaces here
+(its 600/700 steps drive button hover/active). These change with the painting theme.
+
+**Status — fixed, theme-independent (Zebra Mildliner highlighter 燈號).** Sampled from four Mildliner
+soft pens: \`success\` = Mild Green, \`warning\` = Mild Gold, \`error\` = Mild Red, \`info\` = Mild Blue —
+one highlighter set held constant across themes, so "red = error" stays learnable. Light keeps each
+pen's hue but drops lightness a touch (\`success\` #93d07d, \`warning\` #e6c85c, \`error\` #f16f83,
+\`info\` #7cc4ef); dark uses the authentic pens as-is (#b0e7a3 / #ecd679 / #f4617c / #a2dffe). The
+**marker** is for fills/washes/dots/rings/icon tint; meaning is carried by icon shape + ink text,
+never colour alone (WCAG 1.4.1), so on the light page it is deliberately low-contrast. Coloured
+status *text* uses the paired **-ink** step (\`error-ink\` #af4744 etc., ≥4.5:1; text-/bg-/border-{role}-ink).
+
+Surfaces map onto warm off-white paper — \`bg\` #f0eee9 (Cloud Dancer page), \`surface-card\` #faf9f5
+(raised near-white card), \`bg-muted\`→\`bg-accented\` warm-neutral recessed fills; text \`text\` #433222
+(ink) with dimmed/muted/toned/highlighted variants. The \`board\` tokens
 (#243b30 ground, #edefe4 chalk) style the chalkboard surface used for worked solutions.
 
 **Dark theme** (\`.dark\`) re-grounds everything on cool blue: \`bg\` #1c2330, \`text\` #f4debc
-(cream), primary brightened to #a9b8d7, board #15231c. Both themes target WCAG AA (4.5:1)
-for body text on their surfaces.
+(cream), primary brightened to #a9b8d7, board #15231c; status markers brighten (success #86c47e,
+error #ef7a86 …) and already clear text contrast on the night ground. Both themes target WCAG AA
+(4.5:1) for body text on their surfaces.
 
 ## Typography
 
@@ -226,13 +237,14 @@ shadows. Hierarchy is conveyed by **tonal layers** (\`bg\` → \`bg-muted\` → 
 rows lifts the surface by compositing \`bg-elevated\` at ~50% alpha rather than adding a shadow;
 interactive **cards** sharpen their edge to \`border-inverted\` on hover — still flat, no shadow.
 
-Cards sit a step below the page via a **\`--surface-card\`** alias onto the existing surface ramp
-(no new colour): light uses **\`bg-accented\`** (the deepest paper step) with a **\`border-accented\`**
-edge, so a card reads as a distinct layer rather than the near-flat 1.14:1 of \`bg-elevated\`;
-\`text-muted\` still holds AA (4.94:1). Dark keeps the cool night identity on \`bg-muted\` — its
-\`bg-accented\`/\`bg-elevated\` are *lighter* than the page and would drop \`text-muted\` below AA, so
-the card uses a different ramp step per theme. On either fill \`text-dimmed\` fails AA, so card body
-text stays \`text\`/\`text-muted\`.
+Cards read as a distinct layer via the **\`--surface-card\`** token. Light **raises** the card to a
+near-white **\`surface-card\`** #faf9f5 ABOVE the Cloud Dancer page (#f0eee9), so the brighter fill
+gives real figure-ground (page→card 1.10:1 the bright way) on a ground that is itself a notch below
+pure white — the recessed cream steps of the old page were near-flat (1.14:1) and read as no card at
+all. Dark instead **rests** the card on **\`bg-muted\`** #363f4f, one step above the night page: dark's
+\`bg-accented\`/\`bg-elevated\` are *lighter* than the page and would drop \`text-muted\` below AA, so the
+card uses a different ramp direction per theme. Both fills hold \`text-muted\` at AA (light 6.57:1, dark
+4.96:1); a **\`border-accented\`** edge completes the depth.
 The lone shadow exception is the \`board\` chalkboard surface, which carries a single soft shadow
 (\`0 2px 10px\` at ~0.18 alpha) so it reads as a physical board.
 
@@ -250,7 +262,7 @@ Built on **Nuxt UI v4**; app-owned classes fill the gaps. Patterns:
   primary-600/700. Ghost buttons (nav, icon, inline links) are transparent with muted text
   that resolves to full ink on hover.
 - **Cards** — flat panels with 6px radius and \`card\` padding; separated by fill + a
-  \`border-accented\` edge, never shadow. Fill is \`--surface-card\` (an alias onto \`bg-accented\`
+  \`border-accented\` edge, never shadow. Fill is \`--surface-card\` (raised near-white #faf9f5
   light / \`bg-muted\` dark; see Elevation). The interactive variant sharpens its edge on hover.
   Use \`<AppCard>\`.
 - **Interactive list rows** — transparent by default, hover composites \`bg-elevated\` at 50%.
@@ -267,17 +279,19 @@ app-owned interactive elements (Nuxt UI components ship their own).
 - **Do** keep \`primary\` for the single most important action, links, and focus per view.
 - **Do** convey depth with tone and borders; **don't** add drop shadows to UI chrome — this
   system is flat (the \`board\` surface is the sole exception).
-- **Do** use \`secondary\`/\`success\`/\`warning\`/\`error\` as sparse flat accents; **don't** build
-  multi-step interactive ramps from them in UI without pulling the tuned ramp from tokens.json.
-- **Do** keep coloured *text* (badges, links, alert titles) to \`primary\`/\`neutral\` — the only
-  roles that clear WCAG AA on the cream surface in light mode. For \`secondary\`/\`success\`/
-  \`warning\`/\`error\` semantics at text size, convey them with solid fills + icons or the role's
-  **700** ramp step; **don't** set small text in their base (500) tones on light surfaces
-  (2.6–4.4:1, below AA).
+- **Do** treat \`success\`/\`warning\`/\`error\`/\`info\` as the **fixed status set** — the same
+  highlighter markers under every theme (never re-tint them per painting scheme); reach for them
+  for fills/washes/dots/rings/icon tint, and always pair with an icon + ink text (never colour
+  alone). **Don't** vary status hues by theme or set status meaning by colour only.
+- **Do** keep coloured *text* (badges, links, alert titles) to \`primary\`/\`neutral\`, or use the
+  status **-ink** step (\`text-error-ink\` etc., ≥4.5:1) for coloured status text; **don't** set
+  status **markers** as small text on the light page — they are deliberately soft (1.4–2.5:1) for the
+  highlighter look and fail AA as text.
 - **Do** set headings in serif Ming and body in Inter; **don't** mix more than these roles.
 - **Do** maintain WCAG AA (4.5:1) for body text on its surface in both themes; **don't** set
-  \`text-dimmed\` on \`bg-elevated\`/card surfaces — it clears AA only on the base \`bg\` page
-  (3.97:1 light / 2.36:1 dark on elevated). Use \`text\`/\`text-muted\` on cards.
+  \`text-dimmed\` on the recessed \`bg-muted\`/\`bg-elevated\`/\`bg-accented\` fills — it clears AA on the
+  base \`bg\` page (4.70:1) and the raised card (5.17:1) but not the recessed steps (4.13:1 light /
+  2.36:1 dark on elevated). Use \`text\`/\`text-muted\` there.
 - **Don't** hard-code ms or cubic-beziers — use the motion tokens (fast/base/slow, standard ease).
 `;
 

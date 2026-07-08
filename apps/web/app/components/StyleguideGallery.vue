@@ -7,32 +7,62 @@ import { icons } from "~/utils/icons";
 import type { ButtonIntent, ButtonSize } from "~/utils/button-intents";
 
 // Colour tokens as swatches — the palette source of truth (semantic.css). Classes are literal so
-// Tailwind's scanner emits them; roles/ink use the --ui-* / --surface-card vars directly.
+// Tailwind's scanner emits them. Each <TokenSwatch> reads its own resolved hex from the DOM, so the
+// values shown are live per theme.
 const surfaceSwatches = [
-  { name: "default", cls: "bg-default" },
-  { name: "muted", cls: "bg-muted" },
-  { name: "elevated", cls: "bg-elevated" },
-  { name: "accented", cls: "bg-accented" },
-  { name: "card", cls: "bg-(--surface-card)" },
-  { name: "inverted", cls: "bg-inverted" },
+  { name: "default", chip: "bg-default", desc: "頁面底色" },
+  { name: "muted", chip: "bg-muted", desc: "次階填色 · 輸入/表格" },
+  { name: "elevated", chip: "bg-elevated", desc: "抬升 · code/hover" },
+  { name: "accented", chip: "bg-accented", desc: "最深填色" },
+  { name: "card", chip: "bg-(--surface-card)", desc: "卡片 · 亮浮白/暗抬升" },
+  { name: "inverted", chip: "bg-inverted", desc: "反相墨底" },
 ];
-const roleSwatches = [
-  { name: "primary", cls: "bg-(--ui-primary)" },
-  { name: "secondary", cls: "bg-(--ui-secondary)" },
-  { name: "success", cls: "bg-(--ui-success)" },
-  { name: "info", cls: "bg-(--ui-info)" },
-  { name: "warning", cls: "bg-(--ui-warning)" },
-  { name: "error", cls: "bg-(--ui-error)" },
+// Brand roles — per-theme (from the painting scheme).
+const brandSwatches = [
+  { name: "primary", chip: "bg-(--ui-primary)", desc: "主色 · 行動/連結/焦點" },
+  { name: "secondary", chip: "bg-(--ui-secondary)", desc: "輔色 · 暖金" },
+];
+// Status roles — FIXED highlighter markers (Zebra Mildliner); each pairs a marker (fill/icon) with
+// a -ink text step. Swatch shows both the marker hex and the resolved -ink hex.
+const statusSwatches = [
+  {
+    name: "success",
+    chip: "bg-(--ui-success)",
+    ink: "text-success-ink",
+    desc: "成功/正確 · Mild Green",
+  },
+  { name: "warning", chip: "bg-(--ui-warning)", ink: "text-warning-ink", desc: "注意 · Mild Gold" },
+  { name: "error", chip: "bg-(--ui-error)", ink: "text-error-ink", desc: "錯誤 · Mild Red" },
+  { name: "info", chip: "bg-(--ui-info)", ink: "text-info-ink", desc: "提示 · Mild Blue" },
 ];
 const borderSwatches = [
-  { name: "default", cls: "border-default" },
-  { name: "accented", cls: "border-accented" },
+  { name: "default", chip: "border-default", desc: "一般邊框" },
+  { name: "accented", chip: "border-accented", desc: "強調 · 卡片邊" },
 ];
 const inkTiers = [
-  { name: "text", cls: "text-default" },
-  { name: "toned", cls: "text-(--ui-text-toned)" },
-  { name: "muted", cls: "text-muted" },
-  { name: "dimmed", cls: "text-dimmed" },
+  { name: "text", chip: "text-default", desc: "主要內文" },
+  { name: "toned", chip: "text-(--ui-text-toned)", desc: "加重" },
+  { name: "muted", chip: "text-muted", desc: "次要" },
+  { name: "dimmed", chip: "text-dimmed", desc: "最弱 · 僅頁底達 AA" },
+];
+
+// Colour-token families rendered as label-left rows: all share one left rail so every swatch group
+// aligns, instead of wrapping raggedly in a half-column. The rail is a FIXED two-part label — bold
+// short name + one concise note — so every row keeps the same rhythm (full rationale lives in the
+// semantic.css / DESIGN.md comments, not repeated here). `read` picks which computed property each
+// TokenSwatch samples (bg default; border for borders, text for the ink tiers). Ink lives here too —
+// it is a colour token, so all colour families sit together above Typography.
+const colorGroups: {
+  name: string;
+  note?: string;
+  items: { name: string; chip: string; desc?: string; ink?: string }[];
+  read?: "border" | "text";
+}[] = [
+  { name: "Brand 品牌色", note: "隨主題切換", items: brandSwatches },
+  { name: "Surfaces 紙面階", note: "由淺到深，末為墨底", items: surfaceSwatches },
+  { name: "Borders 邊框", note: "1px 描邊", items: borderSwatches, read: "border" },
+  { name: "Status 狀態燈號", note: "固定不隨主題", items: statusSwatches },
+  { name: "Ink 墨階", note: "文字強度 · 均達 AA", items: inkTiers, read: "text" },
 ];
 
 const selectItems = [
@@ -70,51 +100,52 @@ const demoState = ref<(typeof demoStates)[number]>("data");
 </script>
 
 <template>
-  <div class="text-default space-y-section">
-    <!-- Colors — the palette (semantic.css tokens) as swatches. -->
-    <section class="space-y-4">
-      <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Colors · 色票</h3>
+  <!-- Two-band grid: Foundations (token layer) then Components (UI). Wide zones span both columns;
+       compact zones pair two-across. Span order tiles gap-free without reordering, so the reading
+       sequence stays system → UI. Bands are col-span-full hairline dividers. -->
+  <div class="text-default grid grid-cols-1 gap-x-8 gap-y-section lg:grid-cols-2">
+    <!-- ── Foundations · 系統層 ── colour + type tokens. Each family is a self-contained block (header +
+         vertical list of row-swatches) flowed through a 2-column masonry: the browser packs blocks by
+         height so both columns fill, reviving the original "use the full width" intent — but the
+         row-swatches align regardless of column width, so there is no ragged half-column wrapping. -->
+    <p class="col-span-full text-dimmed text-caption font-medium tracking-eyebrow uppercase">
+      Foundations · 系統層
+    </p>
 
-      <div class="space-y-1.5">
-        <p class="text-dimmed text-caption">Surfaces 紙面階（背景由淺到深，末為 inverted 墨底）</p>
-        <div class="flex flex-wrap gap-3">
-          <div v-for="s in surfaceSwatches" :key="s.name" class="space-y-1">
-            <div class="border-default size-14 rounded-card border" :class="s.cls" />
-            <p class="text-dimmed text-caption text-center">{{ s.name }}</p>
-          </div>
+    <div class="col-span-full columns-1 gap-8 lg:columns-2">
+      <!-- Colour families (semantic.css tokens); each swatch is block-left / meta-right. -->
+      <section v-for="g in colorGroups" :key="g.name" class="mb-6 break-inside-avoid">
+        <div class="mb-2.5">
+          <p class="text-muted text-caption font-medium tracking-eyebrow uppercase">{{ g.name }}</p>
+          <p v-if="g.note" class="text-dimmed text-caption">{{ g.note }}</p>
         </div>
-      </div>
-
-      <div class="space-y-1.5">
-        <p class="text-dimmed text-caption">Roles 語義色（solid）</p>
-        <div class="flex flex-wrap gap-3">
-          <div v-for="r in roleSwatches" :key="r.name" class="space-y-1">
-            <div class="size-14 rounded-card" :class="r.cls" />
-            <p class="text-dimmed text-caption text-center">{{ r.name }}</p>
-          </div>
+        <div class="space-y-2.5">
+          <TokenSwatch v-for="s in g.items" :key="s.name" v-bind="s" :read="g.read" />
         </div>
-      </div>
+      </section>
 
-      <div class="space-y-1.5">
-        <p class="text-dimmed text-caption">Borders 邊框</p>
-        <div class="flex flex-wrap gap-3">
-          <div v-for="b in borderSwatches" :key="b.name" class="space-y-1">
-            <div class="bg-default size-14 rounded-card border-2" :class="b.cls" />
-            <p class="text-dimmed text-caption text-center">{{ b.name }}</p>
-          </div>
+      <!-- Typography — packed into the same masonry so it fills the shorter column. -->
+      <section class="mb-6 break-inside-avoid">
+        <p class="text-muted text-caption font-medium tracking-eyebrow uppercase">Typography</p>
+        <div class="mt-2.5 space-y-1.5">
+          <p class="font-serif text-title-lg tracking-tight">標題 title-lg · 明體</p>
+          <p class="font-serif text-title-sm tracking-tight">標題 title-sm · 明體</p>
+          <p class="text-body">內文 body · Inter，研究所備考資訊平台。</p>
+          <p class="text-muted text-small">說明 small · 次要文字（墨階見上方 Ink）。</p>
+          <p class="text-caption">caption · 最小級（eyebrow / 標註）。</p>
         </div>
-      </div>
+      </section>
+    </div>
 
-      <div class="space-y-0.5">
-        <p class="text-dimmed text-caption">Ink 墨階（文字強度，均須達 WCAG AA）</p>
-        <p v-for="t in inkTiers" :key="t.name" class="text-body" :class="t.cls">
-          {{ t.name }} · 研究所備考資訊平台 Aa 123
-        </p>
-      </div>
-    </section>
+    <!-- ── Components · UI 元件 ── built on the tokens above; wide zones span both columns. -->
+    <p
+      class="col-span-full border-t border-default pt-6 text-dimmed text-caption font-medium tracking-eyebrow uppercase"
+    >
+      Components · UI 元件
+    </p>
 
     <!-- Buttons — AppButton intent × size; source of truth for the hierarchy. -->
-    <section class="space-y-3">
+    <section class="space-y-3 lg:col-span-2">
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">
         Buttons · AppButton intents
       </h3>
@@ -168,7 +199,7 @@ const demoState = ref<(typeof demoStates)[number]>("data");
     </section>
 
     <!-- Icon registry — the semantic names app code references (utils/icons). -->
-    <section class="space-y-3">
+    <section class="space-y-3 lg:col-span-2">
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">
         Icons · registry
       </h3>
@@ -277,19 +308,10 @@ const demoState = ref<(typeof demoStates)[number]>("data");
       </QueryState>
     </section>
 
-    <!-- Navigation -->
-    <section class="space-y-3">
-      <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Navigation</h3>
-      <div class="flex flex-wrap items-center gap-4">
-        <UPagination v-model:page="page" :total="120" :items-per-page="20" />
-        <ColorModeToggle />
-      </div>
-    </section>
-
     <!-- Surfaces -->
     <section class="space-y-3">
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Surfaces</h3>
-      <!-- AppCard: 靜態面板。填色 --surface-card(亮 bg-accented / 暗 bg-muted)+ border-accented 銳邊,
+      <!-- AppCard: 靜態面板。填色 --surface-card(亮 #faf9f5 浮於頁面上 / 暗 bg-muted)+ border-accented 銳邊,
            內文限 text/text-muted。 -->
       <AppCard>
         <p class="font-medium">AppCard · 靜態</p>
@@ -311,19 +333,18 @@ const demoState = ref<(typeof demoStates)[number]>("data");
       </AppBoard>
     </section>
 
-    <!-- Typography -->
-    <section class="space-y-2">
-      <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Typography</h3>
-      <p class="font-serif text-title-lg tracking-tight">標題 title-lg · 明體</p>
-      <p class="font-serif text-title-sm tracking-tight">標題 title-sm · 明體</p>
-      <p class="text-body">內文 body · Inter，研究所備考資訊平台。</p>
-      <p class="text-muted text-small">說明 small · 次要文字（墨階見 Colors）。</p>
-      <p class="text-caption">caption · 最小級（eyebrow / 標註）。</p>
+    <!-- Navigation -->
+    <section class="space-y-3">
+      <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Navigation</h3>
+      <div class="flex flex-wrap items-center gap-4">
+        <UPagination v-model:page="page" :total="120" :items-per-page="20" />
+        <ColorModeToggle />
+      </div>
     </section>
 
     <!-- Prose (MDC content) — the @tailwindcss/typography mapping recoloured to --ui-* roles.
          Mirrors how question stems/choices/explanations render markdown. -->
-    <section class="space-y-3">
+    <section class="space-y-3 lg:col-span-2">
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Prose (MDC)</h3>
       <div class="prose prose-sm max-w-none">
         <h4>標題範例</h4>
