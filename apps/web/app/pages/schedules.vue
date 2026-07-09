@@ -87,7 +87,7 @@ const prefersReducedMotion = useReducedMotion();
                 <span class="text-muted text-small w-44 shrink-0 tabular-nums">{{
                   formatDateRange(item.at, item.endAt)
                 }}</span>
-                <AppBadge variant="subtle" size="sm">{{
+                <AppBadge intent="meta" size="sm">{{
                   ADMISSION_EVENT_LABELS[item.event]
                 }}</AppBadge>
                 <span class="font-medium">{{ item.school.name }}</span>
