@@ -17,12 +17,14 @@ export default withNuxt(
     },
   },
   {
-    // Design-system guardrail (docs/08): app code goes through <AppButton>/<IconButton> + the icons
-    // registry, never raw <UButton>/i-lucide-* strings. Allowlist below = wrappers/registry/styleguide.
+    // Design-system guardrail (docs/08): app code goes through <AppButton>/<IconButton>/<AppBadge>
+    // + the icons registry, never raw <UButton>/<UBadge>/i-lucide-* strings. Allowlist below =
+    // wrappers/registry/styleguide.
     files: ["app/**/*.vue", "app/**/*.ts"],
     ignores: [
       "app/components/AppButton.vue",
       "app/components/IconButton.vue",
+      "app/components/AppBadge.vue",
       "app/components/StyleguideGallery.vue",
       "app/pages/styleguide.vue",
       "app/utils/icons.ts",
@@ -42,6 +44,20 @@ export default withNuxt(
           // <ColorModeToggle> (→ IconButton) so it inherits the design system too.
           selector: "VElement[rawName='UColorModeButton']",
           message: "改用 <ColorModeToggle>(走 IconButton 設計系統),勿直接用 <UColorModeButton>。",
+        },
+        {
+          selector: "VElement[rawName='UBadge']",
+          message: "改用 <AppBadge>,勿直接用 <UBadge>(見 components/AppBadge.vue)。",
+        },
+        {
+          selector:
+            "VElement[rawName='AppBadge'] VAttribute[directive=false][key.name=/^(color|variant)$/]",
+          message: "AppBadge 不吃 color/variant,改用 intent(見 utils/badge-intents.ts)。",
+        },
+        {
+          selector:
+            "VElement[rawName='AppBadge'] VAttribute[directive=true][key.argument.name=/^(color|variant)$/]",
+          message: "AppBadge 不吃 color/variant,改用 intent(見 utils/badge-intents.ts)。",
         },
         {
           selector: 'VLiteral[value=/^"?i-lucide-/]',

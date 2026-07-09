@@ -75,7 +75,7 @@ const prefersReducedMotion = useReducedMotion();
     title="考古題"
     description="跨校練單科:依考科、學校、年度、題型檢索研究所歷屆考題。"
   >
-    <div class="border-default mb-section flex flex-wrap gap-control rounded-card border p-card">
+    <AppCard class="mb-section flex flex-wrap items-end gap-control">
       <USelectMenu
         v-model="subject"
         :items="subjectItems"
@@ -101,7 +101,7 @@ const prefersReducedMotion = useReducedMotion();
         aria-label="年度"
         class="w-full sm:w-32"
       />
-    </div>
+    </AppCard>
 
     <QueryState
       :pending="isPending"

@@ -7,9 +7,14 @@ export default defineAppConfig({
       primary: "blue",
       neutral: "stone",
     },
-    // Skeleton default (bg-elevated) is near-invisible on the cream page (~1.2:1) and vanishes
-    // under prefers-reduced-motion (no pulse). Use the warmer border-accented tone so the
-    // loading shape stays perceivable in both themes without leaving the palette.
-    skeleton: { base: "animate-pulse rounded-md bg-(--ui-border-accented)" },
+    // bg-elevated skeleton default is near-invisible on cream and disappears without motion;
+    // border-accented fixes that. rounded-sm not rounded-card: tailwind-merge doesn't know
+    // rounded-card conflicts with the base theme's rounded-md/lg, so it'd append not override.
+    skeleton: { base: "animate-pulse rounded-sm bg-(--ui-border-accented)" },
+    select: { slots: { base: "rounded-sm", content: "rounded-sm", item: "before:rounded-sm" } },
+    selectMenu: {
+      slots: { base: "rounded-sm", content: "rounded-sm", item: "before:rounded-sm" },
+    },
+    toast: { slots: { root: "rounded-sm" } },
   },
 });

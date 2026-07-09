@@ -85,15 +85,36 @@ withDefaults(defineProps<{ value?: string; size?: "base" | "sm"; prose?: boolean
    ignoring --tw-prose-* — so on the board they show as cream frames/chips, and the chalk thead
    text even washes out on its cream surface. Re-skin every inset to the board's own line + a faint
    chalk tint, unifying them with the board edge. Unlayered → wins over the layered utilities. */
-.board.prose :where(pre, code, th, td) {
+.board.prose :where(pre, th, td) {
   border-color: var(--board-line);
 }
-.board.prose :where(thead),
-.board.prose :where(:not(pre) > code) {
-  background-color: color-mix(in srgb, var(--board-ink) 10%, transparent);
+.board.prose :where(thead) {
+  background-color: color-mix(in srgb, var(--board-ink) 8%, transparent);
 }
-/* Inline chips also need chalk text (ProseCode hard-codes dark text-highlighted). */
+/* Inline code chips: DSA content wraps single symbols (`!`, `*`) in backticks constantly, so
+   Nuxt UI's default bordered/padded ProseCode badge (colour override: it hard-codes dark
+   text-highlighted) stacks into a wall of buttons. Drop border/ring, shrink tint → mono token. */
 .board.prose :where(:not(pre) > code) {
   color: var(--board-ink);
+  background-color: color-mix(in srgb, var(--board-ink) 8%, transparent);
+  border: none;
+  box-shadow: none;
+  border-radius: 0.25em;
+  padding: 0.05em 0.35em;
+}
+
+/* A paragraph entirely one bold run reads as a mini section header in AI explanations — give it
+   accent chalk for hierarchy. :only-child excludes inline emphasis in normal sentences, so body
+   text isn't blanket-recoloured. --board-accent-ink is a structural marker (not a status colour,
+   hence not "info") — FIXED value, see semantic.css for why it doesn't flip with theme. */
+.board.prose :where(p > strong:only-child) {
+  color: var(--board-accent-ink);
+}
+
+/* GenWanMin2 TW (font-serif) ships only Regular/400 — no bold source file — so <strong> gets
+   FAKED via synthetic outline-thickening, uneven on thin-stroke Latin (e.g. "Approach"). Worse on
+   lower-luminance accent chalk than solid --board-ink. Disable synthesis; colour carries emphasis. */
+.board.prose strong {
+  font-synthesis: none;
 }
 </style>

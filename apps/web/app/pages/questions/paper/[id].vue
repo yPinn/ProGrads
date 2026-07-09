@@ -179,7 +179,7 @@ function choiceState(
                   <AppButton intent="primary" size="sm" @click="submit">交卷</AppButton>
                 </template>
                 <template v-else>
-                  <AppBadge color="primary" variant="soft" size="lg" class="tabular-nums">
+                  <AppBadge intent="count" size="lg" class="tabular-nums">
                     得分 {{ score }}/{{ gradable.length }}
                   </AppBadge>
                   <AppButton intent="secondary" size="sm" @click="restart">再測一次</AppButton>
@@ -215,7 +215,7 @@ function choiceState(
 
               <div class="mb-2 flex items-center gap-2">
                 <span class="font-serif text-title-sm tracking-tight">第 {{ q.number }} 題</span>
-                <AppBadge variant="subtle" size="sm">{{ QUESTION_TYPE_LABELS[q.type] }}</AppBadge>
+                <AppBadge intent="meta" size="sm">{{ QUESTION_TYPE_LABELS[q.type] }}</AppBadge>
                 <UIcon
                   v-if="submitted && q.choices.length"
                   :name="isQuestionCorrect(q) ? icons.correct : icons.wrong"

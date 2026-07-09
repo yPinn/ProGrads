@@ -1,24 +1,18 @@
 <script setup lang="ts">
 import type { FacultyDegree, FacultyMemberWithDepartment, FacultyThesis } from "@prograds/shared";
+import { DEGREE_LEVEL_LABELS, THESIS_ROLE_LABELS } from "~/utils/faculty-labels";
 
 // One faculty member card: name/title, note/lab, education, research areas, theses, homepage.
 // Shared by both faculty views (by-school roster and by-track cross-school listing).
 defineProps<{ member: FacultyMemberWithDepartment }>();
 
-const THESIS_ROLE_LABELS: Record<string, string> = { advised: "指導論文", authored: "著作" };
-const DEGREE_LEVEL_LABELS: Record<string, string> = {
-  bachelor: "學士",
-  master: "碩士",
-  phd: "博士",
-  other: "其他",
-};
 const isHttp = (url: string | null): url is string => !!url && /^https?:\/\//.test(url);
 
 // Compose display strings here (not in-template) so field/year separators are explicit —
 // interpolations glued to element boundaries drop their whitespace under Vue's condense mode.
 // 學歷:「博士 · <校> — <領域> (<年>)」, 領域/年缺省則自然略去。
 function formatDegree(d: FacultyDegree): string {
-  let s = `${DEGREE_LEVEL_LABELS[d.level] ?? d.level} · ${d.institution}`;
+  let s = `${DEGREE_LEVEL_LABELS[d.level]} · ${d.institution}`;
   if (d.field) s += ` — ${d.field}`;
   if (d.year) s += ` (${d.year})`;
   return s;
@@ -26,7 +20,7 @@ function formatDegree(d: FacultyDegree): string {
 
 // 論文前綴:「著作 · 2011」/ 年缺省則只留角色「指導論文」。
 function thesisTag(t: FacultyThesis): string {
-  const role = THESIS_ROLE_LABELS[t.role] ?? t.role;
+  const role = THESIS_ROLE_LABELS[t.role];
   return t.year ? `${role} · ${t.year}` : role;
 }
 </script>
@@ -53,15 +47,11 @@ function thesisTag(t: FacultyThesis): string {
       <li v-for="d in member.degrees" :key="d.id">{{ formatDegree(d) }}</li>
     </ul>
 
-    <ul v-if="member.researchAreas.length" class="mt-3 flex flex-wrap gap-1.5">
-      <li
-        v-for="area in member.researchAreas"
-        :key="area"
-        class="border-accented text-muted text-caption rounded-full border px-2 py-0.5"
-      >
+    <div v-if="member.researchAreas.length" class="mt-3 flex flex-wrap gap-1.5">
+      <AppBadge v-for="area in member.researchAreas" :key="area" intent="tag" size="sm">
         {{ area }}
-      </li>
-    </ul>
+      </AppBadge>
+    </div>
 
     <!-- 2-col grid: the tag column sizes to the widest label (指導論文 · YYYY), so every
          thesis title shares one left baseline. `contents` keeps the <ul><li> semantics

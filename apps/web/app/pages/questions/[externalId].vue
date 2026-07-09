@@ -65,7 +65,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onArrowNav));
             <p class="text-muted text-caption mb-1 tracking-eyebrow uppercase">卷別</p>
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
               <h1 class="font-serif text-title-md tracking-tight">{{ q.examSubject.name }}</h1>
-              <AppBadge variant="subtle">{{ QUESTION_TYPE_LABELS[q.type] }}</AppBadge>
+              <AppBadge intent="meta">{{ QUESTION_TYPE_LABELS[q.type] }}</AppBadge>
             </div>
             <p class="text-muted text-small mt-1">
               {{ q.exam.school.name }} {{ q.exam.year }} ·
@@ -80,9 +80,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onArrowNav));
               v-for="s in q.subjects"
               :key="s.slug"
               :to="`/questions?subject=${s.slug}`"
-              color="neutral"
-              variant="outline"
-              class="focus-ring hover:bg-elevated transition-colors"
+              intent="tag"
               :aria-label="`練習考科:${s.name}(跨校)`"
             >
               {{ s.name }}
@@ -125,7 +123,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onArrowNav));
           <section v-if="q.explanation" class="mt-6">
             <div class="mb-2 flex items-center gap-2">
               <h2 class="font-serif text-title-sm tracking-tight">標準解析</h2>
-              <AppBadge variant="subtle">{{
+              <AppBadge intent="meta">{{
                 REVIEW_STATUS_LABELS[q.explanation.reviewStatus]
               }}</AppBadge>
             </div>

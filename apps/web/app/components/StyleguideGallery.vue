@@ -215,15 +215,16 @@ const demoState = ref<(typeof demoStates)[number]>("data");
       </div>
     </section>
 
-    <!-- Badges -->
+    <!-- Badges — raw UBadge on purpose: this sweeps Nuxt UI's native colour/variant scale for
+         comparison (docs/08), which the intent-locked <AppBadge> no longer exposes. -->
     <section class="space-y-3">
       <h3 class="text-muted text-caption font-medium tracking-eyebrow uppercase">Badges</h3>
       <div class="flex flex-wrap items-center gap-2">
-        <AppBadge v-for="c in badgeColors" :key="c" :color="c" variant="subtle">{{ c }}</AppBadge>
+        <UBadge v-for="c in badgeColors" :key="c" :color="c" variant="subtle">{{ c }}</UBadge>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <AppBadge v-for="v in ['solid', 'soft', 'subtle', 'outline']" :key="v" :variant="v"
-          >primary {{ v }}</AppBadge
+        <UBadge v-for="v in ['solid', 'soft', 'subtle', 'outline']" :key="v" :variant="v"
+          >primary {{ v }}</UBadge
         >
       </div>
     </section>
