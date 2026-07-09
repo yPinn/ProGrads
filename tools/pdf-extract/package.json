@@ -6,6 +6,7 @@
   "scripts": {
     "to-images": "tsx src/to-images.ts",
     "crop": "tsx src/crop.ts",
+    "split": "tsx src/split.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit"
