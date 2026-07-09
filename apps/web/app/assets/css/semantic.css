@@ -75,6 +75,10 @@
   --board: #243b30;
   --board-ink: #edefe4;
   --board-line: #3a5446;
+  /* Accent chalk for structural markers (AppBoard's whole-line-bold rule) — board-scoped, not a
+     status colour. FIXED (not flipping like --ui-info-ink, tuned for the light page bg — on the
+     dark board that drops to ~2:1, fails AA). Pinned to dark theme's info-ink value (~8:1 here). */
+  --board-accent-ink: #a2dffe;
 }
 
 /* dark = 燈下夜讀：冷藍夜底、燈光奶油字、提亮靛藍主色。 */
@@ -118,6 +122,7 @@
   --board: #15231c;
   --board-ink: #edefe4;
   --board-line: #2c4034;
+  --board-accent-ink: #a2dffe; /* same fixed value as light — see :root for why it doesn't flip */
 }
 
 /* text-/bg-/border-{role}-ink utilities for coloured status TEXT (bare text-{role} stays the
