@@ -46,6 +46,10 @@
   --container-page: 80rem;
   --radius-card: 0.375rem; /* aligned with Nuxt UI's --ui-radius */
 
+  /* Extra breakpoint below Tailwind's sm (40rem) — PaperCard's stacked→side-by-side switch only
+     needs ~30rem once the button row is narrow (5/row); bare `sm` would strand ~10rem unused. */
+  --breakpoint-xs: 30rem;
+
   /* Motion tokens — single source for all animation timing. Consumed by Tailwind
      transition utilities (via the --default-* overrides below), Vue/Nuxt page
      transitions, and @vueuse/motion presets. Never write bare ms/cubic-bezier. */
