@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch, onMounted, onBeforeUnmount } from "vue";
+import { computed, ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 import { useQuestion } from "~/composables/useQuestion";
 import { ApiError } from "~/utils/api-error";
@@ -13,6 +13,12 @@ const route = useRoute();
 const externalId = computed(() => String(route.params.externalId));
 
 const { data: q, isPending, isError, error, refetch } = useQuestion(externalId);
+
+// 標準解析預設收合(查閱頁不代答,但也不該一進頁面就把答案攤開);切題(上一題/下一題)時重新收合。
+const showAnswer = ref(false);
+watch(externalId, () => {
+  showAnswer.value = false;
+});
 
 // A missing question is a real 404 page (SEO/UX), not an inline retry banner;
 // other failures (network/5xx) keep the retryable ErrorState below.
@@ -121,18 +127,29 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onArrowNav));
           </RenderBoundary>
 
           <section v-if="q.explanation" class="mt-6">
-            <div class="mb-2 flex items-center gap-2">
+            <!-- 按鈕固定在標題列(不隨展開/摺疊移動位置);預設收合,查閱頁仍以「先自己想」為主。 -->
+            <div class="flex items-center gap-2">
               <h2 class="font-serif text-title-sm tracking-tight">標準解析</h2>
               <AppBadge intent="meta">{{
                 REVIEW_STATUS_LABELS[q.explanation.reviewStatus]
               }}</AppBadge>
+              <AppButton
+                :intent="showAnswer ? 'ghost' : 'secondary'"
+                size="sm"
+                class="ml-auto"
+                @click="showAnswer = !showAnswer"
+                >{{ showAnswer ? "隱藏標準解析" : "顯示標準解析" }}</AppButton
+              >
             </div>
-            <!-- Explanation renders on the blackboard too (chalk prose + dark-green code),
-                 matching the stem; <AppBoard> applies the same treatment. -->
-            <RenderBoundary label="解析">
-              <AppBoard :value="q.explanation.standardAnswer" size="sm" />
-            </RenderBoundary>
-            <p class="text-muted text-caption mt-3">AI 生成解析,僅供參考。</p>
+
+            <template v-if="showAnswer">
+              <!-- Explanation renders on the blackboard too (chalk prose + dark-green code),
+                   matching the stem; <AppBoard> applies the same treatment. -->
+              <RenderBoundary label="解析">
+                <AppBoard :value="q.explanation.standardAnswer" size="sm" class="mt-2" />
+              </RenderBoundary>
+              <p class="text-muted text-caption mt-3">AI 生成解析,僅供參考。</p>
+            </template>
           </section>
 
           <!-- 同卷上下題切換(依題序);頭/尾題對應端 disable。亦支援左右方向鍵。 -->
