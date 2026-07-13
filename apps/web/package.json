@@ -27,7 +27,7 @@
     "@pinia/nuxt": "^0.11.3",
     "@prograds/shared": "workspace:*",
     "@schedule-x/calendar": "^4.6.0",
-    "@schedule-x/theme-default": "^4.6.0",
+    "@schedule-x/theme-default": "^4.6.1",
     "@schedule-x/vue": "^4.1.0",
     "@tanstack/vue-query": "^5.101.2",
     "@tanstack/vue-table": "^8.21.3",
