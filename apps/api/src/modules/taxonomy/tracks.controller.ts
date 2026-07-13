@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
 import type { Track, TrackWithSubjects } from "@prograds/shared";
-import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { ApiBadRequest, ApiNotFound } from "../../common/api-error-responses.js";
 import { TrackQueryDto } from "./dto/track-query.dto.js";
 import { TrackResponseDto, TracksResponseDto } from "./dto/taxonomy-response.dto.js";
@@ -27,6 +27,7 @@ export class TracksController {
     summary: "取得單一所別",
     description: "依 slug 取得所別詳情，含該所別共用的考科清單。",
   })
+  @ApiParam({ name: "slug", description: "所別 slug", example: "cs" })
   @ApiOkResponse({ type: TrackResponseDto })
   @ApiNotFound()
   async get(@Param("slug") slug: string): Promise<{ data: TrackWithSubjects }> {

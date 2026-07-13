@@ -73,6 +73,7 @@ const SUBJECTS: TrackSeed[] = [
   { slug: "infosec-intro", name: "資訊安全概論" },
   { slug: "prog", name: "程式設計" },
   { slug: "english", name: "英文" },
+  { slug: "chinese", name: "國文" },
   // 電機所 考科（大碩/TKB 分類）；ds/algo/co/la/dm 沿用 cs 共用
   { slug: "engmath", name: "工程數學" },
   { slug: "prob", name: "機率" },

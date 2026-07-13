@@ -7,7 +7,7 @@ import type {
   QuestionFacets,
   QuestionSummary,
 } from "@prograds/shared";
-import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { ApiBadRequest, ApiNotFound } from "../../common/api-error-responses.js";
 import { QuestionQueryDto } from "./dto/question-query.dto.js";
 import {
@@ -87,6 +87,10 @@ export class QuestionsController {
     description:
       "回傳單一考卷（ExamSubject）的所有題目全文，含選項（附正解）與標準解析，供整卷計時測驗。前端於作答前隱藏正解／解析，交卷後才揭曉並批改。",
   })
+  @ApiParam({
+    name: "examSubjectId",
+    description: "考卷科目 id（cuid，由 GET /questions/papers 取得）",
+  })
   @ApiOkResponse({ type: PaperTestResponseDto })
   @ApiNotFound()
   async paperTest(@Param("examSubjectId") examSubjectId: string): Promise<{ data: PaperTest }> {
@@ -98,6 +102,7 @@ export class QuestionsController {
     summary: "取得單一題目",
     description: "依 externalId 取得題目詳情，含題幹、選項與所屬考卷 / 考科。",
   })
+  @ApiParam({ name: "externalId", description: "題目對外唯一代碼", example: "nccu-2025-acct-q01" })
   @ApiOkResponse({ type: QuestionResponseDto })
   @ApiNotFound()
   async get(@Param("externalId") externalId: string): Promise<{ data: QuestionDetail }> {

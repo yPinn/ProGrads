@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
 import type { ExamDetail, ExamSummary } from "@prograds/shared";
-import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { ApiBadRequest, ApiNotFound } from "../../common/api-error-responses.js";
 import { ExamQueryDto } from "./dto/exam-query.dto.js";
 import { ExamResponseDto, ExamsResponseDto } from "./dto/exams-response.dto.js";
@@ -35,6 +35,7 @@ export class ExamsController {
     summary: "取得單一考卷",
     description: "依 id 取得考卷詳情，含題目清單與配分。",
   })
+  @ApiParam({ name: "id", description: "考卷 id（cuid，由 GET /exams 取得）" })
   @ApiOkResponse({ type: ExamResponseDto })
   @ApiNotFound()
   async get(@Param("id") id: string): Promise<{ data: ExamDetail }> {

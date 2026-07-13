@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from "@nestjs/common";
 import type { Subject } from "@prograds/shared";
-import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { ApiNotFound } from "../../common/api-error-responses.js";
 import { SubjectResponseDto, SubjectsResponseDto } from "./dto/taxonomy-response.dto.js";
 import { TaxonomyService } from "./taxonomy.service.js";
@@ -25,6 +25,7 @@ export class SubjectsController {
     summary: "取得單一考科",
     description: "依 slug 取得考科詳情。考科為全域共用題庫，可跨所別 / 學校練習。",
   })
+  @ApiParam({ name: "slug", description: "考科 slug", example: "algo" })
   @ApiOkResponse({ type: SubjectResponseDto })
   @ApiNotFound()
   async get(@Param("slug") slug: string): Promise<{ data: Subject }> {
