@@ -116,6 +116,11 @@ Nuxt 3/4；UI Nuxt UI + Tailwind；狀態 Pinia；動態取資料 TanStack Query
 內容由 API 驅動，Markdown 題幹/解析以 Nuxt MDC + KaTeX + Shiki 渲染；圖表 vue-echarts；行事曆 Schedule-X；表格 TanStack Table；
 SEO `@nuxtjs/seo`；i18n `@nuxtjs/i18n`；`@nuxt/image`、`@nuxt/icon`。
 
+> **現況**：`vue-echarts`/`echarts`、`@tanstack/vue-table`、`vee-validate`/`@vee-validate/zod`
+> 已裝但 `app/` 內尚無任何引用（圖表/表格/表單功能尚未接線）——見 `tasks/todo.md`
+> 待清理或啟用項目。`better-sqlite3` 亦已列但無用途，屬 starter 殘留待清。其餘（Pinia、
+> TanStack Query、Nuxt MDC、Schedule-X、@nuxtjs/seo/i18n、@nuxt/image）皆已接線使用中。
+
 ### 後端（NestJS）
 
 NestJS + `@nestjs/platform-fastify`；設定 `@nestjs/config`(+Zod)；DTO `nestjs-zod`；文件 `@nestjs/swagger`；
@@ -123,13 +128,27 @@ NestJS + `@nestjs/platform-fastify`；設定 `@nestjs/config`(+Zod)；DTO `nestj
 快取 `@nestjs/cache-manager` + Redis；佇列 BullMQ；排程 `@nestjs/schedule`；日誌 nestjs-pino；
 `@fastify/helmet`、`@nestjs/terminus`。
 
+> **現況**：僅 `@nestjs/config`、`nestjs-zod`、`@nestjs/swagger`、`nestjs-pino`、
+> `@fastify/helmet` 已安裝並接線。**尚未安裝**：`@nestjs/jwt`+passport-jwt（延至第二階段，
+> 見 D17）、`@nestjs/throttler`（見 `tasks/todo.md` P1.5，公開端點目前**零限流**）、
+> `@nestjs/cache-manager`+Redis、BullMQ、`@nestjs/schedule`、`@nestjs/terminus`。
+
 ### DB / AI / 通知
 
 PostgreSQL + Prisma（後期 pgvector）；AI 離線 `@anthropic-ai/sdk`(Claude Opus 4.8) + self-consistency，
 線上 `groq-sdk`，串流統一 Vercel AI SDK；Email Resend；推播（後期）`@line/bot-sdk`（LINE Messaging API）。
+
+> **現況**：僅 PostgreSQL + Prisma 已落地。`@anthropic-ai/sdk`/`groq-sdk`/Vercel AI SDK/
+> Resend/`@line/bot-sdk` **皆未安裝**——AI 解答現為人工依 `tools/ai-pipeline/PROMPT.md`
+> 手動生成（見 [04-ai-pipeline.md](04-ai-pipeline.md)），提醒訂閱尚未開始（`tasks/todo.md` P1）。
 
 ### 測試 / DX / 部署
 
 Vitest（前後端統一 runner）+ Supertest/Testcontainers（後端整合）、`@nuxt/test-utils`（前端元件）、Playwright（E2E），目標 80%；
 ESLint + Prettier + TS strict + Husky + lint-staged + commitlint + release-please；各 app/package 自帶 ESLint 設定（共用 root `base`）；
 前端 CF Pages、後端/DB Docker Compose（api + postgres + redis）+ Caddy 反代、CI GitHub Actions、Sentry。
+
+> **現況**：Vitest + `@nuxt/test-utils` 已用；Supertest/Testcontainers（後端整合測試）、
+> Playwright（E2E）、Sentry **尚未安裝**——後端目前僅 service 層單元測試，多數 module 無
+> controller/整合測試（見全專案 code review 發現）。ESLint/Prettier/Husky/commitlint/
+> release-please 鏈已落地。

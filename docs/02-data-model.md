@@ -114,7 +114,7 @@ department (系所, 穩定)
 
 - **`ExamSubject @@unique([examId, slug])`**：讓 sync 能以 (exam, 卷 slug) 冪等 upsert（否則無法去重重建合科卷）。卷去系所化後 upsert 鍵由卷名改為**路徑帶入的卷 slug**（`name` 不再唯一，可有重複顯示名）；見 migration `decouple_exam_from_department`。
 - **`Question.order Int`**：可靠的整卷排序（`number` 為 `"3"/"3a"/"10"` 字串，字典序會錯）；整卷答案匯出與重現整卷靠此。
-- **解答結構化**（`Explanation` / `Choice` model 既有）：`Explanation` 以 `answer_type` 判別式表達（選擇→`Choice.isCorrect`、數值→值、申論→markdown）。MC 的選項寫入由 sync 暫緩（見 03）。
+- **解答結構化**（`Explanation` / `Choice` model 既有）：`Explanation` 以 `answer_type` 判別式表達（選擇→`Choice.isCorrect`、數值→值、申論→markdown）。**已實作**：sync 解析 `## 選項`/`## 答案` 並寫入 `Choice`（`tools/content-sync/src/sync.ts`），MC 不再暫緩。
 
 **規劃中（尚未實作）**：
 
@@ -147,7 +147,20 @@ department (系所, 穩定)
 - `thesis_role`：`advised | authored`（指導學生論文 / 教授自著）
 - `degree_level`：`bachelor | master | phd | other`（學士 / 碩士 / 博士 / 其他）
 
-## 起步資料（資管/資工）
+## 起步資料（資管/資工 + 實際擴及會計所、政大文學院）
 
 - 資工所考科：資料結構、演算法、計算機組織、作業系統、線性代數、離散數學。
 - 資管所考科：資訊管理、程式設計、（與資工共用）資料結構/線代、管理學、統計學等（逐校考科組合待補）。
+- **現況已擴及會計所**（非原定「起步聚焦資管/資工」範圍，見 [00-product.md](00-product.md)）：
+  政大會計所題目佔題庫 27%，`business-admin` track 已補上對應 `track_subject` 連結。
+- **政大文學院全 8 系所**（中文/歷史/哲學/圖資檔案/宗教/台史/台文/華語文教學）已從 prospectus.pdf
+  逐系所抽取進 `admissions/2026/nccu/departments.yml`，對應新增 6 個人文類 track（`history`/
+  `philosophy`/`lis`/`religion`/`tw-history`/`tw-lit`）+ 16 個考科 slug。`chinese`（國文）現由 2 系
+  實證（中文系「高階國文」、華語文教學「國文」），非共通科臆測；`tw-history`（台灣史所）依實證
+  無筆試（純資料審查+面試），故無 `track_subject` 連結——與 `tourism`/`leisure` 同理，非遺漏。
+
+  **`track_subject` 查證方法（已定案）**：以 `admissions/*/*/departments.yml` 的
+  `papers[].subjects`（官方簡章實際考科）join `schools.seed.ts` dept→track，取實際考科聯集——
+  不依 TKB/大碩分類級慣例臆測，共通科目（國文/英文）尤須逐校查證，同 track 內不同系所可能完全
+  不同（政大會計所零共通科、MBA 考英文）。已查證 8 校：`chinese` 零證據、任何 track 皆不掛；
+  `english` 僅掛在有實證的 track。待更多內容進來持續依此法擴充、核校。

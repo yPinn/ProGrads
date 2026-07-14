@@ -2,8 +2,14 @@
 
 ## 雙層架構
 
-- **Claude = 品質防線（離線、真相來源）**：離線批次生成「標準解答 + 知識點」，存成 markdown 檔案。
+- **Claude = 品質防線（離線、真相來源）**：離線生成「標準解答 + 知識點」，存成 markdown 檔案。
+  **現況**：人在環路（human-in-the-loop）半自動——由人／Claude Code session 依 `tools/ai-pipeline/PROMPT.md`
+  逐題手動生成，`tools/ai-pipeline` 僅提供 `list-pending`（列出待處理題目）+ markdown patch 輔助，
+  repo **未依賴 `@anthropic-ai/sdk`**，尚無自動呼叫 API 的批次腳本。下方「離線生成」一節描述的
+  self-consistency 投票 / 佇列退避重試為**規劃中**目標，非現況。
 - **Groq = 線上擴充（免費、快）**：runtime 讀 Claude 的標準解答當 grounding，做白話解釋 / 延伸 / 回答追問。
+  **現況**：**規劃中，尚未實作**——repo 未依賴 `groq-sdk`，無對應 API 端點（見
+  [tasks/todo.md](../tasks/todo.md) P2「AI online follow-up」）。
 
 ## Grounding 契約（線上 Groq 必守）
 
@@ -12,7 +18,10 @@
 
 結論鎖死、只開放擴充——這是整個架構成立的前提，避免較弱的線上模型污染防線。
 
-## 離線生成（內容工廠）
+## 離線生成（內容工廠，規劃中設計）
+
+以下為目標架構（self-consistency 投票、佇列化批次），**尚未實作**——現況為人工依
+`tools/ai-pipeline/PROMPT.md` 逐題手動生成（見上「雙層架構」）：
 
 ```text
 for 每題官方考題:
@@ -24,7 +33,9 @@ for 每題官方考題:
   寫入 ProGrads-content/*.md（frontmatter: model_used / confidence / review_status）
 ```
 
-執行位置：`tools/` 腳本或 `nestjs-commander` CLI（非 runtime）。
+規劃執行位置：`tools/` 腳本或 `nestjs-commander` CLI（非 runtime）。**現況**：`tools/ai-pipeline`
+的 `list-pending` 只掃描 content repo 找出缺 `## 標準解答` 的題目並列出，不呼叫任何 AI API；
+實際生成由人／Claude Code session 手動完成後，用 `tools/ai-pipeline/src/patch.ts` 寫回 markdown。
 
 ## 成本控制
 
