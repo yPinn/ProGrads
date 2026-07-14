@@ -117,8 +117,9 @@ Nuxt 3/4；UI Nuxt UI + Tailwind；狀態 Pinia；動態取資料 TanStack Query
 SEO `@nuxtjs/seo`；i18n `@nuxtjs/i18n`；`@nuxt/image`、`@nuxt/icon`。
 
 > **現況**：`vue-echarts`/`echarts`、`@tanstack/vue-table`、`vee-validate`/`@vee-validate/zod`
-> 已裝但 `app/` 內尚無任何引用（圖表/表格/表單功能尚未接線）——見 `tasks/todo.md`
-> 待清理或啟用項目。`better-sqlite3` 亦已列但無用途，屬 starter 殘留待清。其餘（Pinia、
+> 已裝但 `app/` 內尚無任何引用（圖表/表格/表單功能尚未接線）——見
+> [09-roadmap.md](09-roadmap.md) 的技術與文件缺口。`better-sqlite3` 亦已列但無用途，
+> 屬 starter 殘留待清。其餘（Pinia、
 > TanStack Query、Nuxt MDC、Schedule-X、@nuxtjs/seo/i18n、@nuxt/image）皆已接線使用中。
 
 ### 後端（NestJS）
@@ -130,7 +131,7 @@ NestJS + `@nestjs/platform-fastify`；設定 `@nestjs/config`(+Zod)；DTO `nestj
 
 > **現況**：僅 `@nestjs/config`、`nestjs-zod`、`@nestjs/swagger`、`nestjs-pino`、
 > `@fastify/helmet` 已安裝並接線。**尚未安裝**：`@nestjs/jwt`+passport-jwt（延至第二階段，
-> 見 D17）、`@nestjs/throttler`（見 `tasks/todo.md` P1.5，公開端點目前**零限流**）、
+> 見 D17）、`@nestjs/throttler`（見 [09-roadmap.md](09-roadmap.md) P4，公開端點目前**零限流**）、
 > `@nestjs/cache-manager`+Redis、BullMQ、`@nestjs/schedule`、`@nestjs/terminus`。
 
 ### DB / AI / 通知
@@ -139,8 +140,9 @@ PostgreSQL + Prisma（後期 pgvector）；AI 離線 `@anthropic-ai/sdk`(Claude 
 線上 `groq-sdk`，串流統一 Vercel AI SDK；Email Resend；推播（後期）`@line/bot-sdk`（LINE Messaging API）。
 
 > **現況**：僅 PostgreSQL + Prisma 已落地。`@anthropic-ai/sdk`/`groq-sdk`/Vercel AI SDK/
-> Resend/`@line/bot-sdk` **皆未安裝**——AI 解答現為人工依 `tools/ai-pipeline/PROMPT.md`
-> 手動生成（見 [04-ai-pipeline.md](04-ai-pipeline.md)），提醒訂閱尚未開始（`tasks/todo.md` P1）。
+> Resend/`@line/bot-sdk` **皆未安裝**——AI 解答現為人工依 `tools/ai-pipeline/PROMPT-generate.md`
+> 手動生成（見 [04-ai-pipeline.md](04-ai-pipeline.md)），提醒訂閱尚未開始（見
+> [09-roadmap.md](09-roadmap.md) P2）。
 
 ### 測試 / DX / 部署
 

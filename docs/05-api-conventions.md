@@ -3,10 +3,13 @@
 ## 風格
 
 - REST，資源命名用複數名詞：`/categories`、`/tracks`、`/subjects`、`/schools`、`/departments`、`/exams`、`/questions`、`/schedules`。
-  `/stats`（`AdmissionStat`）**規劃中**：模型已存在，尚未接 controller/service（見 [tasks/todo.md](../tasks/todo.md) P1）。
+  `/stats`（`AdmissionStat`）**規劃中**：模型已存在，尚未接 controller/service（見
+  [09-roadmap.md](09-roadmap.md) P1）。
 - 版本前綴：`/api/v1`。
 - 過濾/分頁用 query，**以 slug 過濾**（非顯示名）：`?track=cs&school=ntu&year=2025&page=1&pageSize=20`。
-  **現況**：僅 `/questions`、`/questions/papers` 已落地此分頁慣例；`/faculty`（roster 天生小）、`/exams`、`/departments`、`/schedules` 目前無分頁、無 `meta.total`——待內容規模擴大後補齊（見 todo.md P1）。
+  **現況**：僅 `/questions`、`/questions/papers` 已落地此分頁慣例；`/faculty`（roster 天生小）、
+  `/exams`、`/departments`、`/schedules` 目前無分頁、無 `meta.total`——待內容規模擴大後補齊。
+  後續補齊時機見 [09-roadmap.md](09-roadmap.md) 的技術與文件缺口。
 
 ## 契約：Zod 單一事實來源
 

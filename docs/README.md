@@ -16,6 +16,7 @@
 | [06-decisions.md](06-decisions.md)               | 決策紀錄（ADR）：每個重大選型的理由                              |
 | [07-trends.md](07-trends.md)                     | 考科趨勢（規劃）：資料相依、分階段落地、指標定義、SWOT 與風險    |
 | [08-design-system.md](08-design-system.md)       | 前端設計系統：token 分層、按鈕 intent、icon 登記、eslint 護欄    |
+| [09-roadmap.md](09-roadmap.md)                   | Roadmap 與產品缺口：MVP 優先順序、延期理由、公開前缺口           |
 
 ## 一句話定案
 

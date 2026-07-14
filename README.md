@@ -15,6 +15,7 @@
 - [AI pipeline](docs/04-ai-pipeline.md)
 - [API 慣例](docs/05-api-conventions.md)
 - [決策紀錄（ADR）](docs/06-decisions.md)
+- [Roadmap 與產品缺口](docs/09-roadmap.md)
 
 ## 技術棧
 
