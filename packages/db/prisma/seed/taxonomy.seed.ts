@@ -54,6 +54,13 @@ const TAXONOMY: { slug: string; name: string; tracks: TrackSeed[] }[] = [
       { slug: "edu", name: "教育所" },
       { slug: "poli-sci", name: "政治所" },
       { slug: "diplomacy", name: "外交所" },
+      // NCCU 文學院擴充（見 admissions/2026/nccu/departments.yml）
+      { slug: "history", name: "歷史所" },
+      { slug: "philosophy", name: "哲學所" },
+      { slug: "lis", name: "圖資檔案所" },
+      { slug: "religion", name: "宗教所" },
+      { slug: "tw-history", name: "台灣史所" },
+      { slug: "tw-lit", name: "台文所" },
     ],
   },
 ];
@@ -106,12 +113,31 @@ const SUBJECTS: TrackSeed[] = [
   { slug: "insurance", name: "保險學" },
   { slug: "mgmt", name: "管理學" },
   { slug: "mgmt-case", name: "管理個案分析" },
+  // 人文類考科（nccu 文學院 8 系所實證）
+  { slug: "zh-lit-hist", name: "中國文學史" }, // 中文系
+  { slug: "zh-thought-hist", name: "中國思想史" },
+  { slug: "philology", name: "文字學" },
+  { slug: "zh-hist", name: "中國通史" }, // 歷史系
+  { slug: "world-hist", name: "世界通史" },
+  { slug: "zh-modern-tw-hist", name: "中國近現代史與台灣史" },
+  { slug: "hist-english", name: "歷史英文" },
+  { slug: "phil-analysis", name: "哲學問題分析" }, // 哲學系
+  { slug: "library-sci", name: "圖書資訊學" }, // 圖資檔案所
+  { slug: "archival-sci", name: "檔案學" },
+  { slug: "zh-modern-hist", name: "中國現代史" }, // 不含台灣史, 與 zh-modern-tw-hist 不同範圍
+  { slug: "religion-hist-culture", name: "宗教歷史與文化" }, // 宗教所
+  { slug: "religion-intro", name: "宗教研究概論" },
+  { slug: "tw-lit-hist", name: "台灣文學史" }, // 台文所
+  { slug: "lit-theory", name: "文學理論與批評" },
+  { slug: "ling-intro", name: "語言學概論" }, // 華語文教學
 ];
 
-// track slug → subject slugs (the global shared library; note ds/algo
-// are shared across cs[理工] and info-mgmt[商管] — a cross-category shared subject).
+// track slug → subject slugs (global shared library; ds/algo cross cs[理工]/info-mgmt[商管]).
+// Evidence-derived from admissions/departments.yml + questions content, not TKB/大碩
+// category convention — common subjects (english/chinese) are per-department, verify before
+// assuming (see 02-data-model.md §起步資料).
 const TRACK_SUBJECTS: Record<string, string[]> = {
-  cs: ["ds", "algo", "co", "os", "la", "dm", "infosec-intro", "prog"],
+  cs: ["ds", "algo", "co", "os", "la", "dm", "infosec-intro", "prog", "english", "engmath", "prob"],
   ee: [
     "engmath",
     "prob",
@@ -143,10 +169,48 @@ const TRACK_SUBJECTS: Record<string, string[]> = {
     "db",
     "networking",
     "algo",
-    "english",
     "prog",
     "co",
+    "english",
+    "econ",
   ],
+  "business-admin": [
+    "mgmt",
+    "mgmt-case",
+    "acct",
+    "cost-mgmt-acct",
+    "auditing",
+    "tax-law",
+    "english",
+    "calc",
+    "cs-intro",
+    "econ",
+    "stat",
+  ],
+  finance: [
+    "fin-mgmt",
+    "econ",
+    "insurance",
+    "insurance-law",
+    "company-law",
+    "english",
+    "calc",
+    "stat",
+  ],
+  econ: ["econ", "calc", "stat"],
+  stat: ["stat", "math-stat", "stat-method", "calc", "la", "english"],
+  math: ["calc", "la"],
+  "intl-business": ["econ", "english", "stat"],
+  "ind-mgmt": ["mgmt", "mgmt-case", "stat", "english", "calc", "cs-intro", "econ", "la", "prog"],
+  // NCCU 文學院實證（見 admissions/2026/nccu/departments.yml）。tw-history（台灣史所）
+  // 無筆試（純資料審查+面試），無考科可掛，故不列 track_subject 項——與 tourism/leisure 同理。
+  "zh-lit": ["chinese", "zh-lit-hist", "zh-thought-hist", "philology"],
+  history: ["zh-hist", "world-hist", "zh-modern-tw-hist", "hist-english"],
+  philosophy: ["phil-analysis"],
+  lis: ["english", "library-sci", "cs-intro", "archival-sci", "zh-modern-hist"],
+  religion: ["english", "religion-hist-culture", "religion-intro"],
+  "tw-lit": ["tw-lit-hist", "lit-theory"],
+  "zh-lang": ["chinese", "english", "ling-intro"],
 };
 
 export interface TaxonomySeedResult {
@@ -185,6 +249,10 @@ export async function seedTaxonomy(prisma: PrismaClient): Promise<TaxonomySeedRe
     });
     subjectIdBySlug.set(subject.slug, row.id);
   }
+
+  // Full reconcile (delete-then-recreate): upsert alone would only ever add links, leaving
+  // stale rows behind whenever a track's subject list shrinks. Safe — pure join table, no dependents.
+  await prisma.trackSubject.deleteMany({ where: { trackId: { in: [...trackIdBySlug.values()] } } });
 
   for (const [trackSlug, subjectSlugs] of Object.entries(TRACK_SUBJECTS)) {
     const trackId = trackIdBySlug.get(trackSlug);

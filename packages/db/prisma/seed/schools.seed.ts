@@ -107,6 +107,15 @@ const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
       { slug: "mba", name: "企業管理研究所", track: "business-admin" },
       { slug: "rmi", name: "風險管理與保險學系", track: "finance" },
       { slug: "tiipm", name: "科技管理與智慧財產研究所", track: "ind-mgmt" },
+      // 文學院（招生情報 + 考科軸全涵蓋，見 admissions/2026/nccu/departments.yml）。
+      { slug: "zh-lit", name: "中國文學系", track: "zh-lit" },
+      { slug: "history", name: "歷史學系", track: "history" },
+      { slug: "philosophy", name: "哲學系", track: "philosophy" },
+      { slug: "lis", name: "圖書資訊與檔案學研究所", track: "lis" },
+      { slug: "religion", name: "宗教研究所", track: "religion" },
+      { slug: "tw-history", name: "台灣史研究所", track: "tw-history" },
+      { slug: "tw-lit", name: "台灣文學研究所", track: "tw-lit" },
+      { slug: "tcsl", name: "華語文教學碩士學位學程", track: "zh-lang" },
     ],
   },
   // ── 四中（中央／中山／中興／中正）──────────────────────────
