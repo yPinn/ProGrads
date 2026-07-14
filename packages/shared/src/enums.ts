@@ -23,8 +23,8 @@ export const AnswerType = z
 export type AnswerType = z.infer<typeof AnswerType>;
 
 export const ReviewStatus = z
-  .enum(["ai_generated", "human_verified", "flagged"])
-  .describe("審閱狀態:AI 生成 / 人工驗證 / 已標記");
+  .enum(["ai_generated", "ai_reviewed", "human_verified", "flagged"])
+  .describe("審閱狀態:AI 生成 / AI 複查通過 / 人工驗證 / 已標記");
 export type ReviewStatus = z.infer<typeof ReviewStatus>;
 
 export const Confidence = z.enum(["high", "medium", "low"]).describe("AI 解析信心度:高 / 中 / 低");

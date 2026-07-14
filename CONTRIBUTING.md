@@ -56,7 +56,8 @@
 
 - **只收官方已公開考題**，每檔 frontmatter 必含 `source_url` 與 `license_status`。
 - `unknown` 授權狀態不得合併。
-- 標準解答由 AI 離線生成；人工修正請更新 `review_status`。
+- 標準解答由 AI 離線生成（`tools/ai-pipeline/PROMPT-generate.md`）並經複查（`tools/ai-pipeline/PROMPT-review.md`）；
+  人工修正請更新 `review_status`。
 - 格式見 [docs/03-content-pipeline.md](docs/03-content-pipeline.md)。
 
 ## 文件

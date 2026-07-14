@@ -43,6 +43,7 @@ enum AnswerType {
 
 enum ReviewStatus {
   ai_generated
+  ai_reviewed
   human_verified
   flagged
 }
