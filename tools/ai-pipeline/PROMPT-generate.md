@@ -2,6 +2,8 @@
 
 每次處理考題時，請完整遵守本文件。這是品質基線，確保跨 session 的解答一致性。
 
+生成後的複查規格見 [PROMPT-review.md](./PROMPT-review.md)（Codex 或人工複查用，不重複本檔內容）。
+
 ## 工作流程
 
 1. **列出待處理題目**：
@@ -16,7 +18,12 @@
    - 更新 frontmatter：`model_used`、`confidence`、`review_status: ai_generated`
    - 寫回檔案（可用 `tools/ai-pipeline/src/patch.ts` 或直接編輯）
 
-3. **完成後驗證並同步**：先離線契約檢查（免 DB），全綠後再入庫（需 DB）：
+3. **交由 Codex 或人工複查正確性**：跑
+   `pnpm --filter @prograds/ai-pipeline list-unreviewed` 列出已生成、尚未複查（`review_status: ai_generated`
+   且有內容）的題目；依 [PROMPT-review.md](./PROMPT-review.md) 逐題複查，發現問題就修正或標 `flagged`。複查
+   通過 → `review_status: ai_reviewed`；`human_verified` 嚴格保留給真人簽核，不會由複查自動觸發。
+
+4. **完成後驗證並同步**：先離線契約檢查（免 DB），全綠後再入庫（需 DB）：
 
    ```bash
    pnpm --filter @prograds/content-sync validate questions {content-repo}/questions
@@ -26,7 +33,7 @@
 ## 注意事項
 
 - 每題獨立處理，一題失敗不影響其他題
-- `review_status: human_verified` 或 `flagged` 的題目跳過，不覆蓋
+- `review_status: ai_reviewed`、`human_verified` 或 `flagged` 的題目在 `list-pending` 中跳過，不覆蓋
 - 若題目有歧義，`confidence` 設 `low`，在 `## 知識點延伸` 說明疑點
 - 完成後告知哪些題生成成功、哪些設為 `low` confidence 需人工複查
 

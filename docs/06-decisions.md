@@ -18,7 +18,7 @@
 
 - **決策**：標準解答由 Claude 離線生成（檔案），Groq 線上 grounded 擴充。
 - **理由**：品質防線 + 成本可控；線上模型被 grounding 框住不得改結論。
-- **現況**：離線層為人在環路半自動（人工依 prompt 生成，未接 API）；線上 Groq 層尚未實作。
+- **現況**：離線層為人在環路（人工依 prompt 生成，長期不接 API，見 D19）；線上 Groq 層尚未實作。
   詳見 [04-ai-pipeline.md](04-ai-pipeline.md)。
 
 ## D4. 前端 Nuxt，部署 Cloudflare Pages
@@ -125,3 +125,20 @@
 - **理由**：schema（`FacultyMember`/`FacultyThesis`/`FacultyDegree`）、content pipeline、API、前端頁面已完整落地
   （10 校內容），且直接支援產品定位「該考哪間」的選校決策，與價值主張一致。
 - **現況**：`00-product.md` MVP 清單已補列第 5 項；此前落地已久卻未寫入產品文件，屬本次文件翻新修正。
+
+## D19. AI 離線生成不做程式化批次自動化，維持人工透過 Claude Code 逐題生成
+
+- **決策**：`tools/ai-pipeline` 的 self-consistency 投票 / 佇列批次架構（04-ai-pipeline.md 原「規劃中設計」）**不採用**；
+  離線生成長期維持人在環路：人／Claude Code session 依 `PROMPT-generate.md` 逐題手動生成，`tools/ai-pipeline`
+  僅保留 `list-pending`／`list-unreviewed`（掃描待處理／待複查）+ `patch.ts`（寫回 markdown）等輔助腳本，
+  repo 不安裝 `@anthropic-ai/sdk`。
+- **理由**：程式化呼叫 API（含 self-consistency 多次投票）會產生按 token 計費的額外費用；Claude Code session
+  本身已是人在環路，每題都有人審查，self-consistency 投票要解決的「降低單次生成隨機錯誤」已被人工把關涵蓋，
+  不需要再疊加一層自動化重複解決同一問題。
+- **取捨**：放棄批次吞吐量（無法無人值守大量生成），換取零額外 API 成本，且複雜度維持在「兩支輔助腳本」而非
+  佇列/重試/CLI 基礎設施。若未來出現大量無人值守生成的明確需求（例如題量遠超人工產能），再重新評估。
+- **複查**：正確性複查用 Codex（跨模型交叉檢查）或人工，走訂閱方案（固定月費），不按 token 計費，與本決策
+  成本原則一致。複查通過但無人親自看過的題目，`review_status` 設為 `ai_reviewed`；`human_verified` 徽章
+  嚴格保留給真人簽核（不會由複查自動觸發），避免信任徽章失真（見 [04-ai-pipeline.md](04-ai-pipeline.md)）。
+- **同原則延伸**：目前不打算做全站 AI 功能；若未來重新評估有此需求，預設方向是 Groq + skill（沿用線上層
+  既有的免費 API + grounding 模式），而非改接 Claude/OpenAI 按量計費 API，維持同一套成本原則。

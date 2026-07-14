@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "list-pending": "tsx src/index.ts",
+    "list-unreviewed": "tsx src/list-unreviewed.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "tsx --test src/patch.spec.ts",

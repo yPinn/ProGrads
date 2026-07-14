@@ -1,17 +1,17 @@
-// list-pending: prints question files that are missing a ## 標準解答 section.
-// Output is consumed by a human + Claude Code session following PROMPT-generate.md guidelines.
+// list-unreviewed: prints question files with a generated answer that has not yet passed
+// Codex/human review (review_status still ai_generated). Consumed following PROMPT-review.md.
 
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import { contentRoot, listQuestionFiles, sectionContent } from "./files.js";
 
-function hasMissingAnswer(rawMd: string): boolean {
+function needsReview(rawMd: string): boolean {
   const parsed = matter(rawMd);
   const status = (parsed.data as { review_status?: string }).review_status;
-  if (status === "human_verified" || status === "flagged") return false;
+  if (status !== "ai_generated") return false;
 
-  return sectionContent(parsed.content, "標準解答").length === 0;
+  return sectionContent(parsed.content, "標準解答").length > 0;
 }
 
 function main(): void {
@@ -25,15 +25,17 @@ function main(): void {
   }
   const files = listQuestionFiles(root);
 
-  const pending = files.filter((rel) => {
+  const unreviewed = files.filter((rel) => {
     const raw = readFileSync(path.join(root, rel), "utf8");
-    return hasMissingAnswer(raw);
+    return needsReview(raw);
   });
 
   // eslint-disable-next-line no-console
-  console.log(`pending: ${pending.length}/${files.length} file(s) need ## 標準解答\n`);
+  console.log(
+    `unreviewed: ${unreviewed.length}/${files.length} file(s) generated but not yet reviewed\n`,
+  );
 
-  for (const rel of pending) {
+  for (const rel of unreviewed) {
     const raw = readFileSync(path.join(root, rel), "utf8");
     const parsed = matter(raw);
     const fm = parsed.data as { question_type?: string; subjects?: string[]; question_id?: string };

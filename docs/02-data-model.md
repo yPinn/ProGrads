@@ -143,7 +143,7 @@ department (系所, 穩定)
 - `admission_type`：`exam | recommended | in_service`（考試入學 / 推甄 / 在職專班）
 - `question_type`：`mc | essay | calc | proof | cloze | listening`
 - `answer_type`：`single_choice | multi_choice | numeric | essay | proof`
-- `review_status`：`ai_generated | human_verified | flagged`
+- `review_status`：`ai_generated | ai_reviewed | human_verified | flagged`
 - `thesis_role`：`advised | authored`（指導學生論文 / 教授自著）
 - `degree_level`：`bachelor | master | phd | other`（學士 / 碩士 / 博士 / 其他）
 

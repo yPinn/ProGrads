@@ -7,9 +7,10 @@ TypeScript + tsx 執行的 workspace 套件。流程見
 - **`content-sync`**（`@prograds/content-sync`）：`ProGrads-content` → Postgres 同步（gray-matter + Zod 驗證 + 冪等 upsert + 合科卷 reconcile + 招生 schedule/departments importer + 師資 importer）。
   執行：`pnpm --filter @prograds/content-sync sync`；離線驗證 `validate <questions|admissions|faculty> <dir>`。
   萃取規格（model-facing）：共用規則 [EXTRACTION.md](./content-sync/EXTRACTION.md)；型別 [題目](./content-sync/PROMPT-questions.md) / [招生](./content-sync/PROMPT-admissions.md) / [師資](./content-sync/PROMPT-faculty.md)。
-- **`ai-pipeline`**（`@prograds/ai-pipeline`）：列出缺少標準解答的題目，批次離線生成解答。
-  執行：`pnpm --filter @prograds/ai-pipeline list-pending`。
-  工作流程與規格：[PROMPT.md](./ai-pipeline/PROMPT.md)。
+- **`ai-pipeline`**（`@prograds/ai-pipeline`）：列出缺少標準解答／尚未複查的題目，人工離線生成與複查解答。
+  執行：`pnpm --filter @prograds/ai-pipeline list-pending`（待生成）／`list-unreviewed`（已生成待複查）。
+  工作流程與規格：生成 [PROMPT-generate.md](./ai-pipeline/PROMPT-generate.md) / 複查
+  [PROMPT-review.md](./ai-pipeline/PROMPT-review.md)。
 - **`pdf-extract`**（`@prograds/pdf-extract`）：PDF → PNG 頁面圖片 / crop（供 AI 視覺萃取用；萃取規格見 content-sync）。
   執行：`pnpm --filter @prograds/pdf-extract to-images <pdf路徑> [output-dir]`。
   輸出請放在 content repo 的 gitignored `images/raw/questions/...` 或 `images/raw/admissions/...`。

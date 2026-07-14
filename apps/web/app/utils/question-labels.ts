@@ -12,6 +12,7 @@ export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
 
 export const REVIEW_STATUS_LABELS: Record<ReviewStatus, string> = {
   ai_generated: "AI 生成",
+  ai_reviewed: "AI 已複查",
   human_verified: "人工驗證",
   flagged: "已標記",
 };
