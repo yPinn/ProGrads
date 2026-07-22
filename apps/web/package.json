@@ -49,16 +49,16 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@iconify-json/lucide": "^1.2.114",
+    "@iconify-json/lucide": "^1.2.118",
     "@nuxt/eslint": "^1.16.0",
     "@nuxt/test-utils": "^4.0.3",
     "@tailwindcss/typography": "^0.5.20",
-    "@vitest/coverage-v8": "^4.1.9",
+    "@vitest/coverage-v8": "^4.1.10",
     "@vue/test-utils": "^2.4.11",
-    "eslint": "^10.5.0",
-    "happy-dom": "^20.10.4",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.9",
-    "vue-tsc": "^3.1.1"
+    "eslint": "^10.7.0",
+    "happy-dom": "^20.11.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10",
+    "vue-tsc": "^3.3.7"
   }
 }
