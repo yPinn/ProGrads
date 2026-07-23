@@ -64,18 +64,43 @@ export default defineNuxtConfig({
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || "http://localhost:8088/api/v1",
     },
   },
-  // CF Pages hybrid: content pages prerender at build, dynamic (API-driven) pages render client-side.
+  // CF Pages hybrid: "/" prerenders at build; content pages (questions/admissions/faculty/
+  // schedules) render server-side per request via the CF worker, cached at the edge (see the
+  // routeRules comment below and docs/06-decisions.md D4).
   // Only build the Cloudflare worker bundle for production builds — in dev it adds ~15s to every
   // startup for no benefit (dev uses Nitro's own dev server), so fall back to the default preset.
   nitro: { preset: process.env.NODE_ENV === "production" ? "cloudflare-pages" : undefined },
   routeRules: {
     "/": { prerender: true },
-    // API-driven pages render client-side (edge can't reach the origin DB at build time).
-    // SEO prerender of question/answer pages comes with the content pipeline (Phase 2).
-    "/schedules": { ssr: false },
-    "/admissions": { ssr: false },
-    "/faculty": { ssr: false },
-    "/questions/**": { ssr: false },
+    // Content pages render server-side per request (not build-time prerender: the edge can't
+    // reach the origin DB at build time, and enumerating every question/dept route up front
+    // doesn't scale). useApiQuery prefetches during SSR so the response HTML carries real
+    // content; CF caches that HTML at the edge (docs/01-architecture.md, docs/06-decisions.md D4).
+    "/questions": {
+      headers: {
+        "cache-control": "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400",
+      },
+    },
+    "/questions/**": {
+      headers: {
+        "cache-control": "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400",
+      },
+    },
+    "/admissions": {
+      headers: {
+        "cache-control": "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400",
+      },
+    },
+    "/faculty": {
+      headers: {
+        "cache-control": "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400",
+      },
+    },
+    "/schedules": {
+      headers: {
+        "cache-control": "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400",
+      },
+    },
   },
   // All icons are Lucide (Nuxt UI v4 defaults; the app adds none). Client-bundle them so they load
   // locally instead of from the Iconify CDN at runtime (the default "remote" mode). Nuxt UI pulls

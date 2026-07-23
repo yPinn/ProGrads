@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/vue-query";
 import { QuestionResponseSchema } from "@prograds/shared";
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
 
@@ -7,7 +6,7 @@ export function useQuestion(externalId: MaybeRefOrGetter<string>) {
   const { $api } = useNuxtApp();
   const id = computed(() => toValue(externalId));
 
-  return useQuery({
+  return useApiQuery({
     queryKey: computed(() => ["question", id.value] as const),
     enabled: computed(() => !!id.value),
     queryFn: async () => {

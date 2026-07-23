@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/vue-query";
 import { AdmissionsResponseSchema, type AdmissionQuery } from "@prograds/shared";
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
 
@@ -9,7 +8,7 @@ export function useAdmissions(query: MaybeRefOrGetter<AdmissionQuery>) {
   const { $api } = useNuxtApp();
   const queryKey = computed(() => ["admissions", toValue(query)] as const);
 
-  return useQuery({
+  return useApiQuery({
     queryKey,
     enabled: computed(() => {
       const q = toValue(query);

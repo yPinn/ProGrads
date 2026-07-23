@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/vue-query";
 import { FacultyResponseSchema, type FacultyQuery } from "@prograds/shared";
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
 
@@ -9,7 +8,7 @@ export function useFaculty(query: MaybeRefOrGetter<FacultyQuery>) {
   const { $api } = useNuxtApp();
   const queryKey = computed(() => ["faculty", toValue(query)] as const);
 
-  return useQuery({
+  return useApiQuery({
     queryKey,
     enabled: computed(() => {
       const q = toValue(query);

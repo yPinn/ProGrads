@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/vue-query";
 import { DepartmentsResponseSchema } from "@prograds/shared";
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
 
@@ -8,7 +7,7 @@ export function useDepartments(school: MaybeRefOrGetter<string | undefined>) {
   const { $api } = useNuxtApp();
   const queryKey = computed(() => ["departments", toValue(school)] as const);
 
-  return useQuery({
+  return useApiQuery({
     queryKey,
     enabled: computed(() => !!toValue(school)),
     queryFn: async () => {

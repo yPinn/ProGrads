@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onBeforeUnmount } from "vue";
+import { computed, ref, watch, onMounted, onBeforeUnmount, onServerPrefetch } from "vue";
 import { useRoute } from "vue-router";
 import { useQuestion } from "~/composables/useQuestion";
 import { ApiError } from "~/utils/api-error";
@@ -12,7 +12,7 @@ import "katex/dist/katex.min.css";
 const route = useRoute();
 const externalId = computed(() => String(route.params.externalId));
 
-const { data: q, isPending, isError, error, refetch } = useQuestion(externalId);
+const { data: q, isPending, isError, error, refetch, suspense } = useQuestion(externalId);
 
 // 標準解析預設收合(查閱頁不代答,但也不該一進頁面就把答案攤開);切題(上一題/下一題)時重新收合。
 const showAnswer = ref(false);
@@ -25,6 +25,16 @@ watch(externalId, () => {
 watch(error, (e) => {
   if (e instanceof ApiError && e.code === "NOT_FOUND") {
     showError({ status: 404, statusText: "找不到題目" });
+  }
+});
+
+// SSR needs the same 404 to become a real HTTP 404 (not a 200 with an empty shell), so crawlers
+// don't index a dead question id. useQuestion's own onServerPrefetch already awaited the fetch;
+// this re-awaits the same settled query (no extra request) purely to read its outcome.
+onServerPrefetch(async () => {
+  await suspense().catch(() => {});
+  if (error.value instanceof ApiError && error.value.code === "NOT_FOUND") {
+    throw createError({ statusCode: 404, statusMessage: "找不到題目", fatal: true });
   }
 });
 

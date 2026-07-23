@@ -24,7 +24,22 @@
 ## D4. 前端 Nuxt，部署 Cloudflare Pages
 
 - **理由**：內容站 SEO 是命脈，需 SSR/prerender；Vue SPA SEO 致命。
-- **取捨**：CF 邊緣碰不到 DB → 內容 prerender、動態走 server API。
+- **取捨**：CF 邊緣碰不到 DB → 內容走 server-driven 渲染、動態走 server API。
+- **內容頁渲染策略：runtime SSR + CF 邊緣快取（非 build 時 prerender）**——CF worker 每請求即時
+  render，server 端呼叫 `apps/api`，回應以 `Cache-Control`（`s-maxage` + `stale-while-revalidate`）
+  在邊緣快取，模式沿用 `admissions` API 既有的 SWR header（見
+  [05-api-conventions.md](05-api-conventions.md)）。
+  - **理由**：免在 build 時列舉題庫/系所/教師的上千條動態路由；內容（`review_status` 更新、新題）
+    不必等重新 build 就能反映；MVP 全匿名無 auth cookie，SSR 回應可安全被邊緣快取，非營利成本
+    靠快取命中率壓低，不必犧牲新鮮度換 prerender 的零邊際成本。
+  - **取捨**：相對 build 時 prerender，多了「首次未命中快取時」的一次 API 呼叫成本；換來免路由
+    列舉與內容即時性。
+  - **實作**：資料抓取原用 `@tanstack/vue-query` 的 `useQuery`（僅 client 端執行），套一層
+    `useApiQuery`（`onServerPrefetch` 呼叫 `.suspense()`）讓 SSR 期間實際等待資料，plugin 端
+    (`plugins/vue-query.ts`) 用 `dehydrate`/`hydrate` 把 server 端 query cache 透過 Nuxt payload
+    傳給 client，client hydrate 後沿用同一 cache、不重打 API。
+  - **現況**：`/questions/**`（含列表/詳情/整卷測驗）、`/admissions`、`/faculty`、`/schedules`
+    已改為 SSR；`/` 維持 build 時 `prerender: true`。
 
 ## D5. 後端 NestJS（Fastify adapter）
 

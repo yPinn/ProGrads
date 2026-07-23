@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/vue-query";
 import { PaperTestResponseSchema } from "@prograds/shared";
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
 
@@ -9,7 +8,7 @@ export function usePaperTest(examSubjectId: MaybeRefOrGetter<string>) {
   const { $api } = useNuxtApp();
   const id = computed(() => toValue(examSubjectId));
 
-  return useQuery({
+  return useApiQuery({
     queryKey: computed(() => ["paper-test", id.value] as const),
     enabled: computed(() => !!id.value),
     queryFn: async () => {

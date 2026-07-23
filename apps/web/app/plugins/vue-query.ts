@@ -1,4 +1,11 @@
-import { QueryCache, QueryClient, VueQueryPlugin } from "@tanstack/vue-query";
+import {
+  dehydrate,
+  hydrate,
+  QueryCache,
+  QueryClient,
+  VueQueryPlugin,
+  type DehydratedState,
+} from "@tanstack/vue-query";
 import { ApiError } from "~/utils/api-error";
 import { backgroundRefetchToast } from "~/utils/query-toast";
 
@@ -28,4 +35,19 @@ export default defineNuxtPlugin((nuxt) => {
   });
 
   nuxt.vueApp.use(VueQueryPlugin, { queryClient });
+
+  // SSR hand-off: queries prefetched server-side (via useApiQuery's onServerPrefetch) live in
+  // this QueryClient's cache after render. Serialize that cache into the Nuxt payload so the
+  // client rehydrates with data already present instead of refetching on mount.
+  const vueQueryState = useState<DehydratedState | null>("vue-query", () => null);
+
+  if (import.meta.server) {
+    nuxt.hooks.hook("app:rendered", () => {
+      vueQueryState.value = dehydrate(queryClient);
+    });
+  }
+
+  if (import.meta.client && vueQueryState.value) {
+    hydrate(queryClient, vueQueryState.value);
+  }
 });

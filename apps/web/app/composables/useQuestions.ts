@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/vue-query";
+import { keepPreviousData } from "@tanstack/vue-query";
 import { QuestionsResponseSchema, type QuestionQuery } from "@prograds/shared";
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
 
@@ -9,7 +9,7 @@ export function useQuestions(query: MaybeRefOrGetter<QuestionQuery>) {
   const { $api } = useNuxtApp();
   const queryKey = computed(() => ["questions", toValue(query)] as const);
 
-  return useQuery({
+  return useApiQuery({
     queryKey,
     placeholderData: keepPreviousData,
     queryFn: async () => {
