@@ -114,6 +114,7 @@ describe("QuestionsService.getPaperTest", () => {
           number: "1",
           type: "SINGLE",
           contentMd: "題幹一",
+          points: 5,
           metadata: { group: "clozeA", passage: "克漏字篇章" },
           choices: [
             { label: "A", contentMd: "甲", isCorrect: true },
@@ -133,6 +134,7 @@ describe("QuestionsService.getPaperTest", () => {
           number: "2",
           type: "SINGLE",
           contentMd: "題幹二",
+          points: null, // unmarked — frontend falls back to 1
           // Same group, but only the lead carries the passage — this member inherits it.
           metadata: { group: "clozeA" },
           choices: [{ label: "A", contentMd: "甲", isCorrect: false }],
@@ -180,6 +182,11 @@ describe("QuestionsService.getPaperTest", () => {
     expect(paper.questions[1]?.groupPassageMd).toBe("克漏字篇章");
     expect(paper.questions[2]?.group).toBeNull();
     expect(paper.questions[2]?.groupPassageMd).toBeNull();
+
+    // 配分 (points) rides along per question; unmarked questions map to null (frontend weights
+    // scoring by points, falling back to 1 per question when null).
+    expect(paper.questions[0]?.points).toBe(5);
+    expect(paper.questions[1]?.points).toBeNull();
 
     // answers ride along (hidden client-side); explanation nullable
     expect(paper.questions[0]?.choices).toEqual([

@@ -125,6 +125,10 @@ export const PaperTestQuestionSchema = z.object({
   type: QuestionType,
   subjects: z.array(SubjectSchema).describe("細粒度考科標籤"),
   contentMd: z.string().describe("題目內容(Markdown)"),
+  points: z
+    .number()
+    .nullable()
+    .describe("該題配分;未標記或該卷各題等權重時為 null(前端退回每題 1 分)"),
   choices: z.array(ChoiceSchema).describe("選項(含正解標記;前端作答前隱藏);非選擇題為空陣列"),
   explanation: ExplanationSchema.nullable().describe("標準解析;尚未產生為 null"),
   group: z.string().nullable().describe("題組 slug(閱讀/克漏字共用篇章);非題組為 null"),

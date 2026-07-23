@@ -26,9 +26,11 @@ const timer = useStopwatch();
 const answers = ref<Record<string, string[]>>({});
 const submitted = ref(false);
 
-// Start the clock once the paper arrives (and not after a finished attempt).
+// Start the clock once the paper arrives (and not after a finished attempt). Client-only: the
+// watcher still fires during SSR once the prefetched query resolves, but setInterval has no
+// business running on the server.
 watch(paper, (p) => {
-  if (p && !submitted.value && !timer.running.value) timer.start();
+  if (import.meta.client && p && !submitted.value && !timer.running.value) timer.start();
 });
 
 function toggleChoice(qid: string, label: string): void {
@@ -56,7 +58,13 @@ function isQuestionCorrect(q: PaperTestQuestion): boolean {
   const answer = correctLabels(q);
   return picked.length === answer.length && picked.every((l, i) => l === answer[i]);
 }
-const score = computed(() => gradable.value.filter(isQuestionCorrect).length);
+// Weight by the paper's declared 配分; unmarked/uniform papers (points: null) fall back to 1 so
+// scoring is unchanged for the common case where every question is worth the same.
+const questionPoints = (q: PaperTestQuestion): number => q.points ?? 1;
+const totalPoints = computed(() => gradable.value.reduce((sum, q) => sum + questionPoints(q), 0));
+const score = computed(() =>
+  gradable.value.filter(isQuestionCorrect).reduce((sum, q) => sum + questionPoints(q), 0),
+);
 
 // Timer display. With a paper time limit (durationMinutes) it counts DOWN (剩餘 → 超時); without a
 // limit it counts up. After 交卷 it shows total time used. Source of truth stays the count-up
@@ -89,11 +97,28 @@ const timerClass = computed(() =>
   submitted.value ? "text-muted" : overtime.value ? "text-error-ink" : "text-default",
 );
 
-function submit(): void {
-  if (submitted.value) return;
+// 交卷 is a soft gate, not a hard block: this is self-paced practice, not a proctored exam, so
+// skipping questions on purpose is legitimate. An unanswered attempt still just needs a nudge —
+// confirm, don't refuse.
+const unansweredCount = computed(() => gradable.value.length - answeredCount.value);
+const showUnansweredConfirm = ref(false);
+
+function finishSubmit(): void {
   submitted.value = true;
   timer.stop();
   if (import.meta.client) window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function submit(): void {
+  if (submitted.value) return;
+  if (unansweredCount.value > 0) {
+    showUnansweredConfirm.value = true;
+    return;
+  }
+  finishSubmit();
+}
+function confirmSubmitAnyway(): void {
+  showUnansweredConfirm.value = false;
+  finishSubmit();
 }
 function restart(): void {
   answers.value = {};
@@ -173,15 +198,23 @@ function choiceState(
                 </span>
 
                 <template v-if="!submitted">
-                  <span class="text-muted text-caption tabular-nums"
+                  <span v-if="gradable.length > 0" class="text-muted text-caption tabular-nums"
                     >已答 {{ answeredCount }}/{{ gradable.length }}</span
                   >
                   <AppButton intent="primary" size="sm" @click="submit">交卷</AppButton>
                 </template>
                 <template v-else>
-                  <AppBadge intent="count" size="lg" class="tabular-nums">
-                    得分 {{ score }}/{{ gradable.length }}
+                  <!-- All-essay/calc papers have no auto-gradable question (gradable.length===0);
+                       "得分 0/0" would read as a zero score rather than "not applicable". -->
+                  <AppBadge
+                    v-if="gradable.length > 0"
+                    intent="count"
+                    size="lg"
+                    class="tabular-nums"
+                  >
+                    得分 {{ score }}/{{ totalPoints }}
                   </AppBadge>
+                  <AppBadge v-else intent="meta" size="lg">本卷無自動計分題目</AppBadge>
                   <AppButton intent="secondary" size="sm" @click="restart">再測一次</AppButton>
                 </template>
               </div>
@@ -298,5 +331,22 @@ function choiceState(
         </div>
       </QueryState>
     </div>
+
+    <!-- TODO: one-off UModal for now; extract an AppConfirmModal when a second confirm-dialog
+         consumer shows up (this is the app's first, no shared pattern to abstract yet). Lives
+         here (not as a template sibling) only to keep a single template root — UModal portals
+         its content out via Teleport, so its DOM position doesn't affect layout. -->
+    <UModal
+      v-model:open="showUnansweredConfirm"
+      title="還有題目未作答"
+      :description="`還有 ${unansweredCount} 題未作答,確定要交卷嗎?`"
+    >
+      <template #footer="{ close }">
+        <div class="flex w-full justify-end gap-2">
+          <AppButton intent="ghost" @click="close">回去作答</AppButton>
+          <AppButton intent="primary" @click="confirmSubmitAnyway">仍要交卷</AppButton>
+        </div>
+      </template>
+    </UModal>
   </UContainer>
 </template>

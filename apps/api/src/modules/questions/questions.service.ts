@@ -140,6 +140,7 @@ export class QuestionsService {
           type: q.type,
           subjects: mapSubjects(q.subjects),
           contentMd: q.contentMd,
+          points: q.points,
           choices: mapChoices(q.choices),
           explanation: q.explanation
             ? {
