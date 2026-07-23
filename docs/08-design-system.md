@@ -4,9 +4,11 @@ Nuxt UI v4 + Tailwind v4；設計 token 以 `@theme` 定義、經 utility 消費
 
 ## Token 分層（`app/assets/css/`）
 
+- `main.css`：分層入口，只做 `@import` 排序（tailwindcss → typography plugin → `@nuxt/ui` → tokens → semantic → base → components → schedule-x），順序即 cascade 順序，不放實際規則。
 - `tokens.css`（`@theme`）：字級/間距/圓角/容器/動效 → `text-body`、`p-card`、`rounded-card`、`max-w-reading`、`min-h-touch`、`--spacing-nav`（nav 高度單一真相，header 與其下 sticky bar 共用）。**卷/卡/頁層級走 token utility、勿裸數值**；子元件微間距可用原生 Tailwind。
 - `semantic.css`：色彩角色 `--ui-*`（`bg-default`/`text-muted`/`text-dimmed`…），light=`:root`、dark=`.dark`；`text-dimmed` 僅在基底 `bg`／抬升的 `card` 上達 WCAG AA（4.70:1／5.17:1），recessed 的 `bg-muted`/`bg-elevated`/`bg-accented` 上不達標（4.13:1 light／2.36:1 dark）——該用 `text`/`text-muted`（詳見 DESIGN.md Do's and Don'ts）。`--board*` 為黑板面。
 - `base.css`：全域元素 + a11y（reduce-motion、隱藏捲軸、按鈕 `select-none` + iOS `tap-highlight`/`touch-action`）。
+- `components.css`：跨頁共用 class（`.focus-ring`、頁面轉場 `.page-*`/`.fade-*`）與共用表面（`.board`，因為要套進 `<MDC>` render 出的根節點，component-scoped style 碰不到）；也放 `@tailwindcss/typography` 的 `.prose` 色彩映射（unlayered，覆蓋 plugin 預設色，接到 `--ui-*`）。
 - Figma 鏡像 `design/tokens.json`：改 semantic 色須同步。
 
 ## 元件分層（`app/components/`）

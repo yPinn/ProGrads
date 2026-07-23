@@ -4,7 +4,7 @@
 
 ## 環境
 
-- Node ≥22（建議 24 LTS，見 `.nvmrc`）、pnpm 10（`corepack enable pnpm`，版本由 `packageManager` 鎖定）、PostgreSQL、Redis。
+- Node ≥22（建議 24 LTS，見 `.nvmrc`）、pnpm 11（`corepack enable pnpm`，版本由 `packageManager` 鎖定）、PostgreSQL、Redis。
 - `pnpm install` 後，Husky hooks 會自動安裝。
 
 ## 分支策略（GitHub Flow，trunk-based）

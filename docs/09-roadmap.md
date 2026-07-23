@@ -15,10 +15,10 @@
 
 目標：讓 AI 解析與官方資料可被信任、可回報、可修正。
 
-- 全站清楚標示「AI 生成解析，僅供參考」。
-- 題目/解析頁提供錯誤回報入口，至少可送出題目 id、錯誤類型、使用者描述。
-- 顯示 `review_status`：`ai_generated` / `ai_reviewed` / `human_verified` / `flagged`。
-- 補上 DMCA / 授權取下流程說明與聯絡入口。
+- [x] 全站清楚標示「AI 生成解析，僅供參考」（`apps/web/app/pages/questions/[externalId].vue`、`.../paper/[id].vue`）。
+- [x] 顯示 `review_status`：`ai_generated` / `ai_reviewed` / `human_verified` / `flagged`（同上兩頁）。
+- [ ] 題目/解析頁提供錯誤回報入口，至少可送出題目 id、錯誤類型、使用者描述——尚未實作。
+- [ ] 補上 DMCA / 授權取下流程說明與聯絡入口——尚未實作。
 
 理由：這是產品護城河「AI 解題」的信任底座，成本低於線上 AI 追問，且直接降低合規與品質風險。
 

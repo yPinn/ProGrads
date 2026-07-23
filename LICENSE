@@ -19,11 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-NOTE: This MIT license covers the SOURCE CODE of this repository only.
-Exam questions and related materials under content/ remain the copyright of
-their respective sources (universities / question authors). They are included
-only where officially published, with source attribution, and are used under
-each source's terms — they are NOT covered by this MIT license.

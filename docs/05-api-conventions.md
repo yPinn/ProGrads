@@ -39,7 +39,7 @@
 - JWT 放 httpOnly cookie，網域設父網域（`*.domain`）以跨 `app.` / `api.` 子網域。
 - 公開內容端點免登入；做題記錄 / AI 追問需登入（第二階段落地，見 [06-decisions.md](06-decisions.md) D17）。
 - 提醒訂閱**不需登入**：純 email double opt-in，`reminder_subscription` 獨立於 `user`（D17），MVP 即可上線。
-- 限流：`@nestjs/throttler` + CF 邊緣雙層。
+- 限流（規劃，尚未實作）：`@nestjs/throttler` + CF 邊緣雙層，排在 [09-roadmap.md](09-roadmap.md) P4；目前 `apps/api` 未安裝 `@nestjs/throttler`，也無對應 guard。
 - CORS：API 僅允許 `WEB_BASE_URL` 來源、`credentials: true`（供 cookie 跨子網域）；dev fallback `http://localhost:3000`。
 
 ## 邊界驗證

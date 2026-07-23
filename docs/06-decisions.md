@@ -110,11 +110,11 @@
 - **釐清**：PostgreSQL 仍是唯一應用 DB（後端，Prisma）；前端不維護額外內容索引。
 - **附帶**：`ogImage` 暫停用（需原生 renderer，日後啟用）。
 
-## D15. Toolchain：Node 24 LTS + pnpm 10
+## D15. Toolchain：Node 24 LTS + pnpm 11
 
-- **決策**：Node 目標 **24（Active LTS）**（`.nvmrc`；`engines` 最低 `>=22`）；pnpm **10.34.3**（成熟穩定 major，由 `packageManager` 鎖定、corepack 取用）。捨棄 pnpm 11（剛發布、未夠成熟）。
-- **pnpm 10 兩個非直覺設定**：
-  - **build script 預設封鎖**（安全性）→ 以 `pnpm.onlyBuiltDependencies` 明確授權原生套件（better-sqlite3、sharp、esbuild、@parcel/watcher、unrs-resolver、vue-demi）。
+- **決策**：Node 目標 **24（Active LTS）**（`.nvmrc`；`engines` 最低 `>=22`）；pnpm **11.9.0**（由 `packageManager` 鎖定、corepack 取用）。評估階段一度因「剛發布、未夠成熟」捨棄 pnpm 11、鎖 10.34.3，後續改採 pnpm 11 並穩定運作至今，此處更新為現況。
+- **pnpm 11 兩個非直覺設定**：
+  - **build script 預設封鎖**（安全性）→ 以 `pnpm.allowBuilds`（pnpm 10.26+/11 起取代 `onlyBuiltDependencies` 的新欄位）明確授權原生套件安裝腳本：`@parcel/watcher`、`@prisma/client`、`@prisma/engines`、`better-sqlite3`、`esbuild`、`prisma`、`sharp`、`unrs-resolver`、`vue-demi` 皆設 `true`；`@scarf/scarf` 明確設 `false` 跳過其 telemetry-only postinstall。
   - **嚴格 node_modules（不 hoist）**→ 程式直接 import 的套件須列為直接依賴，故 `tailwindcss` 加進 `apps/web`（`main.css` 的 `@import "tailwindcss"`）。
 - **維護**：Dependabot 每週升級依賴；major 版本（如 Node/pnpm）以穩定性為先，不盲目追最新。
 

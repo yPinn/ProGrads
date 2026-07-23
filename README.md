@@ -40,11 +40,11 @@ docs/           規格與決策文件
 
 ## 開發
 
-需求：Node ≥22（建議 24 LTS，見 `.nvmrc`）、pnpm 10（版本由 `packageManager` 鎖定）、Docker（本機 PostgreSQL）。Redis 後期才需要。
+需求：Node ≥22（建議 24 LTS，見 `.nvmrc`）、pnpm 11（版本由 `packageManager` 鎖定）、Docker（本機 PostgreSQL）。Redis 後期才需要。
 
 ```bash
 corepack enable
-corepack prepare pnpm@10.34.3 --activate # 對齊 packageManager
+corepack prepare pnpm@11.9.0 --activate # 對齊 packageManager
 pnpm install
 docker compose up -d postgres             # 本機 Postgres（host 5433，僅綁 localhost）
 cp packages/db/.env.example packages/db/.env   # 設 DATABASE_URL
