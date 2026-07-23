@@ -20,6 +20,7 @@ export interface PaperQuestion {
   license_status: string;
   departments: string[];
   subjects: string[];
+  points?: number; // 配分; absent when unmarked/uniform (see QuestionFrontmatter)
 }
 
 // Pure cross-file consistency core (no IO) so it's unit-testable.
@@ -59,6 +60,28 @@ export function checkPaperConsistency(qs: PaperQuestion[]): {
       warnings.push(
         `${paper}: 考科 used by only one question (possible mistag): ${singles.join(", ")}`,
       );
+    }
+
+    // 配分 doesn't have to be all-or-nothing: a common real paper mixes an explicitly-weighted
+    // section (計算/申論, each question labelled) with a uniformly-weighted section (選擇, no
+    // per-question label but a stated per-question value elsewhere on the exam) — e.g. 25 MC
+    // questions worth 2 分 each (unmarked) + 3 essay questions worth 17/16/17 分 (marked) = 100.
+    // So: if every question in the paper marks 配分, the total must be exactly 100. If only some
+    // do, we can't verify the exact total (the unmarked ones' implicit weight is unknown), but
+    // the marked portion alone must never exceed 100.
+    const withPoints = group.filter((q) => q.points !== undefined);
+    if (withPoints.length > 0) {
+      const sum = withPoints.reduce((s, q) => s + (q.points ?? 0), 0);
+      // Tolerance for content authored as thirds etc. (e.g. 33.33 × 3).
+      if (withPoints.length === group.length) {
+        if (Math.abs(sum - 100) > 0.01) {
+          errors.push(`${paper}: 配分 sums to ${sum} (expected 100)`);
+        }
+      } else if (sum > 100.01) {
+        errors.push(
+          `${paper}: 配分 marked on ${withPoints.length}/${group.length} questions already sums to ${sum} (>100)`,
+        );
+      }
     }
   }
 
@@ -112,6 +135,7 @@ export const questionsValidator: ContentValidator = {
       license_status: fm.license_status,
       departments: fm.departments,
       subjects: fm.subjects,
+      points: fm.points,
     };
     return { ok: true, errors, record };
   },

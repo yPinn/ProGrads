@@ -65,6 +65,54 @@ describe("checkPaperConsistency", () => {
     assert.match(r.warnings[0]!, /only one question.*db/);
   });
 
+  it("passes when 配分 sums to 100", () => {
+    const r = checkPaperConsistency([q({ points: 40 }), q({ points: 35 }), q({ points: 25 })]);
+    assert.deepEqual(r.errors, []);
+  });
+
+  it("tolerates floating-point 配分 that sums to ~100 (thirds)", () => {
+    const r = checkPaperConsistency([
+      q({ points: 33.33 }),
+      q({ points: 33.33 }),
+      q({ points: 33.34 }),
+    ]);
+    assert.deepEqual(r.errors, []);
+  });
+
+  it("flags 配分 that doesn't sum to 100", () => {
+    const r = checkPaperConsistency([q({ points: 40 }), q({ points: 40 })]);
+    assert.equal(r.errors.length, 1);
+    assert.match(r.errors[0]!, /配分 sums to 80 \(expected 100\)/);
+  });
+
+  it("allows 配分 marked on only some questions, as long as it doesn't exceed 100", () => {
+    // Real pattern: an explicitly-weighted essay section alongside a uniformly-weighted MC
+    // section that has no per-question 配分 (e.g. 25 MC × 2分 unmarked + 3 essay marked = 100).
+    const r = checkPaperConsistency([
+      q({ points: 17 }),
+      q({ points: 16 }),
+      q({ points: 17 }),
+      q({ points: undefined }),
+      q({ points: undefined }),
+    ]);
+    assert.deepEqual(r.errors, []);
+  });
+
+  it("flags a partially-marked paper whose declared 配分 already exceeds 100", () => {
+    const r = checkPaperConsistency([
+      q({ points: 60 }),
+      q({ points: 60 }),
+      q({ points: undefined }),
+    ]);
+    assert.equal(r.errors.length, 1);
+    assert.match(r.errors[0]!, /配分 marked on 2\/3 questions already sums to 120 \(>100\)/);
+  });
+
+  it("skips the 配分 check when no question in the paper marks it", () => {
+    const r = checkPaperConsistency([q(), q(), q()]);
+    assert.deepEqual(r.errors, []);
+  });
+
   it("isolates papers — one bad paper does not taint another", () => {
     const r = checkPaperConsistency([
       q({ paperKey: "ntu/2026/co-os" }),
