@@ -4,11 +4,12 @@
 
 - 題目：[PROMPT-questions.md](./PROMPT-questions.md)
 - 招生簡章（區A schedule.yml + 區B departments.yml）：[PROMPT-admissions.md](./PROMPT-admissions.md)
+- 報名人數統計表（admission-stats/\*\*/registration.yml）：[PROMPT-registration.md](./PROMPT-registration.md)
 - 師資陣容（faculty/\*.yml）：[PROMPT-faculty.md](./PROMPT-faculty.md)
 
 ## 契約 = 單一真相
 
-型別欄位以 `packages/shared` 的 Zod 契約為準（`content.ts` / `admission-content.ts` / `faculty-content.ts`），規格只補「怎麼從來源對映到欄位」的方法學、不重抄型別。物件多為 `.strict()`：**鍵拼錯會整檔 red**，逐欄比對契約。
+型別欄位以 `packages/shared` 的 Zod 契約為準（`content.ts` / `admission-content.ts` / `admission-stats-content.ts` / `faculty-content.ts`），規格只補「怎麼從來源對映到欄位」的方法學、不重抄型別。物件多為 `.strict()`：**鍵拼錯會整檔 red**，逐欄比對契約。
 
 ## 參照 slug 必須先 seeded
 
@@ -27,7 +28,7 @@
 ## 驗證閘門（三段，由輕到重）
 
 1. **格式**：`pnpm content:check`（prettier + markdownlint）。
-2. **契約（免 DB）**：`pnpm --filter @prograds/content-sync validate <questions|admissions|faculty> <dir>`——離線 Zod + slug/路徑一致，**commit 前主閘門**。
+2. **契約（免 DB）**：`pnpm --filter @prograds/content-sync validate <questions|admissions|admission-stats|faculty> <dir>`——離線 Zod + slug/路徑一致，**commit 前主閘門**。
 3. **入庫（需 DB）**：設 `CONTENT_DIR` 後 `pnpm --filter @prograds/content-sync sync`。
 
 任一步失敗 = 依錯誤訊息（會指出可修正的欄位/路徑）修正後重跑。

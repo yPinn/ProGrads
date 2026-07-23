@@ -108,6 +108,8 @@ depts:
   - 簡章常見 `[× N.NN]` 是**加權倍數非百分比**——換算成 % 時在檔頭 `note` 註明「倍數→%近似換算」，保留原始倍數於 paper `note`。
 - **`methods`**：該組實際採用的項目子集，對齊 `exam` 有值的鍵（純筆試 `[written]`；含面試 `[written, interview]`）。
 - **面試**：組級面試日期掛**這裡**（`interview_at: 2026-03-20`，date 或 datetime），**不掛區A**。
+- **`quota`**：直接照簡章數字填，**不用**推算甄試名額流用後的定案值——考試入學名額常因甄試缺額流用而增加
+  （只增不減），簡章公告時的數字是流用前下限，屬已知限制，見 [docs/06-decisions.md](https://github.com/yPinn/ProGrads/blob/main/docs/06-decisions.md) D20。
 
 ## 常見易錯
 

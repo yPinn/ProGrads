@@ -3,6 +3,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prograds/db";
+import { syncRegistration } from "./admission-stats.js";
 import { syncDepartments, syncSchedule } from "./admissions.js";
 import { syncFaculty } from "./faculty.js";
 import { pruneSyncedContent } from "./prune.js";
@@ -12,6 +13,11 @@ import {
   reconcileExamSubjects,
   syncFile,
 } from "./sync.js";
+import { admissionStatsValidator } from "./validate/admission-stats.js";
+import { admissionsValidator } from "./validate/admissions.js";
+import { facultyValidator } from "./validate/faculty.js";
+import { questionsValidator } from "./validate/questions.js";
+import { runValidator } from "./validate/runner.js";
 
 function contentRoot(): string | null {
   if (process.env.CONTENT_DIR) return path.resolve(process.env.CONTENT_DIR);
@@ -47,13 +53,22 @@ async function main(): Promise<void> {
     );
     return;
   }
+  // Validate before touching the DB at all: structural/cross-file problems (e.g. 配分 not
+  // summing to 100, a divergent exam_subject across a paper) must never partially sync.
+  // runValidator prints its own report and exit(1)s on any error.
+  runValidator(questionsValidator, path.join(root, "questions"));
+  runValidator(admissionsValidator, path.join(root, "admissions"));
+  runValidator(admissionStatsValidator, path.join(root, "admission-stats"));
+  runValidator(facultyValidator, path.join(root, "faculty"));
+
   const files = listFiles(root, "questions", ".md");
   const scheduleFiles = listFiles(root, "admissions", "schedule.yml");
   const departmentFiles = listFiles(root, "admissions", "departments.yml");
+  const registrationFiles = listFiles(root, "admission-stats", "registration.yml");
   const facultyFiles = listFiles(root, "faculty", ".yml");
   // eslint-disable-next-line no-console
   console.log(
-    `content-sync: ${files.length} question file(s), ${scheduleFiles.length} schedule.yml, ${departmentFiles.length} departments.yml, ${facultyFiles.length} faculty.yml under ${root}`,
+    `content-sync: ${files.length} question file(s), ${scheduleFiles.length} schedule.yml, ${departmentFiles.length} departments.yml, ${registrationFiles.length} registration.yml, ${facultyFiles.length} faculty.yml under ${root}`,
   );
 
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
@@ -65,6 +80,8 @@ async function main(): Promise<void> {
   let seasons = 0;
   let admissionGroups = 0;
   let facultyMembers = 0;
+  let applicantsMatched = 0;
+  let applicantsUnmatched = 0;
   const errors: string[] = [];
 
   try {
@@ -108,6 +125,19 @@ async function main(): Promise<void> {
       }
     }
 
+    for (const rel of registrationFiles) {
+      try {
+        const raw = readFileSync(path.join(root, rel), "utf8");
+        const result = await syncRegistration(prisma, resolver, rel, raw);
+        if (!("skipped" in result)) {
+          applicantsMatched += result.matched;
+          applicantsUnmatched += result.unmatched;
+        }
+      } catch (err) {
+        errors.push(`${rel}: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
     for (const rel of facultyFiles) {
       try {
         const raw = readFileSync(path.join(root, rel), "utf8");
@@ -130,7 +160,7 @@ async function main(): Promise<void> {
       : null;
     // eslint-disable-next-line no-console
     console.log(
-      `content-sync done: synced=${synced} skipped=${skipped} reconciled=${reconciled} deptLinks=${deptLinks} seasons=${seasons} admissionGroups=${admissionGroups} facultyMembers=${facultyMembers}`,
+      `content-sync done: synced=${synced} skipped=${skipped} reconciled=${reconciled} deptLinks=${deptLinks} seasons=${seasons} admissionGroups=${admissionGroups} facultyMembers=${facultyMembers} applicantsMatched=${applicantsMatched} applicantsUnmatched=${applicantsUnmatched}`,
     );
     if (pruned) {
       // eslint-disable-next-line no-console
