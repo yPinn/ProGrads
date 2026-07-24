@@ -34,7 +34,7 @@ export const AdmissionRoundSchema = z.object({
   interviewWeight: z.number().int().nullable().describe("面試佔分 %;無則 null"),
   interviewAt: z.string().datetime({ offset: true }).nullable().describe("該組面試時間;無則 null"),
   tiebreak: z.array(z.string()).describe("同分參酌順序(科目顯示名)"),
-  sourceUrl: z.string().nullable().describe("簡章連結;無則 null"),
+  sourceUrl: z.string().nullable().describe("系所官網(資料來源,非簡章直連);無則 null"),
   papers: z.array(AdmissionRoundPaperSchema).describe("該梯次考卷(含合科卷組成與佔分)"),
 });
 export type AdmissionRound = z.infer<typeof AdmissionRoundSchema>;

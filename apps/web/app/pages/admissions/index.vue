@@ -4,6 +4,7 @@ import { useAdmissions } from "~/composables/useAdmissions";
 import { useSchools } from "~/composables/useSchools";
 import { useDepartments } from "~/composables/useDepartments";
 import { ADMISSION_TYPE_LABELS, ADMISSION_METHOD_LABELS } from "~/utils/admission-labels";
+import { brochureUrl } from "~/utils/admission-brochure";
 import { formatDateTime } from "~/utils/format";
 import { toSelectItems } from "~/utils/select";
 import type { AdmissionRound } from "@prograds/shared";
@@ -186,7 +187,7 @@ const prefersReducedMotion = useReducedMotion();
           class="mb-section"
         >
           <h3 class="font-serif text-title-sm mb-3 tracking-tight">
-            {{ g.name || "不分組" }}<span v-if="g.code" class="text-muted"> · {{ g.code }} 組</span>
+            {{ g.name || "不分組" }}
           </h3>
 
           <AppCard v-for="r in g.rounds" :key="`${r.year}-${r.admissionType}`" class="mt-3">
@@ -223,15 +224,26 @@ const prefersReducedMotion = useReducedMotion();
               同分參酌:{{ r.tiebreak.join("、") }}
             </p>
 
-            <a
-              v-if="r.sourceUrl && /^https?:\/\//.test(r.sourceUrl)"
-              :href="r.sourceUrl"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-primary text-small mt-1 inline-block"
-            >
-              簡章連結
-            </a>
+            <div class="mt-1 flex flex-wrap gap-3">
+              <a
+                v-if="r.sourceUrl && /^https?:\/\//.test(r.sourceUrl)"
+                :href="r.sourceUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-primary text-small inline-block"
+              >
+                系所官網
+              </a>
+              <a
+                v-if="brochureUrl(school, r.admissionCode)"
+                :href="brochureUrl(school, r.admissionCode)!"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-primary text-small inline-block"
+              >
+                簡章 PDF
+              </a>
+            </div>
           </AppCard>
         </section>
       </QueryState>
