@@ -27,6 +27,23 @@ export class AdmissionsRepository {
     });
   }
 
+  // A school's admission seasons (fees / announcedAt), one row per (year, admissionType).
+  // Callers join this in-memory against rounds — no FK between admission_season and
+  // admission_round, and a school only ever has a handful of seasons.
+  findSeasons(school: string) {
+    return this.prisma.admissionSeason.findMany({
+      where: { school: { slug: school } },
+      select: {
+        year: true,
+        admissionType: true,
+        announcedAt: true,
+        applicationFee: true,
+        interviewFee: true,
+        feeWaiver: true,
+      },
+    });
+  }
+
   // Flat calendar of school-level season events for a year, optionally filtered by
   // school / event type.
   findEvents(filters: { year: number; school?: string; event?: AdmissionEvent }) {

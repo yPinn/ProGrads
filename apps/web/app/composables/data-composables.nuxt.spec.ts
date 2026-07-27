@@ -103,6 +103,7 @@ const admissionGroup = {
       interviewAt: null,
       tiebreak: [],
       sourceUrl: null,
+      season: null,
       papers: [{ name: "計算機數學", section: null, weight: null, note: null, subjects: [] }],
     },
   ],

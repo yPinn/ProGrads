@@ -17,6 +17,17 @@ export const AdmissionRoundPaperSchema = z.object({
 });
 export type AdmissionRoundPaper = z.infer<typeof AdmissionRoundPaperSchema>;
 
+// School-level season facts (fees / freshness anchor), keyed by (school, year, admissionType) —
+// no FK to admission_round, joined by the API on (year, admissionType). null when the school has
+// no season file for that year/channel (e.g. no schedule.yml yet).
+export const AdmissionSeasonInfoSchema = z.object({
+  announcedAt: z.string().datetime({ offset: true }).nullable().describe("簡章公告日;無則 null"),
+  applicationFee: z.number().int().nullable().describe("報名費(新台幣);無則 null"),
+  interviewFee: z.number().int().nullable().describe("口試費(新台幣);無則 null"),
+  feeWaiver: z.array(z.string()).describe("報名費減免身分(如 low_income)"),
+});
+export type AdmissionSeasonInfo = z.infer<typeof AdmissionSeasonInfoSchema>;
+
 // An admission round: one group × year × channel. Hub for year-varying facts (quota/subjects/scoring).
 export const AdmissionRoundSchema = z.object({
   year: z.number().int().describe("西元學年(如 2025 = 114 學年度)"),
@@ -36,6 +47,7 @@ export const AdmissionRoundSchema = z.object({
   tiebreak: z.array(z.string()).describe("同分參酌順序(科目顯示名)"),
   sourceUrl: z.string().nullable().describe("系所官網(資料來源,非簡章直連);無則 null"),
   papers: z.array(AdmissionRoundPaperSchema).describe("該梯次考卷(含合科卷組成與佔分)"),
+  season: AdmissionSeasonInfoSchema.nullable().describe("校級季別資訊(報名費/公告日);查無則 null"),
 });
 export type AdmissionRound = z.infer<typeof AdmissionRoundSchema>;
 

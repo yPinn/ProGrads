@@ -1,6 +1,17 @@
 import { Injectable } from "@nestjs/common";
-import type { AdmissionEvent, AdmissionGroup, AdmissionScheduleItem } from "@prograds/shared";
+import type {
+  AdmissionEvent,
+  AdmissionGroup,
+  AdmissionScheduleItem,
+  AdmissionSeasonInfo,
+} from "@prograds/shared";
 import { AdmissionsRepository } from "./admissions.repository.js";
+
+// Key a season by (year, admissionType) — the join key shared with admission_round, since
+// there's no FK between the two tables.
+function seasonKey(year: number, admissionType: string): string {
+  return `${year}:${admissionType}`;
+}
 
 @Injectable()
 export class AdmissionsService {
@@ -12,7 +23,22 @@ export class AdmissionsService {
     dept: string;
     year?: number;
   }): Promise<AdmissionGroup[]> {
-    const groups = await this.repo.findGroups(filters);
+    const [groups, seasons] = await Promise.all([
+      this.repo.findGroups(filters),
+      this.repo.findSeasons(filters.school),
+    ]);
+    const seasonByKey = new Map<string, AdmissionSeasonInfo>(
+      seasons.map((s) => [
+        seasonKey(s.year, s.admissionType),
+        {
+          announcedAt: s.announcedAt ? s.announcedAt.toISOString() : null,
+          applicationFee: s.applicationFee,
+          interviewFee: s.interviewFee,
+          feeWaiver: s.feeWaiver,
+        },
+      ]),
+    );
+
     return groups.map((g) => ({
       id: g.id,
       code: g.code,
@@ -35,6 +61,7 @@ export class AdmissionsService {
         interviewAt: r.interviewAt ? r.interviewAt.toISOString() : null,
         tiebreak: r.tiebreak,
         sourceUrl: r.sourceUrl,
+        season: seasonByKey.get(seasonKey(r.year, r.admissionType)) ?? null,
         papers: r.papers.map((p) => ({
           name: p.name,
           section: p.section,

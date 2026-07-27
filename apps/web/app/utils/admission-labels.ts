@@ -57,3 +57,10 @@ export const ADMISSION_METHOD_LABELS: Record<ExamMethod, string> = {
   review: "審查",
   interview: "口試",
 };
+
+// Fee-waiver eligibility codes (AdmissionSeason.feeWaiver — a free-form string[] in the DB,
+// not an enum), so unknown codes fall back to the raw string rather than being dropped.
+export const FEE_WAIVER_LABELS: Record<string, string> = {
+  low_income: "低收入戶",
+  lower_middle_income: "中低收入戶",
+};

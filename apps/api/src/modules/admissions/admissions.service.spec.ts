@@ -49,10 +49,22 @@ describe("AdmissionsService.getGroups", () => {
       },
     ]);
 
-    const service = makeService({ findGroups });
+    const findSeasons = vi.fn().mockResolvedValue([
+      {
+        year: 2025,
+        admissionType: "MASTER",
+        announcedAt: new Date("2024-11-12T00:00:00.000Z"),
+        applicationFee: 1500,
+        interviewFee: 500,
+        feeWaiver: ["low_income"],
+      },
+    ]);
+
+    const service = makeService({ findGroups, findSeasons });
     const result = await service.getGroups({ school: "nccu", dept: "cs", year: 2025 });
 
     expect(findGroups).toHaveBeenCalledWith({ school: "nccu", dept: "cs", year: 2025 });
+    expect(findSeasons).toHaveBeenCalledWith("nccu");
     expect(result).toEqual([
       {
         id: 1,
@@ -77,6 +89,12 @@ describe("AdmissionsService.getGroups", () => {
             interviewAt: "2025-03-15T01:00:00.000Z",
             tiebreak: "面試成績",
             sourceUrl: "https://example.edu/admission",
+            season: {
+              announcedAt: "2024-11-12T00:00:00.000Z",
+              applicationFee: 1500,
+              interviewFee: 500,
+              feeWaiver: ["low_income"],
+            },
             papers: [
               {
                 name: "計算機概論",
@@ -123,16 +141,19 @@ describe("AdmissionsService.getGroups", () => {
       },
     ]);
 
-    const service = makeService({ findGroups });
+    const findSeasons = vi.fn().mockResolvedValue([]);
+    const service = makeService({ findGroups, findSeasons });
     const [group] = await service.getGroups({ school: "nccu", dept: "cs" });
 
     expect(group?.rounds[0]?.interviewAt).toBeNull();
     expect(group?.rounds[0]?.papers).toEqual([]);
+    expect(group?.rounds[0]?.season).toBeNull();
   });
 
   it("returns an empty array when the department has no groups", async () => {
     const findGroups = vi.fn().mockResolvedValue([]);
-    const service = makeService({ findGroups });
+    const findSeasons = vi.fn().mockResolvedValue([]);
+    const service = makeService({ findGroups, findSeasons });
 
     await expect(service.getGroups({ school: "x", dept: "y" })).resolves.toEqual([]);
   });
