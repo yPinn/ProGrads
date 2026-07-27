@@ -3,11 +3,15 @@ import { ref, computed, watch } from "vue";
 import { useAdmissions } from "~/composables/useAdmissions";
 import { useSchools } from "~/composables/useSchools";
 import { useDepartments } from "~/composables/useDepartments";
+import { useQuestionFacets } from "~/composables/useQuestionFacets";
 import { ADMISSION_TYPE_LABELS, ADMISSION_METHOD_LABELS } from "~/utils/admission-labels";
 import { brochureUrl } from "~/utils/admission-brochure";
+import { admitRate } from "~/utils/admit-rate";
+import { seasonLine } from "~/utils/admission-season";
+import { practicableSubjects } from "~/utils/practicable-subjects";
+import { icons } from "~/utils/icons";
 import { formatDateTime } from "~/utils/format";
 import { toSelectItems } from "~/utils/select";
-import type { AdmissionRound } from "@prograds/shared";
 
 useSeoMeta({
   title: "報名資訊",
@@ -66,9 +70,10 @@ const visibleGroups = computed(() => {
     .filter((g) => g.rounds.length > 0);
 });
 
-// Admit rate = admitted / applicants.
-const ratio = (r: AdmissionRound) =>
-  r.applicants && r.admitted ? `${((r.admitted / r.applicants) * 100).toFixed(1)}%` : "—";
+// Subjects that actually have question content, for gating the "practice" badges below each
+// paper — avoids linking to /questions for a subject that would land on an empty results page.
+const { data: facets } = useQuestionFacets();
+const practicableSlugs = computed(() => new Set((facets.value?.subjects ?? []).map((s) => s.slug)));
 
 // Honour OS reduce-motion for the JS-driven stagger (CSS guard can't reach it).
 const prefersReducedMotion = useReducedMotion();
@@ -191,58 +196,90 @@ const prefersReducedMotion = useReducedMotion();
           </h3>
 
           <AppCard v-for="r in g.rounds" :key="`${r.year}-${r.admissionType}`" class="mt-3">
-            <div class="font-medium">
-              {{ r.year }} 學年 · {{ ADMISSION_TYPE_LABELS[r.admissionType] }}
-              <span v-if="r.admissionCode" class="text-muted">· 代碼 {{ r.admissionCode }}</span>
-              <span v-if="r.applicantType" class="text-muted">· {{ r.applicantType }}</span>
-            </div>
+            <div class="sm:grid sm:grid-cols-[1fr_8rem] sm:gap-x-6">
+              <div class="font-medium sm:col-span-2">
+                {{ r.year }} 學年 · {{ ADMISSION_TYPE_LABELS[r.admissionType] }}
+                <span v-if="r.admissionCode" class="text-muted">· 代碼 {{ r.admissionCode }}</span>
+                <span v-if="r.applicantType" class="text-muted">· {{ r.applicantType }}</span>
+              </div>
 
-            <div class="text-small mt-1">
-              名額 {{ r.quota ?? "—" }} · 報名 {{ r.applicants ?? "—" }} · 錄取
-              {{ r.admitted ?? "—" }} · 錄取率 {{ ratio(r) }}
-            </div>
+              <div class="mt-1">
+                <div class="text-muted text-small">
+                  採計:{{ r.methods.map((m) => ADMISSION_METHOD_LABELS[m]).join("、") || "—" }}
+                  <span v-if="r.calculator !== null"
+                    >· 計算機 {{ r.calculator ? "可" : "不可" }}</span
+                  >
+                  <span v-if="r.writtenWeight !== null">· 筆試 {{ r.writtenWeight }}%</span>
+                  <span v-if="r.reviewWeight !== null">· 審查 {{ r.reviewWeight }}%</span>
+                  <span v-if="r.interviewWeight !== null">· 面試 {{ r.interviewWeight }}%</span>
+                  <span v-if="r.interviewAt">· 面試 {{ formatDateTime(r.interviewAt) }}</span>
+                </div>
 
-            <div class="text-muted text-small mt-1">
-              採計:{{ r.methods.map((m) => ADMISSION_METHOD_LABELS[m]).join("、") || "—" }}
-              <span v-if="r.calculator !== null">· 計算機 {{ r.calculator ? "可" : "不可" }}</span>
-              <span v-if="r.writtenWeight !== null">· 筆試 {{ r.writtenWeight }}%</span>
-              <span v-if="r.reviewWeight !== null">· 審查 {{ r.reviewWeight }}%</span>
-              <span v-if="r.interviewWeight !== null">· 面試 {{ r.interviewWeight }}%</span>
-              <span v-if="r.interviewAt">· 面試 {{ formatDateTime(r.interviewAt) }}</span>
-            </div>
+                <ul v-if="r.papers.length" class="text-small mt-2">
+                  <li v-for="(p, i) in r.papers" :key="i">
+                    {{ p.name }}<span v-if="p.weight !== null"> ({{ p.weight }}%)</span>
+                    <span v-if="p.subjects.length" class="text-muted">
+                      — {{ p.subjects.map((s) => s.name).join("、") }}</span
+                    >
+                    <div
+                      v-if="practicableSubjects(p.subjects, practicableSlugs).length"
+                      class="mt-1 flex flex-wrap items-center gap-1"
+                    >
+                      <AppBadge
+                        v-for="s in practicableSubjects(p.subjects, practicableSlugs)"
+                        :key="s.slug"
+                        :to="`/questions?subject=${s.slug}`"
+                        intent="tag"
+                        size="sm"
+                        :aria-label="`練習考科:${s.name}(跨校)`"
+                      >
+                        {{ s.name }}
+                      </AppBadge>
+                    </div>
+                  </li>
+                </ul>
 
-            <ul v-if="r.papers.length" class="text-small mt-2">
-              <li v-for="(p, i) in r.papers" :key="i">
-                {{ p.name }}<span v-if="p.weight !== null"> ({{ p.weight }}%)</span>
-                <span v-if="p.subjects.length" class="text-muted">
-                  — {{ p.subjects.map((s) => s.name).join("、") }}</span
-                >
-              </li>
-            </ul>
+                <p v-if="r.tiebreak.length" class="text-muted text-small mt-1">
+                  同分參酌:{{ r.tiebreak.join("、") }}
+                </p>
 
-            <p v-if="r.tiebreak.length" class="text-muted text-small mt-1">
-              同分參酌:{{ r.tiebreak.join("、") }}
-            </p>
+                <p v-if="seasonLine(r.season)" class="text-muted text-small mt-1">
+                  {{ seasonLine(r.season) }}
+                </p>
+              </div>
 
-            <div class="mt-1 flex flex-wrap gap-3">
-              <a
-                v-if="r.sourceUrl && /^https?:\/\//.test(r.sourceUrl)"
-                :href="r.sourceUrl"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-primary text-small inline-block"
-              >
-                系所官網
-              </a>
-              <a
-                v-if="brochureUrl(school, r.admissionCode)"
-                :href="brochureUrl(school, r.admissionCode)!"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-primary text-small inline-block"
-              >
-                簡章 PDF
-              </a>
+              <div class="text-small mt-3 flex flex-col gap-3 sm:mt-1 sm:h-full sm:justify-between">
+                <div class="space-y-1">
+                  <div>名額 {{ r.quota ?? "—" }}</div>
+                  <div>報名 {{ r.applicants ?? "—" }}</div>
+                  <div>錄取 {{ r.admitted ?? "—" }}</div>
+                  <div class="mt-1">
+                    <div class="text-muted text-caption">錄取率</div>
+                    <div>
+                      {{ admitRate(r)?.percent ?? "—"
+                      }}<span v-if="admitRate(r)?.estimated" class="text-muted">(估算)</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex gap-1">
+                  <IconButton
+                    v-if="r.sourceUrl && /^https?:\/\//.test(r.sourceUrl)"
+                    :to="r.sourceUrl"
+                    :icon="icons.externalLink"
+                    label="系所官網"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  />
+                  <IconButton
+                    v-if="brochureUrl(school, r.admissionCode)"
+                    :to="brochureUrl(school, r.admissionCode)!"
+                    :icon="icons.document"
+                    label="簡章 PDF"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  />
+                </div>
+              </div>
             </div>
           </AppCard>
         </section>

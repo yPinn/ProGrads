@@ -18,6 +18,9 @@ export const icons = {
   // generic
   close: "i-lucide-x",
   warning: "i-lucide-triangle-alert",
+  // external content
+  externalLink: "i-lucide-external-link",
+  document: "i-lucide-file-text",
 } as const;
 
 export type IconName = keyof typeof icons;
