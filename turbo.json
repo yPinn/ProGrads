@@ -21,6 +21,15 @@
     "test": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
+    },
+    "@prograds/ai-pipeline#test": {
+      "dependsOn": ["^build"]
+    },
+    "@prograds/content-sync#test": {
+      "dependsOn": ["^build"]
+    },
+    "@prograds/exam-solvers#test": {
+      "dependsOn": ["^build"]
     }
   }
 }

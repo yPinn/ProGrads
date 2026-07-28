@@ -20,7 +20,9 @@
     "db:studio": "prisma studio",
     "db:validate": "prisma validate",
     "db:format": "prisma format",
-    "db:seed": "tsx prisma/seed/index.ts"
+    "db:seed": "tsx prisma/seed/index.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@prisma/client": "^7.9.0"
