@@ -3,6 +3,7 @@ import { ref, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuestionPapers } from "~/composables/useQuestionPapers";
 import { useQuestionFacets } from "~/composables/useQuestionFacets";
+import { icons } from "~/utils/icons";
 
 useSeoMeta({
   title: "考古題",
@@ -63,6 +64,12 @@ const query = computed(() => ({
   pageSize,
 }));
 
+// Trends needs one subject (its schema requires it) — carry the current subject filter across
+// when set, else send the user to trends' own subject picker.
+const trendsHref = computed(() =>
+  subject.value === "all" ? "/questions/trends" : `/questions/trends?subject=${subject.value}`,
+);
+
 const { data, isPending, isError, error, refetch, isPlaceholderData } = useQuestionPapers(query);
 
 // Honour OS reduce-motion for the JS-driven stagger (CSS guard can't reach it).
@@ -101,6 +108,9 @@ const prefersReducedMotion = useReducedMotion();
         aria-label="年度"
         class="w-full sm:w-32"
       />
+      <AppButton :to="trendsHref" :icon="icons.trend" intent="link" class="ml-auto sm:ml-0"
+        >看歷年趨勢</AppButton
+      >
     </AppCard>
 
     <QueryState
