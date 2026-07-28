@@ -36,10 +36,10 @@
 
 目標：把靜態報名資訊變成會回訪的工具。
 
-- `reminder_subscription` model + migration。
-- `POST /subscriptions`，匿名 email double opt-in，不綁 `user`。
-- 訂閱 scope 支援 school / department / track。
-- 寄送前需要 unsubscribe token 與 confirmed/unsubscribed 狀態。
+- [ ] `reminder_subscription` model + migration。
+- [ ] `POST /subscriptions`，匿名 email double opt-in，不綁 `user`。
+- [ ] 訂閱 scope 支援 school / department / track。
+- [ ] 寄送前需要 unsubscribe token 與 confirmed/unsubscribed 狀態。
 
 理由：符合 MVP 清單，且不必提前做 auth。它能提高回訪與實用性，但要等 schedule/admissions 資料穩定後再做。
 
