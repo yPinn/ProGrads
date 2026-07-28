@@ -135,6 +135,33 @@ export class QuestionsRepository {
     return { subjects, schools, years };
   }
 
+  findSubjectBySlug(slug: string) {
+    return this.prisma.subject.findUnique({
+      where: { slug },
+      select: { id: true, slug: true, name: true },
+    });
+  }
+
+  // All questions tagged with a subject (cross-school), minimal columns for the trends pivot:
+  // type + metadata (→ knowledgePoints) + the exam's year/school. No school/year filtering here —
+  // the service needs the full spread to build the school picker and pick a sensible default.
+  findForTrends(subjectSlug: string) {
+    return this.prisma.question.findMany({
+      where: { subjects: { some: { subject: { slug: subjectSlug } } } },
+      select: {
+        type: true,
+        metadata: true,
+        examSubject: {
+          select: {
+            exam: {
+              select: { year: true, school: { select: { id: true, slug: true, name: true } } },
+            },
+          },
+        },
+      },
+    });
+  }
+
   // The "lead" of a 題組: lowest-order question in the same paper sharing this group slug.
   // The shared passage lives in its contentMd (see content pipeline convention).
   findGroupLead(examSubjectId: string, group: string) {

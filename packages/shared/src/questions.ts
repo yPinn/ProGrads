@@ -190,9 +190,43 @@ export const QuestionFacetsSchema = z.object({
 });
 export type QuestionFacets = z.infer<typeof QuestionFacetsSchema>;
 
+// GET /questions/trends?subject=&school=&top= — 歷年趨勢(單校×年;跨校比較留待 v2)。
+export const TrendQuerySchema = z.object({
+  subject: z.string().min(1).describe("考科 slug(必填;跨校聚合的單位,如 algo)"),
+  school: z.string().min(1).optional().describe("以學校 slug 選校;省略則預設年份最深的校"),
+  top: z.coerce.number().int().positive().max(100).default(30).describe("考點×年最多列出幾個考點"),
+});
+export type TrendQuery = z.infer<typeof TrendQuerySchema>;
+
+// 該考科在各校的年份深度,供學校下拉與預設校選擇(年份數越多,趨勢線越站得住)。
+export const TrendSchoolSchema = SchoolSchema.extend({
+  years: z.number().int().describe("該校此考科出現的相異年份數"),
+});
+export type TrendSchool = z.infer<typeof TrendSchoolSchema>;
+
+// 一個 pivot 列(題型或考點),cells 依 Trend.years 的順序對齊。
+export const TrendRowSchema = z.object({
+  key: z.string().describe("列標籤(題型代碼或考點文字)"),
+  cells: z.array(z.number().int()).describe("逐年計數,索引對齊 Trend.years"),
+  total: z.number().int().describe("Σ 全部年份"),
+  trend: z.enum(["up", "down", "flat"]).describe("首年 vs 末年比較"),
+});
+export type TrendRow = z.infer<typeof TrendRowSchema>;
+
+export const TrendSchema = z.object({
+  subject: SubjectSchema,
+  schools: z.array(TrendSchoolSchema).describe("該考科出現過的所有學校(含年份深度)"),
+  selectedSchool: SchoolSchema.describe("目前呈現的學校(請求指定或伺服器預設)"),
+  years: z.array(z.number().int()).describe("selectedSchool 底下的相異年份,升冪"),
+  byType: z.array(TrendRowSchema).describe("題型 × 年"),
+  byPoint: z.array(TrendRowSchema).describe("考點 × 年(依 total 降冪,取前 top 個)"),
+});
+export type Trend = z.infer<typeof TrendSchema>;
+
 // Response envelopes.
 export const QuestionsResponseSchema = paginatedResponse(QuestionSummarySchema);
 export const PapersResponseSchema = paginatedResponse(PaperSummarySchema);
 export const QuestionResponseSchema = dataResponse(QuestionDetailSchema);
 export const QuestionFacetsResponseSchema = dataResponse(QuestionFacetsSchema);
 export const PaperTestResponseSchema = dataResponse(PaperTestSchema);
+export const TrendResponseSchema = dataResponse(TrendSchema);

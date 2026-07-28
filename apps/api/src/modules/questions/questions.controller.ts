@@ -6,16 +6,18 @@ import type {
   QuestionDetail,
   QuestionFacets,
   QuestionSummary,
+  Trend,
 } from "@prograds/shared";
 import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { ApiBadRequest, ApiNotFound } from "../../common/api-error-responses.js";
-import { QuestionQueryDto } from "./dto/question-query.dto.js";
+import { QuestionQueryDto, TrendQueryDto } from "./dto/question-query.dto.js";
 import {
   PapersResponseDto,
   PaperTestResponseDto,
   QuestionFacetsResponseDto,
   QuestionResponseDto,
   QuestionsResponseDto,
+  TrendResponseDto,
 } from "./dto/questions-response.dto.js";
 import { QuestionsService } from "./questions.service.js";
 
@@ -77,6 +79,21 @@ export class QuestionsController {
   @ApiOkResponse({ type: QuestionFacetsResponseDto })
   async facets(): Promise<{ data: QuestionFacets }> {
     return { data: await this.service.getFacets() };
+  }
+
+  // Must precede the ":externalId" catch-all — a single-segment "trends" would otherwise be read
+  // as an externalId, same reasoning as "facets" above.
+  @Get("trends")
+  @ApiOperation({
+    summary: "歷年趨勢(單校×年)",
+    description:
+      "以考科 slug 跨校聚合後,回傳單一學校(指定或伺服器選年份最深者)的題型×年、考點×年兩張 pivot。跨校比較留待後續版本。",
+  })
+  @ApiOkResponse({ type: TrendResponseDto })
+  @ApiBadRequest()
+  @ApiNotFound()
+  async trends(@Query() query: TrendQueryDto): Promise<{ data: Trend }> {
+    return { data: await this.service.getTrends(query.subject, query.school, query.top) };
   }
 
   // Must precede the ":externalId" catch-all — a two-segment "papers/:id" won't clash with the

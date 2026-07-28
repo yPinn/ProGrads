@@ -44,6 +44,15 @@ export function metaNumber(meta: unknown, key: string): number | null {
   return null;
 }
 
+// As metaString, but for a string-array field (e.g. Question.metadata.knowledgePoints).
+export function metaStringArray(meta: unknown, key: string): string[] {
+  if (meta && typeof meta === "object" && !Array.isArray(meta)) {
+    const value = (meta as Record<string, unknown>)[key];
+    if (Array.isArray(value) && value.every((v) => typeof v === "string")) return value;
+  }
+  return [];
+}
+
 export interface FacultyThesisRow {
   id: string;
   title: string;

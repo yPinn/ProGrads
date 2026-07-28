@@ -209,6 +209,103 @@ describe("QuestionsService.getPaperTest", () => {
   });
 });
 
+describe("QuestionsService.getTrends", () => {
+  const ntu = { id: "sc-ntu", slug: "ntu", name: "國立臺灣大學" };
+  const nccu2 = { id: "sc-nccu", slug: "nccu", name: "國立政治大學" };
+  const algo = { id: "subj-algo", slug: "algo", name: "演算法" };
+
+  // NTU spans 3 years (dp trends down, graph trends up); NCCU has a single year — used to check
+  // the deepest-history default and the sparse-year (still-renders) path.
+  function rows() {
+    return [
+      {
+        type: "mc",
+        metadata: { knowledgePoints: ["dp"] },
+        examSubject: { exam: { year: 2021, school: ntu } },
+      },
+      {
+        type: "essay",
+        metadata: { knowledgePoints: ["dp", "graph"] },
+        examSubject: { exam: { year: 2023, school: ntu } },
+      },
+      {
+        type: "mc",
+        metadata: { knowledgePoints: ["graph"] },
+        examSubject: { exam: { year: 2024, school: ntu } },
+      },
+      // No metadata at all — must not crash metaStringArray or leak a phantom knowledge point.
+      { type: "mc", metadata: null, examSubject: { exam: { year: 2025, school: nccu2 } } },
+    ];
+  }
+
+  it("throws NotFoundException when the subject is unknown", async () => {
+    const findSubjectBySlug = vi.fn().mockResolvedValue(null);
+    const service = makeService({ findSubjectBySlug });
+    await expect(service.getTrends("ghost", undefined, 30)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+  });
+
+  it("throws NotFoundException when the requested school has no questions for the subject", async () => {
+    const findSubjectBySlug = vi.fn().mockResolvedValue(algo);
+    const findForTrends = vi.fn().mockResolvedValue(rows());
+    const service = makeService({ findSubjectBySlug, findForTrends });
+    await expect(service.getTrends("algo", "nchu", 30)).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it("defaults to the school with the deepest year history and lists all schools by depth", async () => {
+    const findSubjectBySlug = vi.fn().mockResolvedValue(algo);
+    const findForTrends = vi.fn().mockResolvedValue(rows());
+    const service = makeService({ findSubjectBySlug, findForTrends });
+
+    const trend = await service.getTrends("algo", undefined, 30);
+
+    expect(findForTrends).toHaveBeenCalledWith("algo");
+    expect(trend.subject).toEqual(algo);
+    expect(trend.selectedSchool).toEqual({ id: "sc-ntu", slug: "ntu", name: "國立臺灣大學" });
+    expect(trend.schools).toEqual([
+      { id: "sc-ntu", slug: "ntu", name: "國立臺灣大學", years: 3 },
+      { id: "sc-nccu", slug: "nccu", name: "國立政治大學", years: 1 },
+    ]);
+    expect(trend.years).toEqual([2021, 2023, 2024]);
+  });
+
+  it("pivots 題型×年 and 考點×年 with cells aligned to years and correct trend arrows", async () => {
+    const findSubjectBySlug = vi.fn().mockResolvedValue(algo);
+    const findForTrends = vi.fn().mockResolvedValue(rows());
+    const service = makeService({ findSubjectBySlug, findForTrends });
+
+    const trend = await service.getTrends("algo", "ntu", 30);
+
+    // mc: 2021=1,2023=0,2024=1 -> total 2, flat (first==last); essay: 0,1,0 -> total 1, flat.
+    expect(trend.byType).toEqual([
+      { key: "mc", cells: [1, 0, 1], total: 2, trend: "flat" },
+      { key: "essay", cells: [0, 1, 0], total: 1, trend: "flat" },
+    ]);
+    // dp: 1,1,0 -> total 2, down (first=1 > last=0); graph: 0,1,1 -> total 2, up (first=0 < last=1).
+    expect(trend.byPoint).toEqual([
+      { key: "dp", cells: [1, 1, 0], total: 2, trend: "down" },
+      { key: "graph", cells: [0, 1, 1], total: 2, trend: "up" },
+    ]);
+  });
+
+  it("caps 考點×年 rows to `top` and still renders a single-year school", async () => {
+    const findSubjectBySlug = vi.fn().mockResolvedValue(algo);
+    const findForTrends = vi.fn().mockResolvedValue(rows());
+    const service = makeService({ findSubjectBySlug, findForTrends });
+
+    const capped = await service.getTrends("algo", "ntu", 1);
+    expect(capped.byPoint).toHaveLength(1);
+
+    // NCCU only has 2025 — sparse, but the pivot still returns (frontend shows an insufficient-
+    // data notice rather than the API refusing to answer).
+    const sparse = await service.getTrends("algo", "nccu", 30);
+    expect(sparse.years).toEqual([2025]);
+    expect(sparse.byType).toEqual([{ key: "mc", cells: [1], total: 1, trend: "flat" }]);
+    expect(sparse.byPoint).toEqual([]); // null metadata -> no knowledge points for this school
+  });
+});
+
 describe("QuestionsService.getQuestion", () => {
   function detailRow(overrides: Record<string, unknown> = {}) {
     return {
