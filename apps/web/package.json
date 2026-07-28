@@ -33,7 +33,7 @@
     "@tanstack/vue-table": "^8.21.3",
     "@vee-validate/zod": "^4.15.1",
     "@vueuse/motion": "^3.0.3",
-    "better-sqlite3": "^12.11.1",
+    "better-sqlite3": "^13.0.1",
     "echarts": "^6.1.0",
     "katex": "^0.18.1",
     "nuxt": "^4.4.8",
