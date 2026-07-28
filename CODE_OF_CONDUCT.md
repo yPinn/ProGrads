@@ -10,4 +10,4 @@
 
 ## 檢舉
 
-如遇違規，請聯絡維護者：`<維護者 email>`。所有檢舉將被保密處理。
+如遇違規，請至 [GitHub Issues](https://github.com/yPinn/ProGrads/issues) 聯絡維護者。所有檢舉將被保密處理。

@@ -114,7 +114,7 @@
 
 - **決策**：Node 目標 **24（Active LTS）**（`.nvmrc`；`engines` 最低 `>=22`）；pnpm **11.9.0**（由 `packageManager` 鎖定、corepack 取用）。評估階段一度因「剛發布、未夠成熟」捨棄 pnpm 11、鎖 10.34.3，後續改採 pnpm 11 並穩定運作至今，此處更新為現況。
 - **pnpm 11 兩個非直覺設定**：
-  - **build script 預設封鎖**（安全性）→ 以 `pnpm.allowBuilds`（pnpm 10.26+/11 起取代 `onlyBuiltDependencies` 的新欄位）明確授權原生套件安裝腳本：`@parcel/watcher`、`@prisma/client`、`@prisma/engines`、`better-sqlite3`、`esbuild`、`prisma`、`sharp`、`unrs-resolver`、`vue-demi` 皆設 `true`；`@scarf/scarf` 明確設 `false` 跳過其 telemetry-only postinstall。
+  - **build script 預設封鎖**（安全性）→ 以 `pnpm.allowBuilds`（pnpm 10.26+/11 起取代 `onlyBuiltDependencies` 的新欄位）明確授權原生套件安裝腳本：`@parcel/watcher`、`@prisma/client`、`@prisma/engines`、`esbuild`、`prisma`、`sharp`、`unrs-resolver`、`vue-demi` 皆設 `true`；`@scarf/scarf` 明確設 `false` 跳過其 telemetry-only postinstall；`better-sqlite3`（`@nuxt/ui` → `@nuxt/content` → `db0` 的 optional 傳遞依賴，非直接依賴，app 內未使用）明確設 `false` 跳過其原生編譯（Windows 上需完整 MSVC C++ 工具鏈，不值得為一個用不到的 optional driver 安裝）。
   - **嚴格 node_modules（不 hoist）**→ 程式直接 import 的套件須列為直接依賴，故 `tailwindcss` 加進 `apps/web`（`main.css` 的 `@import "tailwindcss"`）。
 - **維護**：Dependabot 每週升級依賴；major 版本（如 Node/pnpm）以穩定性為先，不盲目追最新。
 
@@ -189,9 +189,16 @@
 - **取捨**：`AdmissionRound.quota`／未來算的錄取率在流用發生的系所組會偏保守；換取不必為「名額流用表」
   （格式不統一、公告時間點不一，各校甚至同校不同學程規則不同，如 NCKU 智慧半導體學程另有獨立流用規則）
   另建一條內容抽取管線的複雜度。
-- **關聯**：`AdmissionRound.applicants`（`admission-stats/` 樹，見 §admission-stats）不受影響——報名人數與
+- **關聯**：`AdmissionRound.applicants`（`admission-stats/` 樹，見 [03-content-pipeline.md](03-content-pipeline.md) §報名統計資料）不受影響——報名人數與
   名額流用是兩個獨立事實、獨立文件，發生時序也不同（見上表：報名人數表所在的考試報名窗口，一律早於流用
   截止日）。
 - **若未來要做**：`AdmissionRound.admitted`（錄取情況）與名額流用表都是校方公告的**放榜後**獨立文件（如
   NTU 教務處「錄取情況」分頁已有連結），屆時可比照 `admission-stats/` 的 `registration.yml` 模式各自新增
   一種內容檔／sync（如 `admission-stats/{year}/{school}/[{season}/]result.yml`），而非現在就做。
+
+## D21. 文件架構：主題單一歸屬 + 兩層維護基準，取代「定期巡查」假設
+
+- **決策**：每個主題只在一處完整說明，其餘文件只連結、不重述——專案定位/差異化→`README.md`；技術棧細節→`01-architecture.md`；環境/分支/commit·PR/常用指令→`CONTRIBUTING.md`；內容貢獻契約（`source_url`/`license_status`/驗證指令）→`tools/README.md`；資料模型細節→`02-data-model.md`；設計理由（why）→本檔；現況/待辦→`09-roadmap.md`。文件另分兩層維護基準（不重新編號，隱性分類）：**參考層**（`00`–`05`、`08`）描述系統現況，程式碼改了才跟著改，可用完整敘述，但未實作功能不寫成完整案例；**日誌層**（本檔、`09-roadmap.md`）描述會被推翻的判斷，條列優先、why 一句話帶過。workflow（環境/分支/commit·PR/常用指令）不獨立開檔，合併在 `CONTRIBUTING.md` 一區維護；`07-trends.md` 併入 `09-roadmap.md`（同屬日誌層、獨立成檔必要性低於維護成本，原檔 SWOT 與 guardrail 重複同一組風險，併入時只留一份）。
+- **背景**：文件由 AI 依需求規劃產出/修改，非固定巡查維護；一次 audit 抓到多處同一事實散落在 2-4 份文件、部分現況敘述已落後實作（如本次修復的 admission-stats 缺章、roadmap P1/P3/P4 過時狀態）。架構需順著「不定期、AI 驅動更新」的現實設計，而非假設有人固定巡查。
+- **理由**：單一歸屬消除「同事實多處遭遇」的 drift 來源；兩層基準把「該用條列還是敘述」變成內建規則，不必每次重新判斷；workflow 留在 `CONTRIBUTING.md` 對獨立維運的專案不需要多一份檔案。
+- **取捨**：本決策僅涵蓋 `README.md`/`CONTRIBUTING.md`/`docs/*`/`tools/README.md`/`ProGrads-content/README.md` 的組織方式，不涉及程式碼或 schema 變更。

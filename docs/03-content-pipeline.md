@@ -28,6 +28,7 @@ ProGrads-content/
   raw/<school>/<year>/<paper>.pdf                       # Tier0 整卷（LFS）
   questions/<school>/<year>/<paper>/<qNN>.md            # Tier1/2 結構化單題＋解答
   admissions/<year>/<school>/[<season>/]{prospectus.pdf,schedule.yml,departments.yml}  # 招生簡章（獨立樹，見 §招生資料）
+  admission-stats/<year>/<school>/[<season>/]{registration.pdf,registration.yml}  # 報名人數（獨立樹，見 §報名統計資料）
   faculty/<school>/<dept>.yml                           # 師資陣容（獨立樹，見 §師資資料）
 ```
 
@@ -110,8 +111,8 @@ B
 
 - **參照資料（須先存在，由 seed 管）**：category / track / subject / school / department → sync **只解析、不建立**；缺則 red（逼先補 seed/PR）。frontmatter `subjects`/`departments` 皆以 slug 引用既有列。
 - **內容資料（sync 建立/更新）**：exam / exam_subject / question / choice / explanation / question_subject / exam_subject_department。
-- **coverage 規劃輔助**（唯讀、無 DB）：`pnpm --filter @prograds/content-sync report-questions <questions-dir> [--gaps] [--md]`——逐（校,年,卷）列題數、題型組成與 AI 解題完成度（答案／標準解答／知識點），並標出尚無題目的 seed 學校,導引補題順序。
-- **考科趨勢 phase-0（離線,無 DB）**：`report-trends <questions-dir> [--paper=<slug>] [--school=<slug>] [--top=N] [--by-points] [--md]`——直接由 frontmatter `knowledge_points`／`question_type` 樞紐出「考點×年」「題型×年」「考點×校」矩陣,驗證趨勢概念並導引「同校同科多年份」補題縱深。趨勢的產品化(入庫＋API＋UI)屬 phase 2,前置是 knowledge-point 受控詞彙表(見 [subject slug 慣例](#slug-命名慣例)類比)。
+- **coverage 規劃輔助**（唯讀、無 DB）：`pnpm --filter @prograds/content-sync report-questions <questions-dir> [--gaps] [--md]`——逐（校,年,卷）列題數、題型組成與 AI 解題完成度（答案／標準解答／知識點），並標出尚無題目的 seed 學校，導引補題順序。
+- **考科趨勢 phase-0（離線，無 DB）**：`report-trends <questions-dir> [--paper=<slug>] [--school=<slug>] [--top=N] [--by-points] [--md]`——直接由 frontmatter `knowledge_points`／`question_type` 樞紐出「考點×年」「題型×年」「考點×校」矩陣，驗證趨勢概念並導引「同校同科多年份」補題縱深。趨勢的產品化（入庫＋API＋UI）屬 phase 2，前置是 knowledge-point 受控詞彙表（見 [subject slug 慣例](#slug-命名慣例)類比）。
 
 ## 合規與顯示閘門
 
@@ -150,9 +151,10 @@ DATABASE_URL="postgresql://prograds:prograds@localhost:5433/prograds?schema=publ
 CONTENT_DIR="/local/path/to/ProGrads-content"
 
 # commit 前先離線驗證（無需 DB）——逐型別指定 content 子目錄
-pnpm --filter @prograds/content-sync validate questions   /local/path/to/ProGrads-content/questions
-pnpm --filter @prograds/content-sync validate admissions  /local/path/to/ProGrads-content/admissions
-pnpm --filter @prograds/content-sync validate faculty     /local/path/to/ProGrads-content/faculty
+pnpm --filter @prograds/content-sync validate questions        /local/path/to/ProGrads-content/questions
+pnpm --filter @prograds/content-sync validate admissions       /local/path/to/ProGrads-content/admissions
+pnpm --filter @prograds/content-sync validate admission-stats  /local/path/to/ProGrads-content/admission-stats
+pnpm --filter @prograds/content-sync validate faculty          /local/path/to/ProGrads-content/faculty
 
 # 執行 sync
 pnpm --filter @prograds/content-sync sync
@@ -192,9 +194,9 @@ DB 綁 localhost（不對外）→ 驗證與寫入分兩段：
 
 ```text
 content push → 雲端 CI：
-  離線 Zod 驗證各內容檔（questions frontmatter / admissions・faculty YAML），外加路徑↔內容一致與
+  離線 Zod 驗證各內容檔（questions frontmatter / admissions・admission-stats・faculty YAML），外加路徑↔內容一致與
   seed slug 解析（不需 DB）；失敗則 red。逐型別：
-    pnpm --filter @prograds/content-sync validate <questions|admissions|faculty> <dir>
+    pnpm --filter @prograds/content-sync validate <questions|admissions|admission-stats|faculty> <dir>
 
 merge → server 端（self-hosted runner / webhook，搆得到 localhost DB）：
   1. pull content
@@ -203,6 +205,8 @@ merge → server 端（self-hosted runner / webhook，搆得到 localhost DB）�
        → ExamSubject(examId+slug) → Question(question_id) → 重建子表（choices / question_subjects）→ Explanation
      - admissions/schedule.yml：upsert AdmissionSeason + 重建 SeasonEvent / ExamSlot（season 段↔admission_type 一致性驗證）
      - admissions/departments.yml：upsert AdmissionGroup + AdmissionRound + 重建 RoundPaper(+Subject)
+     - admission-stats/registration.yml：依 (dept slug, group code) 對照既有 AdmissionGroup/AdmissionRound，
+       回填 AdmissionRound.applicants（在職身分別存 metadata.applicantsInService，不覆蓋一般身分別數字）
      - faculty/<school>/<dept>.yml：upsert FacultyMember(dept×name) + 重建 theses/degrees + 剔除檔中已移除成員
   3. 收尾 reconcile（僅 questions）：每個 ExamSubject 重算 ① 合科卷 subject 組成（= 其題目 subjects 聯集）
      ② 採用系所（= 其題目 frontmatter departments 聯集 → exam_subject_department）
@@ -277,7 +281,7 @@ admissions/<year>/<school>/[<season>/]       # season: exam(預設可省) / recr
 
 - **①季（schedule.yml）**：簡章**新鮮度狀態**（`not_published/published/superseded`，避免拿舊資料當今年）＋`announced_at`（公告日，即新鮮度錨點）、報名起訖（**含時分**）、**報名費**（＋低收/中低收減免、口試費）、放榜**多梯次**日期、連結（`prospectus_url`/`rules_url`）。
 - **②時間表（schedule.yml）**：科目 × 節次 × 日期時間（可跨天）、可否用計算機、考場（地點/是否另設；CCU 依筆試/無筆試分流）。
-- **③組（departments.yml）**：**招生代碼**(官方,如 NCCU 2131／CCU 1000)、名額、**身分別**(一般/在職/外籍/低收)、特定報考資格、**考試項目**(筆試各科加權% + 審查% + 面試%)、面試日期、同分參酌順序、放榜梯次、**指定參考用書**與其他規定（對備考高價值）、競爭數據（報名人數/錄取→競爭比）。
+- **③組（departments.yml）**：**招生代碼**（官方，如 NCCU 2131／CCU 1000）、名額、**身分別**（一般/在職/外籍/低收）、特定報考資格、**考試項目**（筆試各科加權% + 審查% + 面試%）、面試日期、同分參酌順序、放榜梯次、**指定參考用書**與其他規定（對備考高價值）、競爭數據（報名人數/錄取→競爭比）。
 
 ### schema 缺口（已落地 migration `admission_season_papers`，見 [02-data-model.md](02-data-model.md)）
 
@@ -307,6 +311,22 @@ admissions/<year>/<school>/[<season>/]       # season: exam(預設可省) / recr
 3. **MVP 端到端**：拿 **NTU_115**（純區 A、2 頁、A 層 regex）做第一份 `schedule.yml`，跑通 檔案→sync→DB，最低成本驗證新命名＋schedule schema。
 4. **區 B（需 vision）**：③`departments.yml` schema 增量 + 單校 adapter（建議 NCKU/NCCU，系所多、模板穩）。
 5. **聯招 spike（延後）**：一卷多校系所 + member-school 維度，另開設計；現僅保留 `ust/` slot。
+
+## 報名統計資料（admission-stats）
+
+報名人數是「**一校一年一管道一份**」的公告資料，時序在 §招生資料 的 `departments.yml`（名額/身分別）之後、放榜之前發布，故獨立成樹、與 `admissions/` 同軸（`年/校/管道`），但只回填既有招生組別的報名數字，不建立新組別。
+
+```text
+admission-stats/<year>/<school>/[<season>/]  # season 段規則同 admissions/
+  registration.pdf   # 官方原始快照（Tier0,LFS）
+  registration.yml   # 逐系所組報名人數（結構化後才有此檔；多數學校僅存 PDF 待抽取）
+```
+
+- **契約**：`RegistrationYml`（`packages/shared`）；`school`/`year`/`admission_type` 須與路徑段一致（同 admissions 的路徑↔內容一致規則）。
+- **sync 行為（`src/admission-stats.ts`）**：逐列以 `(dept slug, group code)` 對照**已存在**的 `AdmissionGroup`/`AdmissionRound`（由 `departments.yml` 先建立），回填 `AdmissionRound.applicants`；一般身分別覆蓋 `applicants`，在職身分別（`applicant_type` 含「在職」）改寫入 `metadata.applicantsInService`，避免互相覆蓋。聯招代碼（`joint`）與解析不到 `dept`/對應組別的列**跳過並計入 unmatched**，不猜測、不報錯——`registration.yml` 本可領先 `departments.yml` 覆蓋進度。
+- **與 `AdmissionStat` model 的落差**：schema 另有 `AdmissionStat`（`school×dept×admission_type×year`，含 `applicants/quota/admitted`，見 [02-data-model.md](02-data-model.md)），但目前 sync 與 API 皆不讀寫此表——報名人數實際落在 `AdmissionRound.applicants`（見 [06-decisions.md](06-decisions.md) D20）。`AdmissionStat` 疑似未整併的舊設計，是否併入/移除待後續決策，暫不當作本文件的落地目標。
+- **驗證**：`validate admission-stats <dir>`。
+- **萃取規格**（model-facing）：[tools/content-sync/PROMPT-registration.md](../tools/content-sync/PROMPT-registration.md)。
 
 ## 師資資料（faculty）
 

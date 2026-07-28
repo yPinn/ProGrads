@@ -21,7 +21,7 @@ allowBuilds:
   "@prisma/client": true
   "@prisma/engines": true
   "@scarf/scarf": false # telemetry-only postinstall; explicitly skipped
-  better-sqlite3: true
+  better-sqlite3: false # optional transitive dep (@nuxt/ui > @nuxt/content > db0), unused; skip native build
   esbuild: true
   prisma: true
   sharp: true

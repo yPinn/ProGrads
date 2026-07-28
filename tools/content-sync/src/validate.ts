@@ -3,7 +3,7 @@ import { runValidator } from "./validate/runner.js";
 
 // Single entry for the offline content validators. `validate <type> <dir>` dispatches to the
 // registered ContentValidator. The old per-type scripts are thin package.json aliases of this.
-// Usage: tsx src/validate.ts <faculty|admissions|questions> <dir>
+// Usage: tsx src/validate.ts <faculty|admissions|admission-stats|questions> <dir>
 
 const [type, dir] = process.argv.slice(2);
 const types = Object.keys(VALIDATORS).join(" | ");

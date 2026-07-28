@@ -122,8 +122,7 @@ SEO `@nuxtjs/seo`；i18n `@nuxtjs/i18n`；`@nuxt/image`、`@nuxt/icon`。
 
 > **現況**：`vue-echarts`/`echarts`、`@tanstack/vue-table`、`vee-validate`/`@vee-validate/zod`
 > 已裝但 `app/` 內尚無任何引用（圖表/表格/表單功能尚未接線）——見
-> [09-roadmap.md](09-roadmap.md) 的技術與文件缺口。`better-sqlite3` 亦已列但無用途，
-> 屬 starter 殘留待清。其餘（Pinia、
+> [09-roadmap.md](09-roadmap.md) 的技術與文件缺口。其餘（Pinia、
 > TanStack Query、Nuxt MDC、Schedule-X、@nuxtjs/seo/i18n、@nuxt/image）皆已接線使用中。
 
 ### 後端（NestJS）

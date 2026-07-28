@@ -1,11 +1,63 @@
 # 貢獻指南
 
-歡迎貢獻！本專案為非營利學習用途，請先讀 [docs/](docs/)。
+歡迎貢獻！本專案為非營利學習用途，請先讀 [docs/](docs/)。環境需求、常用指令、分支與 commit/PR 規範都在本檔——這是本 repo 操作規範的唯一來源，`README.md` 只留最小 quickstart。
 
-## 環境
+## 環境與初始化
 
-- Node ≥22（建議 24 LTS，見 `.nvmrc`）、pnpm 11（`corepack enable pnpm`，版本由 `packageManager` 鎖定）、PostgreSQL、Redis。
-- `pnpm install` 後，Husky hooks 會自動安裝。
+需求：Node ≥22（建議 24 LTS，見 `.nvmrc`）、pnpm 11（`corepack enable pnpm`，版本由 `packageManager` 鎖定）、Docker（本機 PostgreSQL）。Redis 後期才需要（見 `docker-compose.yml`）。
+
+```bash
+corepack enable
+corepack prepare pnpm@11.9.0 --activate # 對齊 packageManager
+pnpm install                               # 完成後 Husky hooks 會自動安裝
+docker compose up -d postgres             # 本機 Postgres（host 5433，僅綁 localhost）
+cp packages/db/.env.example packages/db/.env   # 設 DATABASE_URL
+pnpm --filter @prograds/db db:migrate     # 套用 migration（建表）
+pnpm --filter @prograds/db db:seed        # 灌參照資料（分類/學校/系所）
+cp tools/content-sync/.env.example tools/content-sync/.env  # 設 DATABASE_URL + CONTENT_DIR（指向 ProGrads-content）
+pnpm sync                                 # 同步內容（考古題/招生）content → DB；需先 seed
+pnpm --filter @prograds/api dev           # 後端 API（http://localhost:8088/api/v1，docs 於 /api/v1/docs）
+pnpm --filter @prograds/web dev           # 前端（http://localhost:3000）
+```
+
+## 常用指令
+
+根目錄 `pnpm <script>`，依使用情境分區。
+
+### 日常開發
+
+| 指令             | 用途                               |
+| ---------------- | ---------------------------------- |
+| `pnpm dev`       | 各 app 並行開發伺服器（turbo）     |
+| `pnpm build`     | 建置全部 app                       |
+| `pnpm typecheck` | 全 workspace 型別檢查              |
+| `pnpm test`      | 全 workspace 測試                  |
+| `pnpm clean`     | 清 build 產物並移除 `node_modules` |
+
+### 程式碼品質
+
+CI 用 `lint` / `:check`，本機修用 `fix`。
+
+| 指令                | 用途                                                  |
+| ------------------- | ----------------------------------------------------- |
+| `pnpm lint`         | eslint + markdownlint + 各 workspace lint（唯讀檢查） |
+| `pnpm lint:fix`     | eslint + markdownlint + 各 workspace 自動修復         |
+| `pnpm lint:md`      | 只跑 markdownlint（針對性手動執行）                   |
+| `pnpm format`       | prettier 寫入整個 repo                                |
+| `pnpm format:check` | prettier 唯讀檢查                                     |
+| `pnpm fix`          | 一鍵 `format` + `lint:fix`                            |
+
+### 內容資料
+
+content repo 與 DB 同步；內容契約與驗證流程見 [tools/README.md](tools/README.md)。
+
+| 指令                 | 用途                                                       |
+| -------------------- | ---------------------------------------------------------- |
+| `pnpm sync`          | content → DB 同步（考古題/招生；需先 seed）                |
+| `pnpm sync:prune`    | 同步並刪除已從 content repo 移除且帶 `sourcePath` 的資料   |
+| `pnpm db:refresh`    | 一鍵 `migrate deploy → seed → sync`（空庫/重置用）         |
+| `pnpm content`       | 對 `../ProGrads-content` 跑 prettier + markdownlint 並寫入 |
+| `pnpm content:check` | 同上唯讀檢查                                               |
 
 ## 分支策略（GitHub Flow，trunk-based）
 
@@ -48,17 +100,11 @@
   - **文件與 README 用繁中**；README 標題統一 `# <名稱> — <一句話描述>`。`docs/` 為規格/決策的唯一來源，新增決策補 `docs/06-decisions.md`。
   - seed 檔（`packages/db/prisma/seed/`）標註中文參照資料，維持中文。
 - 不可變優先、小檔案高內聚、邊界以 Zod 驗證、錯誤完整處理（見 [docs/05-api-conventions.md](docs/05-api-conventions.md)）。
-- 測試：runner 全棧統一 **Vitest**（E2E 用 Playwright），目標 80%（單元 + 整合 + E2E）。指令一律從 root 跑（`pnpm lint` / `typecheck` / `test`，turbo fan-out），見 [docs/06-decisions.md](docs/06-decisions.md) D16。
+- 測試：runner 全棧統一 **Vitest**，目標 80%（單元 + 整合）；E2E 尚未實作，公開前補齊（見 [docs/09-roadmap.md](docs/09-roadmap.md)）。指令一律從 root 跑，見上方常用指令與 [docs/06-decisions.md](docs/06-decisions.md) D16。
 
 ## 貢獻考題內容
 
-考題內容存放於私有 repo [ProGrads-content](https://github.com/yPinn/ProGrads-content)，非本 monorepo。
-
-- **只收官方已公開考題**，每檔 frontmatter 必含 `source_url` 與 `license_status`。
-- `unknown` 授權狀態不得合併。
-- 標準解答由 AI 離線生成（`tools/ai-pipeline/PROMPT-generate.md`）並經複查（`tools/ai-pipeline/PROMPT-review.md`）；
-  人工修正請更新 `review_status`。
-- 格式見 [docs/03-content-pipeline.md](docs/03-content-pipeline.md)。
+考題內容存放於私有 repo [ProGrads-content](https://github.com/yPinn/ProGrads-content)，非本 monorepo；內容契約（`source_url`/`license_status`）與驗證流程見 [tools/README.md](tools/README.md)。
 
 ## 文件
 

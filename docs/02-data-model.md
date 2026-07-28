@@ -82,6 +82,8 @@ department (系所, 穩定)
 > **考卷↔組別**：考卷去系所化後，`exam` 不再帶 `department_id`/`group`/`admission_group_id`——共用卷橫跨多組，單一 group FK 本就失真。卷↔系所改走 `exam_subject.departments`（M:N，來源＝題目 frontmatter `departments` 的聯集）；卷↔招生組別 M:N 留待招生 pipeline（另一刀）。
 >
 > **未竟**：`admission_stat` 的 key 仍為 `(school, dept, admission_type, year)` **無 group** → 名額分組改掛 `admission_round.quota`（見下）；`admission_stat` 之整併待後續。
+>
+> **現況**：`admission-stats/` 樹的報名人數實際回填 `admission_round.applicants`（見 [03](03-content-pipeline.md) §報名統計資料、[06](06-decisions.md) D20）；`admission_stat` 表目前無 sync 或 API 讀寫，是否整併或移除待後續決策。
 
 ## 例外驗證（資工/資管 壓測後的修正）
 
@@ -122,7 +124,7 @@ department (系所, 穩定)
 - **raw 參照**：`ExamSubject` 連到 `Asset`（Tier0）；下載權限由 `license_status` gate。
 - **整卷答案匯出快取**：整卷答案不另存實體，由 index（`Question.order`）即時組合，產生後做內容定址快取（見 03）。
 
-**招生增量（schema 已落地 migration `admission_season_papers`；content 到 DB 的 importer 已實作，見 [03](03-content-pipeline.md) §招生資料落地狀態）**——三層擁有者 ①季 → ②時間表 → ③組：
+**招生增量（schema 已落地 migration `admission_season_papers`；content 到 DB 的 importer 已實作，見 [03](03-content-pipeline.md) §招生資料（admissions，現況 + 後續））**——三層擁有者 ①季 → ②時間表 → ③組：
 
 - **①季**：新欄/實體——`application_fee` + 減免、`announced_at`（公告日＝簡章新鮮度錨點）、新鮮度狀態（`not_published/published/superseded`）、放榜 `batch`/`sequence`（多梯次）。
 - **②`exam_timetable`（新實體，校級）**：subject × 節次 × `at`(時分) × `calculator_allowed` × 考場。**考試時間掛科目/節次（校級共用），非掛組**——筆試時間表全校共用，系所明細頁只有佔分%。
@@ -152,7 +154,7 @@ department (系所, 穩定)
 - 資工所考科：資料結構、演算法、計算機組織、作業系統、線性代數、離散數學。
 - 資管所考科：資訊管理、程式設計、（與資工共用）資料結構/線代、管理學、統計學等（逐校考科組合待補）。
 - **現況已擴及會計所**（非原定「起步聚焦資管/資工」範圍，見 [00-product.md](00-product.md)）：
-  政大會計所題目佔題庫 27%，`business-admin` track 已補上對應 `track_subject` 連結。
+  政大會計所題目約佔題庫 2 成，`business-admin` track 已補上對應 `track_subject` 連結。
 - **政大文學院全 8 系所**（中文/歷史/哲學/圖資檔案/宗教/台史/台文/華語文教學）已從 prospectus.pdf
   逐系所抽取進 `admissions/2026/nccu/departments.yml`，對應新增 6 個人文類 track（`history`/
   `philosophy`/`lis`/`religion`/`tw-history`/`tw-lit`）+ 16 個考科 slug。`chinese`（國文）現由 2 系
