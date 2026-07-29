@@ -23,6 +23,9 @@ function heat(count: number): string {
 
 const TREND_ICON = { up: "↑", down: "↓", flat: "→" } as const;
 const TREND_LABEL = { up: "上升", down: "下降", flat: "持平" } as const;
+// Color reinforces the arrow/aria-label (which already carry the meaning on their own), so this
+// is a safe addition, not a colorblind-accessibility dependency. Existing semantic tokens only.
+const TREND_COLOR = { up: "text-success-ink", down: "text-error-ink", flat: "text-muted" } as const;
 </script>
 
 <template>
@@ -60,7 +63,7 @@ const TREND_LABEL = { up: "上升", down: "下降", flat: "持平" } as const;
           </td>
           <td class="px-2 py-1.5 text-right font-medium tabular-nums">{{ row.total }}</td>
           <td class="px-2 py-1.5 text-center" :aria-label="TREND_LABEL[row.trend]">
-            {{ TREND_ICON[row.trend] }}
+            <span :class="TREND_COLOR[row.trend]">{{ TREND_ICON[row.trend] }}</span>
           </td>
         </tr>
       </tbody>
