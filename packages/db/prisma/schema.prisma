@@ -138,6 +138,7 @@ model KnowledgePoint {
   id        String                   @id @default(cuid())
   slug      String
   name      String
+  aliases   String[]                 @default([])
   subjectId String
   subject   Subject                  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   parentId  String?

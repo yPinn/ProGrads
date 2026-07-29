@@ -1,4 +1,5 @@
 import { withPrisma } from "./client.ts";
+import { seedKnowledgePoints } from "./knowledge-points.seed.ts";
 import { seedSchools } from "./schools.seed.ts";
 import { seedTaxonomy } from "./taxonomy.seed.ts";
 
@@ -10,8 +11,9 @@ async function main(): Promise<void> {
   await withPrisma(async (prisma) => {
     const { trackIdBySlug, counts } = await seedTaxonomy(prisma);
     const schoolCounts = await seedSchools(prisma, trackIdBySlug);
+    const kpCounts = await seedKnowledgePoints(prisma);
     // eslint-disable-next-line no-console
-    console.log("seed complete:", { ...counts, ...schoolCounts });
+    console.log("seed complete:", { ...counts, ...schoolCounts, ...kpCounts });
   });
 }
 
