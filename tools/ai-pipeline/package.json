@@ -8,7 +8,7 @@
     "list-unreviewed": "tsx src/list-unreviewed.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "tsx --test src/patch.spec.ts",
+    "test": "tsx --test \"src/**/*.spec.ts\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
