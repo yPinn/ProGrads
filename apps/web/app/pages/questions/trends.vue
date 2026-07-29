@@ -126,7 +126,7 @@ function typeLabel(key: string): string {
           />
         </AppCard>
 
-        <AppCard>
+        <AppCard v-if="trend.byPoint.length > 0">
           <h3 class="font-serif text-title-sm mb-3 tracking-tight">考點 × 年</h3>
           <TrendMatrix label="考點" :years="trend.years" :rows="trend.byPoint" />
         </AppCard>
