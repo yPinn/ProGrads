@@ -249,6 +249,15 @@ describe("QuestionsService.getTrends", () => {
     );
   });
 
+  it("throws NotFoundException when the subject has no questions at all", async () => {
+    const findSubjectBySlug = vi.fn().mockResolvedValue(algo);
+    const findForTrends = vi.fn().mockResolvedValue([]);
+    const service = makeService({ findSubjectBySlug, findForTrends });
+    await expect(service.getTrends("algo", undefined, 30)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+  });
+
   it("throws NotFoundException when the requested school has no questions for the subject", async () => {
     const findSubjectBySlug = vi.fn().mockResolvedValue(algo);
     const findForTrends = vi.fn().mockResolvedValue(rows());
