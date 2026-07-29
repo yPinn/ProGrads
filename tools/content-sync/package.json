@@ -8,6 +8,7 @@
     "sync:prune": "tsx src/index.ts --prune",
     "validate": "tsx src/validate.ts",
     "validate-admissions": "tsx src/validate.ts admissions",
+    "validate-admission-stats": "tsx src/validate.ts admission-stats",
     "validate-questions": "tsx src/validate.ts questions",
     "validate-faculty": "tsx src/validate.ts faculty",
     "report-coverage": "tsx src/report-coverage.ts",

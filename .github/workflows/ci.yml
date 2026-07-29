@@ -51,3 +51,47 @@ jobs:
 
       - name: Test
         run: pnpm turbo run test --ui=stream
+
+  content:
+    name: content
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Read-only deploy key on the private ProGrads-content repo. Checked out as a sibling
+      # (../ProGrads-content) so it matches the same relative path the root package.json
+      # scripts (content:check) and local dev (.env CONTENT_DIR) already use.
+      - uses: actions/checkout@v7
+        with:
+          repository: yPinn/ProGrads-content
+          ssh-key: ${{ secrets.CONTENT_DEPLOY_KEY }}
+          path: ../ProGrads-content
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # validate-questions needs the QuestionFrontmatter Zod schema built (packages/db's seed
+      # files are read as plain text, no build/generate needed — see seed-refs.ts).
+      - name: Build shared
+        run: pnpm --filter @prograds/shared build
+
+      - name: Format (content repo)
+        run: pnpm content:check
+
+      - name: Validate questions
+        run: pnpm --filter @prograds/content-sync validate-questions ../ProGrads-content/questions
+
+      - name: Validate admissions
+        run: pnpm --filter @prograds/content-sync validate-admissions ../ProGrads-content/admissions
+
+      - name: Validate admission-stats
+        run: pnpm --filter @prograds/content-sync validate-admission-stats ../ProGrads-content/admission-stats
+
+      - name: Validate faculty
+        run: pnpm --filter @prograds/content-sync validate-faculty ../ProGrads-content/faculty
