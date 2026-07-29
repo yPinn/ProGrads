@@ -239,7 +239,7 @@ const KNOWLEDGE_POINTS: KnowledgePointSeed[] = [
     subject: "algo",
     groupSlug: "divide-and-conquer",
     groupName: "Divide and conquer",
-    slug: "divide-and-conquer",
+    slug: "divide-and-conquer-technique",
     name: "Divide and conquer",
     aliases: ["分治法", "演算法範式"],
   },
@@ -327,7 +327,7 @@ const KNOWLEDGE_POINTS: KnowledgePointSeed[] = [
     subject: "algo",
     groupSlug: "graph-traversal",
     groupName: "Graph traversal",
-    slug: "graph-traversal",
+    slug: "graph-traversal-dfs-bfs",
     name: "Graph traversal (DFS/BFS)",
     aliases: [
       "DFS",
@@ -394,7 +394,7 @@ const KNOWLEDGE_POINTS: KnowledgePointSeed[] = [
     subject: "algo",
     groupSlug: "minimum-spanning-tree",
     groupName: "Minimum spanning tree",
-    slug: "minimum-spanning-tree",
+    slug: "minimum-spanning-tree-general",
     name: "Minimum spanning tree (general)",
     aliases: ["最小生成樹", "生成樹", "環性質", "割性質", "安全邊", "對稱差", "擬陣"],
   },
@@ -458,7 +458,7 @@ const KNOWLEDGE_POINTS: KnowledgePointSeed[] = [
     subject: "algo",
     groupSlug: "dynamic-programming",
     groupName: "Dynamic programming",
-    slug: "dynamic-programming",
+    slug: "dynamic-programming-general",
     name: "Dynamic programming (general)",
     aliases: ["動態規劃", "最佳子結構", "重疊子問題", "次佳解"],
   },
@@ -644,7 +644,9 @@ const KNOWLEDGE_POINTS: KnowledgePointSeed[] = [
     groupName: "Trees",
     slug: "red-black-tree",
     name: "Red-black tree",
-    aliases: ["紅黑樹", "旋轉", "重新著色", "性質修復", "旋轉維護", "順序統計樹", "子樹大小"],
+    // NOTE: "重新著色" deliberately excluded — it's ambiguous (also appears in an unrelated
+    // tree-DP/vertex-cover question, ntu/2025/dsa/q15.md) and would false-positive-tag it here.
+    aliases: ["紅黑樹", "旋轉", "性質修復", "旋轉維護", "順序統計樹", "子樹大小"],
   },
   {
     subject: "algo",
@@ -733,9 +735,11 @@ export async function seedKnowledgePoints(prisma: PrismaClient): Promise<Knowled
     for (const entry of entries) {
       let groupId = groupIdBySlug.get(entry.groupSlug);
       if (!groupId) {
+        // parentId: null on update too — a group row must stay root even if it was previously
+        // (incorrectly) upserted as a leaf under a colliding slug.
         const groupRow = await prisma.knowledgePoint.upsert({
           where: { subjectId_slug: { subjectId: subject.id, slug: entry.groupSlug } },
-          update: { name: entry.groupName },
+          update: { name: entry.groupName, parentId: null },
           create: { subjectId: subject.id, slug: entry.groupSlug, name: entry.groupName },
         });
         groupId = groupRow.id;
