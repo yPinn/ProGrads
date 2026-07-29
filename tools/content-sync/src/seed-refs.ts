@@ -35,3 +35,23 @@ export function readSubjects(): Set<string> {
   for (const m of block[1]!.matchAll(/slug:\s*"([^"]+)"/g)) slugs.add(m[1]!);
   return slugs;
 }
+
+// Subject -> leaf (L2) knowledge-point slugs, parsed from the current seed shape (flat
+// KnowledgePointSeed[] in knowledge-points.seed.ts — each entry's `subject` field precedes its
+// `slug` field, so a sequential line scan can pair them without tracking object boundaries).
+export function readKnowledgePoints(): Map<string, Set<string>> {
+  const src = readFileSync(path.join(SEED_DIR, "knowledge-points.seed.ts"), "utf8");
+  const out = new Map<string, Set<string>>();
+  let currentSubject: string | null = null;
+  for (const line of src.split(/\r?\n/)) {
+    const subject = /^\s*subject:\s*"([^"]+)"/.exec(line);
+    if (subject) {
+      currentSubject = subject[1] ?? null;
+      if (currentSubject && !out.has(currentSubject)) out.set(currentSubject, new Set());
+      continue;
+    }
+    const slug = /^\s*slug:\s*"([^"]+)"/.exec(line);
+    if (slug && currentSubject) out.get(currentSubject)?.add(slug[1]!);
+  }
+  return out;
+}
