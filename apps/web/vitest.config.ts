@@ -15,5 +15,19 @@ export default defineVitestConfig({
       // Empty API base in tests so registerEndpoint() mocks intercept relative requests.
       nuxt: { overrides: { runtimeConfig: { public: { apiBaseUrl: "" } } } },
     },
+    coverage: {
+      // Gate the logic surface only (mirrors apps/api): composables + utils. Pages/components
+      // are thin/markup-heavy and left to e2e; a broader `include` also silently drops
+      // newly-added files from the v8 "all" pass (see docs), so keep this narrow.
+      include: ["app/composables/**/*.ts", "app/utils/**/*.ts"],
+      // Ratcheting floor — set just below current coverage so CI blocks regressions.
+      // Bump these up in the same PR whenever a composable/util gets tested.
+      thresholds: {
+        statements: 69,
+        branches: 79,
+        functions: 69,
+        lines: 70,
+      },
+    },
   },
 });
