@@ -38,7 +38,9 @@ model KnowledgePoint {
   id        String                   @id @default(cuid())
   slug      String
   name      String
-  aliases   String[]                 @default([])   // 中文/其他別名；搜尋、LLM mapping、人工審核用，非統計 key
+  aliases   String[]                 @default([])   // 別名清單，任意數量、任意形式混放（中文全名、簡稱、
+                                                      // 常見英文變體、常見誤譯等皆可）；搜尋、LLM mapping、
+                                                      // 人工審核用，非統計 key，不分型態
   subjectId String
   subject   Subject                  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   parentId  String?
@@ -67,13 +69,23 @@ const KNOWLEDGE_POINTS: Record<string, KpGroup[]> = {
     {
       slug: "recurrence-analysis",
       name: "Recurrence analysis",
-      children: [{ slug: "master-theorem", name: "Master theorem", aliases: ["主定理"] }],
+      children: [
+        {
+          slug: "master-theorem",
+          name: "Master theorem",
+          aliases: ["主定理", "Master 定理", "master's theorem"],
+        },
+      ],
     },
     {
       slug: "graph-algorithms",
       name: "Graph algorithms",
       children: [
-        { slug: "minimum-spanning-tree", name: "Minimum spanning tree", aliases: ["最小生成樹"] },
+        {
+          slug: "minimum-spanning-tree",
+          name: "Minimum spanning tree",
+          aliases: ["最小生成樹", "MST"],
+        },
       ],
     },
   ],
@@ -86,7 +98,8 @@ const KNOWLEDGE_POINTS: Record<string, KpGroup[]> = {
 - 顆粒度標準：對照該科已收錄的歷屆考題語料反推（哪些概念重複出現到值得給穩定 slug），不是憑空套教科書
   目錄或抄外部分類（同 [02-data-model.md](../../02-data-model.md) 對 `track_subject` 的處理原則——
   有現成權威來源可對照就對照，但以實際收錄內容驗證為準）。
-- 顯示名稱以英文/原文專有名詞為主（`name`），中文進 `aliases`，不當統計 key。
+- 顯示名稱以英文/原文專有名詞為主（`name`），其餘所有講法（中文全名、簡稱、常見英文變體、常見誤譯等）
+  都放進 `aliases`——這是一個扁平字串陣列，可放任意數量、不分型態，不當統計 key。
 - 哪一科先建全憑該科內容工作何時進行；不要求上線前全站到位。
 
 ## Frontmatter + Validator
