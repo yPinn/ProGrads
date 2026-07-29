@@ -22,7 +22,13 @@ export const QuestionFrontmatter = z.object({
   points: z.number().positive().optional(), // question points (marked on the stem, e.g. 5pts→5); empty if unmarked or uniform
   source_url: z.union([z.string().url(), z.literal("")]),
   license_status: ContentLicenseStatus,
-  knowledge_points: z.array(z.string().min(1)).default([]), // parsed; not yet persisted (phase 2)
+  // Legacy free-text 考點 labels — display/human-reference only, never persisted to the
+  // KnowledgePoint join. Superseded by knowledge_point_slugs below.
+  knowledge_points: z.array(z.string().min(1)).default([]),
+  // Canonical 考點 slugs (KnowledgePoint.slug, leaf/L2 only), gated by validate-questions against
+  // packages/db/prisma/seed/knowledge-points.seed.ts. Empty for any subject that has no
+  // registered taxonomy yet.
+  knowledge_point_slugs: z.array(z.string().min(1)).default([]),
   // Question-group slug: questions sharing one passage (reading / cloze) carry the same value
   // (e.g. passage-a / cloze-x). The passage lives only in the lead question's `## 題目`; other
   // questions hold just their own stem, and the front end aggregates by group.
