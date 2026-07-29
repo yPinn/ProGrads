@@ -13,13 +13,7 @@ import type {
   TrendRow,
   TrendSchool,
 } from "@prograds/shared";
-import {
-  mapSchool,
-  metaNumber,
-  metaString,
-  metaStringArray,
-  uniqueDepartments,
-} from "../../common/mappers.js";
+import { mapSchool, metaNumber, metaString, uniqueDepartments } from "../../common/mappers.js";
 import { QuestionFilters, QuestionsRepository } from "./questions.repository.js";
 
 // 題型固定順序(mc/essay/calc/proof/cloze/listening),與 CLI report-trends.ts 一致;pivot 只列出
@@ -301,7 +295,7 @@ export class QuestionsService {
     );
 
     const kpSet = [
-      ...new Set(scope.flatMap((r) => metaStringArray(r.metadata, "knowledgePoints"))),
+      ...new Set(scope.flatMap((r) => r.knowledgePoints.map((k) => k.knowledgePoint.name))),
     ];
     const byPoint = pivotRows(
       kpSet,
@@ -310,7 +304,7 @@ export class QuestionsService {
         scope.filter(
           (r) =>
             r.examSubject.exam.year === year &&
-            metaStringArray(r.metadata, "knowledgePoints").includes(key),
+            r.knowledgePoints.some((k) => k.knowledgePoint.name === key),
         ).length,
       top,
     );

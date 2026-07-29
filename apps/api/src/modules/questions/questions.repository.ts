@@ -143,14 +143,15 @@ export class QuestionsRepository {
   }
 
   // All questions tagged with a subject (cross-school), minimal columns for the trends pivot:
-  // type + metadata (→ knowledgePoints) + the exam's year/school. No school/year filtering here —
-  // the service needs the full spread to build the school picker and pick a sensible default.
+  // type + the canonical KnowledgePoint join + the exam's year/school. No school/year filtering
+  // here — the service needs the full spread to build the school picker and pick a sensible
+  // default. knowledgePoints is empty for any subject with no registered taxonomy yet.
   findForTrends(subjectSlug: string) {
     return this.prisma.question.findMany({
       where: { subjects: { some: { subject: { slug: subjectSlug } } } },
       select: {
         type: true,
-        metadata: true,
+        knowledgePoints: { select: { knowledgePoint: { select: { name: true } } } },
         examSubject: {
           select: {
             exam: {

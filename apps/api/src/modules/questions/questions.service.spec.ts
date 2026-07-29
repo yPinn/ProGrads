@@ -220,21 +220,24 @@ describe("QuestionsService.getTrends", () => {
     return [
       {
         type: "mc",
-        metadata: { knowledgePoints: ["dp"] },
+        knowledgePoints: [{ knowledgePoint: { name: "dp" } }],
         examSubject: { exam: { year: 2021, school: ntu } },
       },
       {
         type: "essay",
-        metadata: { knowledgePoints: ["dp", "graph"] },
+        knowledgePoints: [
+          { knowledgePoint: { name: "dp" } },
+          { knowledgePoint: { name: "graph" } },
+        ],
         examSubject: { exam: { year: 2023, school: ntu } },
       },
       {
         type: "mc",
-        metadata: { knowledgePoints: ["graph"] },
+        knowledgePoints: [{ knowledgePoint: { name: "graph" } }],
         examSubject: { exam: { year: 2024, school: ntu } },
       },
-      // No metadata at all — must not crash metaStringArray or leak a phantom knowledge point.
-      { type: "mc", metadata: null, examSubject: { exam: { year: 2025, school: nccu2 } } },
+      // No knowledge points tagged — must not crash and must not leak a phantom row.
+      { type: "mc", knowledgePoints: [], examSubject: { exam: { year: 2025, school: nccu2 } } },
     ];
   }
 
@@ -302,7 +305,7 @@ describe("QuestionsService.getTrends", () => {
     const sparse = await service.getTrends("algo", "nccu", 30);
     expect(sparse.years).toEqual([2025]);
     expect(sparse.byType).toEqual([{ key: "mc", cells: [1], total: 1, trend: "flat" }]);
-    expect(sparse.byPoint).toEqual([]); // null metadata -> no knowledge points for this school
+    expect(sparse.byPoint).toEqual([]); // no knowledge points tagged for this school
   });
 });
 
