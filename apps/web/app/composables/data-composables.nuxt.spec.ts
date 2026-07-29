@@ -8,6 +8,10 @@ import { useQuestion } from "./useQuestion";
 import { useAdmissions } from "./useAdmissions";
 import { useFaculty } from "./useFaculty";
 import { useTracks } from "./useTracks";
+import { useSchools } from "./useSchools";
+import { useDepartments } from "./useDepartments";
+import { usePaperTest } from "./usePaperTest";
+import { useQuestionTrends } from "./useQuestionTrends";
 
 // Run a composable inside the real Nuxt app (so $api + QueryClient are wired) and expose
 // its result. Requests hit registerEndpoint() mocks because apiBaseUrl is "" in tests.
@@ -221,5 +225,104 @@ describe("useQuestion", () => {
     const { result } = await runComposable(() => useQuestion("q-1"));
     await vi.waitFor(() => expect(result.isSuccess.value).toBe(true));
     expect(result.data.value?.externalId).toBe("q-1");
+  });
+});
+
+const school = { id: "sc1", slug: "ntu", name: "臺灣大學" };
+
+describe("useSchools", () => {
+  it("fetches and validates the school list", async () => {
+    registerEndpoint("/schools", () => ({ data: [school] }));
+    const { result } = await runComposable(() => useSchools());
+    await vi.waitFor(() => expect(result.isSuccess.value).toBe(true));
+    expect(result.data.value).toEqual([school]);
+  });
+});
+
+const departmentWithSchool = {
+  id: "d1",
+  slug: "ntu-csie",
+  name: "資訊工程學系",
+  schoolId: "sc1",
+  trackId: null,
+  school,
+};
+
+describe("useDepartments", () => {
+  it("fetches departments for a chosen school", async () => {
+    registerEndpoint("/departments", () => ({ data: [departmentWithSchool] }));
+    const { result } = await runComposable(() => useDepartments("ntu"));
+    await vi.waitFor(() => expect(result.isSuccess.value).toBe(true));
+    expect(result.data.value).toEqual([departmentWithSchool]);
+  });
+
+  it("stays disabled until a school is chosen", async () => {
+    registerEndpoint("/departments", () => ({ data: [departmentWithSchool] }));
+    const { result } = await runComposable(() => useDepartments(undefined));
+    expect(result.fetchStatus.value).toBe("idle");
+  });
+});
+
+const paperTest = {
+  examSubject: {
+    id: "es1",
+    slug: "cs",
+    name: "計算機概論",
+    subjects: questionSummary.subjects,
+    departments: [
+      { id: "d1", slug: "ntu-csie", name: "資訊工程學系", schoolId: "sc1", trackId: null },
+    ],
+  },
+  exam: questionSummary.exam,
+  durationMinutes: 100,
+  questions: [
+    {
+      externalId: "q-1",
+      number: "1",
+      type: "mc",
+      subjects: questionSummary.subjects,
+      contentMd: "題幹內容",
+      points: 5,
+      choices: [
+        { label: "A", contentMd: "選項 A", isCorrect: true },
+        { label: "B", contentMd: "選項 B", isCorrect: false },
+      ],
+      explanation: null,
+      group: null,
+      groupPassageMd: null,
+    },
+  ],
+};
+
+describe("usePaperTest", () => {
+  it("fetches a whole paper by examSubjectId", async () => {
+    registerEndpoint("/questions/papers/es1", () => ({ data: paperTest }));
+    const { result } = await runComposable(() => usePaperTest("es1"));
+    await vi.waitFor(() => expect(result.isSuccess.value).toBe(true));
+    expect(result.data.value).toEqual(paperTest);
+  });
+});
+
+const trend = {
+  subject: { id: "s1", slug: "algorithms", name: "演算法" },
+  schools: [{ ...school, years: 5 }],
+  selectedSchool: school,
+  years: [2021, 2022, 2023],
+  byType: [{ key: "mc", cells: [3, 4, 5], total: 12, trend: "up" as const }],
+  byPoint: [{ key: "動態規劃", cells: [1, 2, 3], total: 6, trend: "up" as const }],
+};
+
+describe("useQuestionTrends", () => {
+  it("fetches trends once a subject is chosen", async () => {
+    registerEndpoint("/questions/trends", () => ({ data: trend }));
+    const { result } = await runComposable(() => useQuestionTrends({ subject: "algorithms" }));
+    await vi.waitFor(() => expect(result.isSuccess.value).toBe(true));
+    expect(result.data.value).toEqual(trend);
+  });
+
+  it("stays disabled until a subject is chosen", async () => {
+    registerEndpoint("/questions/trends", () => ({ data: trend }));
+    const { result } = await runComposable(() => useQuestionTrends({}));
+    expect(result.fetchStatus.value).toBe("idle");
   });
 });
