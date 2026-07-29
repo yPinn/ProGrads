@@ -58,14 +58,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Read-only deploy key on the private ProGrads-content repo. Checked out as a sibling
-      # (../ProGrads-content) so it matches the same relative path the root package.json
-      # scripts (content:check) and local dev (.env CONTENT_DIR) already use.
+      # Read-only deploy key on the private ProGrads-content repo. actions/checkout can't place
+      # a checkout outside $GITHUB_WORKSPACE, so this lands at ./content-repo (not the
+      # ../ProGrads-content sibling path local dev / root package.json scripts use — this job
+      # calls prettier/markdownlint/validate directly instead of pnpm content:check).
       - uses: actions/checkout@v7
         with:
           repository: yPinn/ProGrads-content
           ssh-key: ${{ secrets.CONTENT_DEPLOY_KEY }}
-          path: ../ProGrads-content
+          path: content-repo
 
       - uses: pnpm/action-setup@v6
 
@@ -82,16 +83,16 @@ jobs:
         run: pnpm --filter @prograds/shared build
 
       - name: Format (content repo)
-        run: pnpm content:check
+        run: pnpm exec prettier --check content-repo && pnpm exec markdownlint-cli2 "content-repo/**/*.md"
 
       - name: Validate questions
-        run: pnpm --filter @prograds/content-sync validate-questions ../ProGrads-content/questions
+        run: pnpm --filter @prograds/content-sync validate-questions content-repo/questions
 
       - name: Validate admissions
-        run: pnpm --filter @prograds/content-sync validate-admissions ../ProGrads-content/admissions
+        run: pnpm --filter @prograds/content-sync validate-admissions content-repo/admissions
 
       - name: Validate admission-stats
-        run: pnpm --filter @prograds/content-sync validate-admission-stats ../ProGrads-content/admission-stats
+        run: pnpm --filter @prograds/content-sync validate-admission-stats content-repo/admission-stats
 
       - name: Validate faculty
-        run: pnpm --filter @prograds/content-sync validate-faculty ../ProGrads-content/faculty
+        run: pnpm --filter @prograds/content-sync validate-faculty content-repo/faculty
