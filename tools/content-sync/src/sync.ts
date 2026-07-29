@@ -18,6 +18,7 @@ export class Resolver {
   private schools = new Map<string, { id: string }>();
   private departments = new Map<string, { id: string }>();
   private subjects = new Map<string, { id: string }>();
+  private knowledgePoints = new Map<string, { id: string }>();
 
   constructor(private readonly prisma: PrismaClient) {}
 
@@ -52,6 +53,22 @@ export class Resolver {
     this.subjects.set(slug, row);
     return row;
   }
+
+  // Resolve a knowledge point by slug, scoped to the question's subjects (KnowledgePoint is
+  // subject-scoped; validate-questions already guarantees the slug exists under at least one of
+  // them). Used for the question's `knowledge_point_slugs` list.
+  async knowledgePoint(subjectIds: string[], slug: string): Promise<{ id: string }> {
+    const key = `${[...subjectIds].sort().join(",")}|${slug}`;
+    const hit = this.knowledgePoints.get(key);
+    if (hit) return hit;
+    const row = await this.prisma.knowledgePoint.findFirst({
+      where: { slug, subjectId: { in: subjectIds } },
+      select: { id: true },
+    });
+    if (!row) throw new Error(`unknown knowledge point slug "${slug}" (seed it first)`);
+    this.knowledgePoints.set(key, row);
+    return row;
+  }
 }
 
 export type SyncResult = { examSubjectId: string; departmentIds: string[] } | { skipped: string };
@@ -78,6 +95,14 @@ export async function syncFile(
   const subjects = await Promise.all(fm.subjects.map((s) => resolver.subject(s)));
   const departments = await Promise.all(
     fm.departments.map((d) => resolver.department(school.id, d)),
+  );
+  const knowledgePoints = await Promise.all(
+    fm.knowledge_point_slugs.map((slug) =>
+      resolver.knowledgePoint(
+        subjects.map((s) => s.id),
+        slug,
+      ),
+    ),
   );
 
   const sections = parseSections(parsed.content);
@@ -178,6 +203,17 @@ export async function syncFile(
     await tx.questionSubject.createMany({
       data: subjects.map((s) => ({ questionId: question.id, subjectId: s.id })),
     });
+
+    // Replace granular question_knowledge_point mappings.
+    await tx.questionKnowledgePoint.deleteMany({ where: { questionId: question.id } });
+    if (knowledgePoints.length > 0) {
+      await tx.questionKnowledgePoint.createMany({
+        data: knowledgePoints.map((kp) => ({
+          questionId: question.id,
+          knowledgePointId: kp.id,
+        })),
+      });
+    }
 
     // Replace choices (MC only; no-op for other types).
     await tx.choice.deleteMany({ where: { questionId: question.id } });
