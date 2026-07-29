@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { checkPaperConsistency, type PaperQuestion } from "./questions.js";
+import {
+  checkKnowledgePointSlugs,
+  checkPaperConsistency,
+  type PaperQuestion,
+} from "./questions.js";
 
 // Build a question with sensible paper-level defaults; override per case.
 function q(over: Partial<PaperQuestion> = {}): PaperQuestion {
@@ -122,5 +126,34 @@ describe("checkPaperConsistency", () => {
     ]);
     assert.equal(r.errors.length, 1);
     assert.match(r.errors[0]!, /^ntu\/2026\/co-os:/);
+  });
+});
+
+describe("checkKnowledgePointSlugs", () => {
+  it("passes when knowledge_point_slugs is empty, regardless of pools", () => {
+    const errors = checkKnowledgePointSlugs(["os"], [], new Map());
+    assert.deepEqual(errors, []);
+  });
+
+  it("errors when slugs are set but none of the question's subjects have a registered pool", () => {
+    const errors = checkKnowledgePointSlugs(["os"], ["master-theorem"], new Map());
+    assert.equal(errors.length, 1);
+    assert.match(errors[0]!, /have a registered taxonomy yet/);
+  });
+
+  it("errors on a slug not present in any of the question's subjects' pools", () => {
+    const pools = new Map([["algo", new Set(["master-theorem"])]]);
+    const errors = checkKnowledgePointSlugs(["algo"], ["bogus-slug"], pools);
+    assert.equal(errors.length, 1);
+    assert.match(errors[0]!, /unknown knowledge point slug "bogus-slug"/);
+  });
+
+  it("passes a slug present in the union of the question's subjects' pools", () => {
+    const pools = new Map([
+      ["algo", new Set(["master-theorem"])],
+      ["ds", new Set(["red-black-tree"])],
+    ]);
+    const errors = checkKnowledgePointSlugs(["algo", "ds"], ["red-black-tree"], pools);
+    assert.deepEqual(errors, []);
   });
 });

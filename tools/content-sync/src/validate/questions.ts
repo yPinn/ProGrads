@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { QuestionFrontmatter } from "@prograds/shared";
 import matter from "gray-matter";
 import { parseQuestionPath } from "../paths.js";
-import { readSchoolDepts, readSubjects } from "../seed-refs.js";
+import { readKnowledgePoints, readSchoolDepts, readSubjects } from "../seed-refs.js";
 import { type CheckResult, type ContentValidator, formatZodIssues } from "./runner.js";
 
 // questions/**/*.md — QuestionFrontmatter contract + subject/department slugs against the
@@ -11,6 +11,7 @@ import { type CheckResult, type ContentValidator, formatZodIssues } from "./runn
 // departments must agree across a paper; a subject used by only one question is a warning).
 const schoolDepts = readSchoolDepts();
 const subjects = readSubjects();
+const knowledgePoints = readKnowledgePoints();
 
 export interface PaperQuestion {
   rel: string; // for messages
@@ -88,6 +89,31 @@ export function checkPaperConsistency(qs: PaperQuestion[]): {
   return { errors, warnings };
 }
 
+// Pure 考點 slug gate (no IO) so it's unit-testable, mirrors checkPaperConsistency. `pools` maps
+// subject slug -> registered leaf (L2) knowledge-point slugs (readKnowledgePoints()).
+export function checkKnowledgePointSlugs(
+  subjectSlugs: string[],
+  kpSlugs: string[],
+  pools: Map<string, Set<string>>,
+): string[] {
+  if (kpSlugs.length === 0) return [];
+
+  const hasAnyPool = subjectSlugs.some((s) => (pools.get(s)?.size ?? 0) > 0);
+  if (!hasAnyPool) {
+    return [
+      `knowledge_point_slugs set but none of subjects [${subjectSlugs.join(", ")}] have a registered taxonomy yet (leave it empty and use knowledge_points until one exists)`,
+    ];
+  }
+
+  const union = new Set(subjectSlugs.flatMap((s) => [...(pools.get(s) ?? [])]));
+  return kpSlugs
+    .filter((k) => !union.has(k))
+    .map(
+      (k) =>
+        `unknown knowledge point slug "${k}" for subjects [${subjectSlugs.join(", ")}] (not in knowledge-points.seed)`,
+    );
+}
+
 export const questionsValidator: ContentValidator = {
   label: "validate-questions",
   reportWarnings: true,
@@ -125,6 +151,13 @@ export const questionsValidator: ContentValidator = {
       if (!validDepts?.has(d)) {
         errors.push(`${rel}: dept "${d}" not seeded for school "${path_.school}"`);
       }
+    }
+    for (const e of checkKnowledgePointSlugs(
+      fm.subjects,
+      fm.knowledge_point_slugs,
+      knowledgePoints,
+    )) {
+      errors.push(`${rel}: ${e}`);
     }
 
     const record: PaperQuestion = {
