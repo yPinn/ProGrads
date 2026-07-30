@@ -202,3 +202,10 @@
 - **背景**：文件由 AI 依需求規劃產出/修改，非固定巡查維護；一次 audit 抓到多處同一事實散落在 2-4 份文件、部分現況敘述已落後實作（如本次修復的 admission-stats 缺章、roadmap P1/P3/P4 過時狀態）。架構需順著「不定期、AI 驅動更新」的現實設計，而非假設有人固定巡查。
 - **理由**：單一歸屬消除「同事實多處遭遇」的 drift 來源；兩層基準把「該用條列還是敘述」變成內建規則，不必每次重新判斷；workflow 留在 `CONTRIBUTING.md` 對獨立維運的專案不需要多一份檔案。
 - **取捨**：本決策僅涵蓋 `README.md`/`CONTRIBUTING.md`/`docs/*`/`tools/README.md`/`ProGrads-content/README.md` 的組織方式，不涉及程式碼或 schema 變更。
+
+## D22. Content 路徑 season 段改用 admission_type 原字，取消獨立詞彙
+
+- **決策**：`admissions/`、`admission-stats/` 路徑 season 段直接用 `admission_type` 字面值（`recommended`/`in_service`），取消原本各自的詞彙（`recruit`/`in-service`）；`exam` 仍預設省略。
+- **背景**：路徑詞彙與 DB/YAML 詞彙分開維護（程式碼兩處對照表 + 三份文件），屬雙重事實來源，曾因此建錯路徑名（卡在 sync 而非 validate）。查證台灣校務英譯慣例（「推甄」譯 Admission through Recommendation）與 REST 路徑/enum 對映慣例（路徑段應為 enum 值本身的大小寫轉換，非另一個字），皆指向 `recommended`。
+- **理由**：路徑段=enum 值時驗證可直接比對共用 Zod enum，不必另維護對照表，消除「查表才知道對應」的出錯面。
+- **取捨**：既有 `ncku/recruit`、`nycu/recruit` 已改名（見對應 commit）；日後文件提到 season 段一律用 `admission_type` 字面值，不用再教一套詞彙。
