@@ -11,6 +11,7 @@ import { AdmissionsModule } from "./modules/admissions/admissions.module.js";
 import { ExamsModule } from "./modules/exams/exams.module.js";
 import { QuestionsModule } from "./modules/questions/questions.module.js";
 import { StatsModule } from "./modules/stats/stats.module.js";
+import { CoverageModule } from "./modules/content-coverage/coverage.module.js";
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { StatsModule } from "./modules/stats/stats.module.js";
     ExamsModule,
     QuestionsModule,
     StatsModule,
+    CoverageModule,
   ],
 })
 export class AppModule {}

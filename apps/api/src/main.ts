@@ -45,6 +45,8 @@ async function bootstrap(): Promise<void> {
     .addTag("questions", "題目（題庫內容；跨校練單科 / 考卷視圖）")
     .addTag("admissions", "招生情報（系所組別 × 逐年梯次：名額 / 考科 / 日程）")
     .addTag("schedules", "招生行事曆（報名 / 筆試 / 面試 / 放榜事件）")
+    .addTag("stats", "平台統計（全站總覽數字）")
+    .addTag("coverage", "內容清點（content repo 建置狀況，僅本機開發）")
     .build();
   const document = cleanupOpenApiDoc(SwaggerModule.createDocument(app, config));
   SwaggerModule.setup("api/v1/docs", app, document, {

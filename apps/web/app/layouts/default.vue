@@ -88,6 +88,11 @@ const mobileNavOpen = ref(false);
             class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
             >Styleguide</NuxtLink
           >
+          <NuxtLink
+            to="/coverage"
+            class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
+            >Coverage</NuxtLink
+          >
         </nav>
       </UContainer>
     </footer>
