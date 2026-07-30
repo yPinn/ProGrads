@@ -1,26 +1,18 @@
 import type { PrismaClient } from "../../generated/client/client.ts";
 
-// Subject-scoped controlled vocabulary for exam knowledge points. See
-// docs/02-data-model.md and docs/09-roadmap.md §考科趨勢.
+// Subject-scoped controlled vocabulary for exam knowledge points. See docs/02-data-model.md and
+// docs/09-roadmap.md §考科趨勢. Flat list, one row per L2 leaf — the offline parser
+// (seed-refs.ts readKnowledgePoints) pairs each entry's `subject` field with the `slug` field
+// right after it, so keep that order. Only `slug` (the leaf) may be tagged on a question;
+// `groupSlug`/`groupName` are L1 browsing groups, never tagged directly.
 //
-// Flat list (one row per L2 leaf) so the offline text parser
-// (tools/content-sync/src/seed-refs.ts readKnowledgePoints) doesn't need to track nested
-// bracket depth — it just pairs each entry's `subject` field with the `slug` field that follows
-// it. Keep that field order (subject, groupSlug, groupName, slug, name, aliases) per entry.
+// Granularity comes from the actual exam corpus per subject, not an imposed syllabus. `name`
+// uses English/original terminology; `aliases` holds every other form (Chinese, abbreviations,
+// variants) — unstructured, not a statistics key.
 //
-// Only `slug` (the leaf) may be tagged on a question via frontmatter `knowledge_point_slugs`;
-// `groupSlug`/`groupName` are pure L1 browsing/governance groups, never tagged directly.
-//
-// Granularity: derived from the actual collected exam corpus for that subject (which concepts
-// recur enough to deserve a stable slug), not an external syllabus imposed top-down. Display
-// names use English/original terminology; `aliases` holds every other form (Chinese full name,
-// abbreviation, common English variant, common mistranslation) — any count, unstructured, not a
-// statistics key.
-//
-// Empty until a subject's content work builds its first pool — no site-wide upfront taxonomy.
-// Add entries here via PR once a subject is ready.
+// Empty pool = no taxonomy built for that subject yet; add entries via PR once ready.
 export interface KnowledgePointSeed {
-  subject: string; // Subject.slug (packages/db/prisma/seed/taxonomy.seed.ts)
+  subject: string; // Subject.slug (taxonomy.seed.ts)
   groupSlug: string;
   groupName: string;
   slug: string;
@@ -28,10 +20,8 @@ export interface KnowledgePointSeed {
   aliases?: string[];
 }
 
-// First pool: ds (資料結構) + algo (演算法), derived from the 149 questions currently collected
-// under questions/**/dsa*/ and questions/**/ds-algo/ (nccu/nchu/ntu 2021-2026). Clustered from
-// their raw `knowledge_points` free text — see git history for the extraction. Draft for review;
-// re-cluster as more papers are added rather than treating this as final.
+// Derived from the collected exam corpus per subject — see git history for each subject's
+// extraction/clustering. Draft; re-cluster as more papers are added.
 const KNOWLEDGE_POINTS: KnowledgePointSeed[] = [
   // ---------- ds (資料結構) ----------
   {
@@ -592,10 +582,8 @@ const KNOWLEDGE_POINTS: KnowledgePointSeed[] = [
     ],
   },
 
-  // algo also carries a substantial share of classic data-structure questions (this corpus tags
-  // ds-vs-algo per-question, not per-paper, and many DSA papers put stack/queue/tree/hash
-  // questions under algo) — mirrors ds's structural groups above, populated from algo's own
-  // tagged questions rather than duplicating ds's rows (KnowledgePoint is subject-scoped).
+  // algo also tags classic DS questions (this corpus tags ds vs algo per-question, not
+  // per-paper); mirrors ds's structural groups above with its own rows (subject-scoped).
   {
     subject: "algo",
     groupSlug: "linear-structures",
@@ -644,8 +632,8 @@ const KNOWLEDGE_POINTS: KnowledgePointSeed[] = [
     groupName: "Trees",
     slug: "red-black-tree",
     name: "Red-black tree",
-    // NOTE: "重新著色" deliberately excluded — it's ambiguous (also appears in an unrelated
-    // tree-DP/vertex-cover question, ntu/2025/dsa/q15.md) and would false-positive-tag it here.
+    // "重新著色" excluded — ambiguous, also appears in an unrelated tree-DP/vertex-cover
+    // question (ntu/2025/dsa/q15.md) and would false-positive-tag it here.
     aliases: ["紅黑樹", "旋轉", "性質修復", "旋轉維護", "順序統計樹", "子樹大小"],
   },
   {
@@ -700,9 +688,8 @@ const KNOWLEDGE_POINTS: KnowledgePointSeed[] = [
   },
 
   // ---------- english (英文) ----------
-  // Excludes pure question-format/section labels (克漏字, 語境填空, 篇章理解, 閱讀理解) and
-  // article-topic tags (AI論述, 學術論述, 政策變革, 政治操作, 背景事件, 具體事例, 程序規定,
-  // 論爭焦點) — neither is a testable English-skill concept, so neither gets a slug/alias.
+  // Excludes format labels (克漏字/語境填空/篇章理解/閱讀理解) and article-topic tags
+  // (AI論述/學術論述/政策變革/etc.) — neither is a testable English-skill concept.
   {
     subject: "english",
     groupSlug: "vocabulary",
@@ -938,10 +925,8 @@ export interface KnowledgePointSeedResult {
   leaves: number;
 }
 
-// Idempotent upsert of L1 groups then L2 leaves, per subject. Full reconcile per subject
-// (delete-then-recreate leaves no longer listed) so a shrinking pool doesn't leave stale rows —
-// same reasoning as seedTaxonomy's track_subject reconcile; safe because QuestionKnowledgePoint
-// cascades on delete.
+// Idempotent per-subject upsert: L1 groups then L2 leaves, then delete leaves no longer listed
+// (same reconcile as seedTaxonomy's track_subject; safe since QuestionKnowledgePoint cascades).
 export async function seedKnowledgePoints(prisma: PrismaClient): Promise<KnowledgePointSeedResult> {
   const bySubject = new Map<string, KnowledgePointSeed[]>();
   for (const entry of KNOWLEDGE_POINTS) {
@@ -968,8 +953,7 @@ export async function seedKnowledgePoints(prisma: PrismaClient): Promise<Knowled
     for (const entry of entries) {
       let groupId = groupIdBySlug.get(entry.groupSlug);
       if (!groupId) {
-        // parentId: null on update too — a group row must stay root even if it was previously
-        // (incorrectly) upserted as a leaf under a colliding slug.
+        // Reset parentId on update too, in case this slug was once a colliding leaf.
         const groupRow = await prisma.knowledgePoint.upsert({
           where: { subjectId_slug: { subjectId: subject.id, slug: entry.groupSlug } },
           update: { name: entry.groupName, parentId: null },
