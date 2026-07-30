@@ -14,11 +14,12 @@ describe("admission-stats path parsing", () => {
 
   it("maps season path segments to admission types", () => {
     assert.equal(
-      parseAdmissionStatsPath("admission-stats/2026/nycu/recruit/registration.yml").admissionType,
+      parseAdmissionStatsPath("admission-stats/2026/nycu/recommended/registration.yml")
+        .admissionType,
       "recommended",
     );
     assert.equal(
-      parseAdmissionStatsPath("admission-stats/2026/nthu/in-service/registration.yml")
+      parseAdmissionStatsPath("admission-stats/2026/nthu/in_service/registration.yml")
         .admissionType,
       "in_service",
     );

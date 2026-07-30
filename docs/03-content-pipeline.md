@@ -229,7 +229,7 @@ merge → server 端（self-hosted runner / webhook，搆得到 localhost DB）�
 > - 已落地，DB 表（migration `admission_season_papers`）：`AdmissionSeason`（①季）、`AdmissionSeasonEvent`（校級事件）、`AdmissionExamSlot`（②節次時間表）、`AdmissionRoundPaper`(+`Subject`)（③組考卷）。
 > - 已落地，區A importer：`tools/content-sync` 讀 `admissions/<year>/<school>/schedule.yml`，upsert `AdmissionSeason` + 重建 `AdmissionSeasonEvent` / `AdmissionExamSlot`（`src/admissions.ts`）。
 > - 已落地，區B importer：`tools/content-sync` 讀 `admissions/<year>/<school>/departments.yml`，upsert `AdmissionGroup`（content-derived，單一事實來源）+ `AdmissionRound`（逐年事實）+ 重建 `AdmissionRoundPaper`(+`Subject`)（`src/admissions.ts`）。
-> - 已落地，路徑管道驗證：`admissions/<year>/<school>/recruit/schedule.yml` 等路徑推導出的管道必須與 YAML `admission_type` 一致。
+> - 已落地，路徑管道驗證：`admissions/<year>/<school>/recommended/schedule.yml` 等路徑推導出的管道必須與 YAML `admission_type` 一致。
 > - 招生 API 現況：`/schedules` 讀校級 `AdmissionSeasonEvent`（content 來源；行事曆為校級，不含系所/組）。`/admissions`（組別/梯次）讀 `AdmissionGroup` / `AdmissionRound`（含 `AdmissionRoundPaper` 結構化考卷與組級事實：招生代碼/身分別/採計%/`interviewAt`/同分參酌），全數來自 `departments.yml`（`seed` 已退役 `admission.seed.ts`）。
 > - 待退役（已不被讀寫，留待專屬 drop migration）：`AdmissionRoundEvent`（事件改掛校級 season）、`AdmissionRoundSubject`（考科改由 `AdmissionRoundPaper` 表達；組級面試日改用 `AdmissionRound.interviewAt`）。
 > - **coverage 規劃輔助**（唯讀、無 DB）：`pnpm --filter @prograds/content-sync report-admissions <admissions-dir> [--gaps] [--md] [--tracks=<eecs|business|all>]`——對照 seed 系所清單列出各（年,校）prospectus/schedule/departments 三檔完成度，並標出尚缺 `departments.yml` 覆蓋的 seed 系所，導引補件順序（同 `report-coverage` 之於 faculty）。
@@ -237,7 +237,7 @@ merge → server 端（self-hosted runner / webhook，搆得到 localhost DB）�
 > **五份壓測**（NTU/NCCU/NCKU/CCU 115 + 台聯大 115）證實一份簡章可乾淨切成兩區：**區 A 日程/地點**（校級、A 層 regex 可抽）與**區 B 系所/組明細**（B 層、須 vision）。NTU 那份甚至**只有區 A**（2 頁「重要日程表」單獨發），坐實兩區可獨立成檔。故 `prospectus.yml` 拆為 `schedule.yml`（區 A）+ `departments.yml`（區 B），沿抽取層邊界切：A 層先落地、不被卡 vision 的 B 層綁架，且兩區 git diff 互不污染。
 
 ```text
-admissions/<year>/<school>/[<season>/]       # season: exam(預設可省) / recruit(推甄) / in-service(在職)
+admissions/<year>/<school>/[<season>/]       # season 段即 admission_type: exam(預設可省) / recommended(推甄) / in_service(在職)
   prospectus.pdf     # 簡章原始快照（Tier0,LFS）
   schedule.yml       # 區A:①季框架 + ②科目節次時間表（校級,A 層）
   departments.yml    # 區B:③各系所組明細（系所→組 keyed entry,大時可 shard 成 depts/<dept>.yml）

@@ -1,16 +1,7 @@
 import type { PrismaClient } from "@prograds/db";
-import { DepartmentsYml, ScheduleYml } from "@prograds/shared";
+import { AdmissionType, DepartmentsYml, ScheduleYml } from "@prograds/shared";
 import { parse as parseYaml } from "yaml";
 import type { Resolver } from "./sync.js";
-
-type AdmissionType = "exam" | "recommended" | "in_service";
-
-// Path season segment maps to admission_type; the segment is omitted for the default (exam).
-const SEASON_ADMISSION_TYPE: Record<string, AdmissionType> = {
-  exam: "exam",
-  recruit: "recommended",
-  "in-service": "in_service",
-};
 
 export type ScheduleResult =
   | { seasonId: string; events: number; slots: number }
@@ -32,7 +23,8 @@ function toDate(value: string): Date {
 }
 
 // admissions/<year>/<school>/[<season>/]<file>; year/school are cross-checked against the
-// file body, admission_type comes from the optional season segment (default exam).
+// file body. The season segment IS the admission_type verbatim (shared AdmissionType enum),
+// omitted for the default (exam) — no separate path↔type vocabulary to keep in sync.
 export function parseAdmissionsPath(relPath: string): {
   year: number;
   school: string;
@@ -46,13 +38,13 @@ export function parseAdmissionsPath(relPath: string): {
   }
   const year = Number.parseInt(parts[1] ?? "", 10);
   const school = parts[2] ?? "";
-  const admissionType = SEASON_ADMISSION_TYPE[parts.length === 5 ? (parts[3] ?? "") : "exam"];
-  if (!Number.isInteger(year) || !school || !admissionType) {
+  const season = AdmissionType.safeParse(parts.length === 5 ? parts[3] : "exam");
+  if (!Number.isInteger(year) || !school || !season.success) {
     throw new Error(
       `unexpected admissions path: ${relPath} (want admissions/<year>/<school>/[<season>/]<file>)`,
     );
   }
-  return { year, school, admissionType };
+  return { year, school, admissionType: season.data };
 }
 
 export function validateAdmissionTypeMatchesPath(

@@ -23,11 +23,11 @@
 ## 路徑與檔
 
 ```text
-admissions/{year}/{school}/[{season}/]schedule.yml      # 區A（season 段：exam 可省 / recruit / in-service）
+admissions/{year}/{school}/[{season}/]schedule.yml      # 區A（season 段：exam 可省 / recommended / in_service）
 admissions/{year}/{school}/[{season}/]departments.yml   # 區B
 ```
 
-- `season` 段對齊 `admission_type`；預設 `exam` 省略。同校同年有推甄/在職多份簡章時才加段（避免撞檔）。sync 會驗證「路徑 season ↔ 檔內 `admission_type` 一致」。
+- `season` 段即 `admission_type` 本身（無獨立詞彙）；預設 `exam` 省略。同校同年有推甄/在職多份簡章時才加段（避免撞檔）。sync 會驗證「路徑 season ↔ 檔內 `admission_type` 一致」。
 - 檔內 `school`/`year` 必須等於路徑段。
 
 ## 區A：`schedule.yml`

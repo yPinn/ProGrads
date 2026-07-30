@@ -43,7 +43,7 @@ interface School {
 interface Unit {
   year: number;
   school: string;
-  season: string; // "exam" default; else recruit / in-service
+  season: string; // "exam" default; else recommended / in_service
   prospectus: boolean;
   schedule: boolean;
   departments: boolean;

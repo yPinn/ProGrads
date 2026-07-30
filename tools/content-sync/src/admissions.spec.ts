@@ -13,17 +13,17 @@ describe("admissions path parsing", () => {
 
   it("maps season path segments to admission types", () => {
     assert.equal(
-      parseAdmissionsPath("admissions/2026/ntu/recruit/schedule.yml").admissionType,
+      parseAdmissionsPath("admissions/2026/ntu/recommended/schedule.yml").admissionType,
       "recommended",
     );
     assert.equal(
-      parseAdmissionsPath("admissions/2026/ntu/in-service/schedule.yml").admissionType,
+      parseAdmissionsPath("admissions/2026/ntu/in_service/schedule.yml").admissionType,
       "in_service",
     );
   });
 
   it("rejects schedule body admission_type that disagrees with the path season", () => {
-    const pathRef = parseAdmissionsPath("admissions/2026/ntu/recruit/schedule.yml");
+    const pathRef = parseAdmissionsPath("admissions/2026/ntu/recommended/schedule.yml");
     assert.throws(
       () => validateAdmissionTypeMatchesPath(pathRef, "exam", "schedule.yml"),
       /admission_type mismatch/,

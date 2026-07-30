@@ -1,24 +1,15 @@
 import type { PrismaClient } from "@prograds/db";
-import { RegistrationYml } from "@prograds/shared";
+import { AdmissionType, RegistrationYml } from "@prograds/shared";
 import { parse as parseYaml } from "yaml";
 import type { Resolver } from "./sync.js";
-
-type AdmissionType = "exam" | "recommended" | "in_service";
-
-// Path season segment maps to admission_type; the segment is omitted for the default (exam).
-// Mirrors admissions.ts's SEASON_ADMISSION_TYPE (same vocabulary, same convention).
-const SEASON_ADMISSION_TYPE: Record<string, AdmissionType> = {
-  exam: "exam",
-  recruit: "recommended",
-  "in-service": "in_service",
-};
 
 export type RegistrationResult =
   | { school: string; matched: number; unmatched: number }
   | { skipped: string };
 
 // admission-stats/<year>/<school>/[<season>/]registration.yml; year/school are cross-checked
-// against the file body, admission_type comes from the optional season segment (default exam).
+// against the file body. The season segment IS the admission_type verbatim (shared
+// AdmissionType enum), omitted for the default (exam) — mirrors admissions.ts.
 export function parseAdmissionStatsPath(relPath: string): {
   year: number;
   school: string;
@@ -32,13 +23,13 @@ export function parseAdmissionStatsPath(relPath: string): {
   }
   const year = Number.parseInt(parts[1] ?? "", 10);
   const school = parts[2] ?? "";
-  const admissionType = SEASON_ADMISSION_TYPE[parts.length === 5 ? (parts[3] ?? "") : "exam"];
-  if (!Number.isInteger(year) || !school || !admissionType) {
+  const season = AdmissionType.safeParse(parts.length === 5 ? parts[3] : "exam");
+  if (!Number.isInteger(year) || !school || !season.success) {
     throw new Error(
       `unexpected admission-stats path: ${relPath} (want admission-stats/<year>/<school>/[<season>/]registration.yml)`,
     );
   }
-  return { year, school, admissionType };
+  return { year, school, admissionType: season.data };
 }
 
 // Parse, validate and backfill AdmissionRound.applicants from one registration.yml. Rows are
