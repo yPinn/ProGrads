@@ -21,7 +21,7 @@ const subject = ref<string>(typeof route.query.subject === "string" ? route.quer
 const school = ref<string>("all");
 const year = ref<number | "all">("all");
 const page = ref(1);
-const pageSize = 20;
+const pageSize = 10;
 
 // Filter options come from facets — only subjects/schools/years that actually have questions, so
 // the dropdowns never offer dead options. Subjects show a paper count; schools keep server order;
