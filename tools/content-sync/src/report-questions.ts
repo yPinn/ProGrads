@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { type QuestionType, QuestionFrontmatter } from "@prograds/shared";
 import matter from "gray-matter";
 import { parseSections } from "./body.js";
@@ -38,7 +38,7 @@ interface Paper {
 }
 
 // School slug -> display name, parsed textually from the seed (source of truth for the roster).
-function readSeedSchoolNames(): Map<string, string> {
+export function readSeedSchoolNames(): Map<string, string> {
   const src = readFileSync(SEED_FILE, "utf8");
   const names = new Map<string, string>();
   let current: string | null = null;
@@ -56,7 +56,7 @@ function readSeedSchoolNames(): Map<string, string> {
 }
 
 // Walk the questions dir → one Paper per (school, year, paper) directory.
-function readPapers(root: string): Paper[] {
+export function readPapers(root: string): Paper[] {
   const papers = new Map<string, Paper>();
   const files = (readdirSync(root, { recursive: true }) as string[])
     .map((e) => e.replace(/\\/g, "/"))
@@ -127,6 +127,72 @@ const typeMix = (types: Map<QuestionType, number>): string =>
   TYPE_ORDER.filter((t) => types.has(t))
     .map((t) => `${t}${types.get(t)}`)
     .join("/");
+
+// JSON-friendly shape for the coverage dev page (apps/web /coverage) — one flat row per built
+// paper (the type Map collapses to the same "mc4/essay2" string the CLI prints).
+export interface QuestionsCoveragePaper {
+  school: string;
+  schoolName: string;
+  year: number;
+  paper: string;
+  count: number;
+  typeMix: string;
+  answered: number;
+  solved: number;
+  withKp: number;
+  verified: number;
+  flagged: number;
+  bad: string[];
+}
+export interface QuestionsCoverageResult {
+  papers: QuestionsCoveragePaper[];
+  totalQuestions: number;
+  totalPapers: number;
+  schoolsWithQuestions: number;
+  totalSeedSchools: number;
+  missingSchools: { slug: string; name: string }[]; // seeded schools with zero questions
+  orphans: string[];
+}
+
+export function computeQuestionsCoverage(root: string): QuestionsCoverageResult {
+  const schoolNames = readSeedSchoolNames();
+  const all = readPapers(root);
+  const orphans = all.find((p) => p.school === "" && p.year === 0)?.bad ?? [];
+  const papers = all
+    .filter((p) => p.school !== "" || p.year !== 0)
+    .sort(
+      (a, b) =>
+        a.school.localeCompare(b.school) || a.year - b.year || a.paper.localeCompare(b.paper),
+    );
+
+  const schoolsWithQ = new Set(papers.map((p) => p.school));
+  const missingSchools = [...schoolNames.keys()]
+    .filter((s) => !schoolsWithQ.has(s))
+    .map((s) => ({ slug: s, name: schoolNames.get(s)! }));
+
+  return {
+    papers: papers.map((p) => ({
+      school: p.school,
+      schoolName: schoolNames.get(p.school) ?? "",
+      year: p.year,
+      paper: p.paper,
+      count: p.count,
+      typeMix: typeMix(p.types),
+      answered: p.answered,
+      solved: p.solved,
+      withKp: p.withKp,
+      verified: p.verified,
+      flagged: p.flagged,
+      bad: p.bad,
+    })),
+    totalQuestions: papers.reduce((s, p) => s + p.count, 0),
+    totalPapers: papers.length,
+    schoolsWithQuestions: schoolsWithQ.size,
+    totalSeedSchools: schoolNames.size,
+    missingSchools,
+    orphans,
+  };
+}
 
 // Report output goes to stdout (so it can be piped); console.log is disallowed by lint.
 const out = (s: string): void => void process.stdout.write(`${s}\n`);
@@ -226,4 +292,7 @@ function main(): void {
   }
 }
 
-main();
+// Only run the CLI when this file is the process entrypoint — see report-coverage.ts.
+if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+  main();
+}

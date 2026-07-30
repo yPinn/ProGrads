@@ -3,7 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "main": "./dist/coverage.js",
+  "types": "./dist/coverage.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/coverage.d.ts",
+      "import": "./dist/coverage.js"
+    }
+  },
   "scripts": {
+    "build": "tsc",
     "sync": "tsx src/index.ts",
     "sync:prune": "tsx src/index.ts --prune",
     "validate": "tsx src/validate.ts",
@@ -14,6 +23,7 @@
     "report-coverage": "tsx src/report-coverage.ts",
     "report-admissions": "tsx src/report-admissions.ts",
     "report-questions": "tsx src/report-questions.ts",
+    "report-admission-stats": "tsx src/report-admission-stats.ts",
     "report-trends": "tsx src/report-trends.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

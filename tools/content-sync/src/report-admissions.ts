@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { DepartmentsYml } from "@prograds/shared";
 import { parse as parseYaml } from "yaml";
 
@@ -18,7 +18,7 @@ import { parse as parseYaml } from "yaml";
 // Track scopes — which seed departments count toward coverage. EECS is the original axis;
 // business covers the 商學院/管理學院 tracks; all counts every seeded department. Select with
 // --tracks=<eecs|business|all> (default eecs). null = every track.
-const TRACK_SCOPES: Record<string, { label: string; tracks: Set<string> | null }> = {
+export const TRACK_SCOPES: Record<string, { label: string; tracks: Set<string> | null }> = {
   eecs: { label: "EECS", tracks: new Set(["cs", "ee", "info-mgmt"]) },
   business: {
     label: "商管",
@@ -40,7 +40,7 @@ interface School {
   name: string;
   depts: Dept[];
 }
-interface Unit {
+export interface Unit {
   year: number;
   school: string;
   season: string; // "exam" default; else recommended / in_service
@@ -53,7 +53,7 @@ interface Unit {
 }
 
 // Parse the seed (textually, like report-coverage) into ordered schools with dept name + track.
-function readSeedSchools(): School[] {
+export function readSeedSchools(): School[] {
   const src = readFileSync(SEED_FILE, "utf8");
   const schools: School[] = [];
   let current: School | null = null;
@@ -78,7 +78,7 @@ function readSeedSchools(): School[] {
 }
 
 // Walk the admissions dir → one Unit per (year, school, season) directory.
-function readUnits(root: string): Unit[] {
+export function readUnits(root: string): Unit[] {
   const units = new Map<string, Unit>();
   const entries = (readdirSync(root, { recursive: true }) as string[])
     .map((e) => e.replace(/\\/g, "/"))
@@ -123,6 +123,53 @@ function readUnits(root: string): Unit[] {
     (a, b) =>
       b.year - a.year || a.school.localeCompare(b.school) || a.season.localeCompare(b.season),
   );
+}
+
+// JSON-friendly shape for the coverage dev page (apps/web /coverage) — a Unit enriched with the
+// school's display name and its in-scope dept coverage counts (tracks param, default "eecs").
+export interface AdmissionsCoverageUnit extends Unit {
+  schoolName: string;
+  scopeDeptTotal: number;
+  scopeDeptCovered: number;
+  scopeLabel: string;
+}
+export interface AdmissionsCoverageResult {
+  units: AdmissionsCoverageUnit[];
+  totalUnits: number;
+  withDepartments: number;
+  fillable: number; // prospectus present, no departments.yml yet
+}
+
+export function computeAdmissionsCoverage(
+  root: string,
+  trackScope: keyof typeof TRACK_SCOPES = "eecs",
+): AdmissionsCoverageResult {
+  const scope = TRACK_SCOPES[trackScope]!;
+  const schools = readSeedSchools();
+  const seedBySlug = new Map(schools.map((s) => [s.slug, s]));
+  const scopedDepts = (slug: string): Dept[] =>
+    (seedBySlug.get(slug)?.depts ?? []).filter(
+      (d) => scope.tracks === null || scope.tracks.has(d.track),
+    );
+
+  const units = readUnits(root).map((u) => {
+    const scoped = scopedDepts(u.school);
+    const covered = scoped.filter((d) => u.coveredDepts.includes(d.slug)).length;
+    return {
+      ...u,
+      schoolName: seedBySlug.get(u.school)?.name ?? "",
+      scopeDeptTotal: scoped.length,
+      scopeDeptCovered: covered,
+      scopeLabel: scope.label,
+    };
+  });
+
+  return {
+    units,
+    totalUnits: units.length,
+    withDepartments: units.filter((u) => u.departments).length,
+    fillable: units.filter((u) => u.prospectus && !u.departments).length,
+  };
 }
 
 // Report output goes to stdout (so it can be piped); console.log is disallowed by lint.
@@ -225,4 +272,7 @@ function main(): void {
   );
 }
 
-main();
+// Only run the CLI when this file is the process entrypoint — see report-coverage.ts.
+if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+  main();
+}

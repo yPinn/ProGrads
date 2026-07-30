@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { FacultyYml } from "@prograds/shared";
 import { parse as parseYaml } from "yaml";
 import { parseFacultyPath } from "./faculty.js";
@@ -37,7 +37,7 @@ interface Built {
 }
 
 // Parse the seed (textually, like seed-refs) into ordered schools with dept name + track.
-function readSeedSchools(): School[] {
+export function readSeedSchools(): School[] {
   const src = readFileSync(SEED_FILE, "utf8");
   const schools: School[] = [];
   let current: School | null = null;
@@ -65,7 +65,7 @@ function readSeedSchools(): School[] {
 
 // Walk the faculty dir → per-file field tallies, keyed "school/dept". Orphans = files whose
 // path is malformed or that fail the shared contract (surfaced separately, not counted).
-function readBuilt(root: string): { built: Map<string, Built>; orphans: string[] } {
+export function readBuilt(root: string): { built: Map<string, Built>; orphans: string[] } {
   const built = new Map<string, Built>();
   const orphans: string[] = [];
   const files = (readdirSync(root, { recursive: true }) as string[])
@@ -100,6 +100,64 @@ function readBuilt(root: string): { built: Map<string, Built>; orphans: string[]
     });
   }
   return { built, orphans };
+}
+
+// JSON-friendly shape for the coverage dev page (apps/web /coverage) — one flat row per seeded
+// dept (built or not), instead of the Map the console/--md printers below use directly.
+export interface FacultyCoverageDept {
+  school: string;
+  schoolName: string;
+  dept: string;
+  deptName: string;
+  track: string;
+  built: boolean;
+  members: number;
+  withTitle: number;
+  withResearch: number;
+  thesesMembers: number;
+  authored: number;
+  withDegrees: number;
+  asOf: string;
+}
+export interface FacultyCoverageResult {
+  depts: FacultyCoverageDept[];
+  totalDepts: number;
+  builtDepts: number;
+  totalMembers: number;
+  orphans: string[];
+}
+
+export function computeFacultyCoverage(root: string): FacultyCoverageResult {
+  const schools = readSeedSchools();
+  const { built, orphans } = readBuilt(root);
+  const depts: FacultyCoverageDept[] = [];
+  for (const sc of schools) {
+    for (const d of sc.depts) {
+      const b = built.get(`${sc.slug}/${d.slug}`);
+      depts.push({
+        school: sc.slug,
+        schoolName: sc.name,
+        dept: d.slug,
+        deptName: d.name,
+        track: d.track,
+        built: !!b,
+        members: b?.members ?? 0,
+        withTitle: b?.withTitle ?? 0,
+        withResearch: b?.withResearch ?? 0,
+        thesesMembers: b?.thesesMembers ?? 0,
+        authored: b?.authored ?? 0,
+        withDegrees: b?.withDegrees ?? 0,
+        asOf: b?.asOf ?? "-",
+      });
+    }
+  }
+  return {
+    depts,
+    totalDepts: depts.length,
+    builtDepts: depts.filter((d) => d.built).length,
+    totalMembers: depts.reduce((s, d) => s + d.members, 0),
+    orphans,
+  };
 }
 
 const pct = (num: number, den: number): string =>
@@ -196,4 +254,9 @@ function main(): void {
   }
 }
 
-main();
+// Only run the CLI when this file is the process entrypoint (`tsx src/report-coverage.ts` or
+// `node dist/report-coverage.js`) — importing computeFacultyCoverage elsewhere (e.g. apps/api's
+// coverage module) must not trigger argv parsing / process.exit.
+if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+  main();
+}
