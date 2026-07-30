@@ -92,6 +92,13 @@ export const AdmissionScheduleQuerySchema = z.object({
 });
 export type AdmissionScheduleQuery = z.infer<typeof AdmissionScheduleQuerySchema>;
 
+// GET /schedules/upcoming?limit=<int> — next N events across all schools/years by absolute
+// time, for deadline-reminder widgets that can't reliably guess "the current 學年".
+export const UpcomingSchedulesQuerySchema = z.object({
+  limit: z.coerce.number().int().positive().max(20).default(5).describe("回傳筆數(上限 20,預設 5)"),
+});
+export type UpcomingSchedulesQuery = z.infer<typeof UpcomingSchedulesQuerySchema>;
+
 // Response envelopes.
 export const AdmissionsResponseSchema = dataResponse(z.array(AdmissionGroupSchema));
 export const AdmissionScheduleResponseSchema = dataResponse(z.array(AdmissionScheduleItemSchema));

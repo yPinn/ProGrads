@@ -13,6 +13,32 @@ function seasonKey(year: number, admissionType: string): string {
   return `${year}:${admissionType}`;
 }
 
+interface ScheduleEventRow {
+  event: AdmissionEvent;
+  at: Date;
+  endAt: Date | null;
+  location: string | null;
+  sequence: number | null;
+  season: {
+    year: number;
+    admissionType: AdmissionScheduleItem["admissionType"];
+    school: { slug: string; name: string };
+  };
+}
+
+function mapScheduleEvent(e: ScheduleEventRow): AdmissionScheduleItem {
+  return {
+    school: { slug: e.season.school.slug, name: e.season.school.name },
+    year: e.season.year,
+    admissionType: e.season.admissionType,
+    event: e.event,
+    at: e.at.toISOString(),
+    endAt: e.endAt ? e.endAt.toISOString() : null,
+    location: e.location,
+    sequence: e.sequence,
+  };
+}
+
 @Injectable()
 export class AdmissionsService {
   constructor(private readonly repo: AdmissionsRepository) {}
@@ -84,15 +110,12 @@ export class AdmissionsService {
     event?: AdmissionEvent;
   }): Promise<AdmissionScheduleItem[]> {
     const events = await this.repo.findEvents(filters);
-    return events.map((e) => ({
-      school: { slug: e.season.school.slug, name: e.season.school.name },
-      year: e.season.year,
-      admissionType: e.season.admissionType,
-      event: e.event,
-      at: e.at.toISOString(),
-      endAt: e.endAt ? e.endAt.toISOString() : null,
-      location: e.location,
-      sequence: e.sequence,
-    }));
+    return events.map(mapScheduleEvent);
+  }
+
+  // Next N events across all schools/years by absolute time (deadline-reminder widgets).
+  async getUpcomingSchedule(limit: number): Promise<AdmissionScheduleItem[]> {
+    const events = await this.repo.findUpcomingEvents(limit);
+    return events.map(mapScheduleEvent);
   }
 }

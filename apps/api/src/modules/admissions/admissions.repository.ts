@@ -60,4 +60,15 @@ export class AdmissionsRepository {
       orderBy: [{ at: "asc" }, { id: "asc" }],
     });
   }
+
+  // Next N events across all schools/years by absolute time — for deadline-reminder widgets
+  // that can't reliably guess "the current 學年" from a 西元學年 number alone.
+  findUpcomingEvents(limit: number) {
+    return this.prisma.admissionSeasonEvent.findMany({
+      where: { at: { gte: new Date() } },
+      include: { season: { include: { school: true } } },
+      orderBy: [{ at: "asc" }, { id: "asc" }],
+      take: limit,
+    });
+  }
 }

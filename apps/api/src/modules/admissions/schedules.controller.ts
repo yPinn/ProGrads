@@ -3,7 +3,7 @@ import type { AdmissionScheduleItem } from "@prograds/shared";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiBadRequest } from "../../common/api-error-responses.js";
 import { AdmissionsService } from "./admissions.service.js";
-import { AdmissionScheduleQueryDto } from "./dto/admission-query.dto.js";
+import { AdmissionScheduleQueryDto, UpcomingSchedulesQueryDto } from "./dto/admission-query.dto.js";
 import { AdmissionScheduleResponseDto } from "./dto/admissions-response.dto.js";
 
 @ApiTags("schedules")
@@ -29,5 +29,19 @@ export class SchedulesController {
         event: query.event,
       }),
     };
+  }
+
+  @Get("upcoming")
+  @ApiOperation({
+    summary: "近期招生事件",
+    description:
+      "跨學年、依絕對時間撈最近 N 筆即將到來的招生事件（報名起訖 / 筆試 / 面試 / 放榜），供首頁 deadline 提醒使用。`limit` 選填，預設 5、上限 20。",
+  })
+  @ApiOkResponse({ type: AdmissionScheduleResponseDto })
+  @ApiBadRequest()
+  async upcoming(
+    @Query() query: UpcomingSchedulesQueryDto,
+  ): Promise<{ data: AdmissionScheduleItem[] }> {
+    return { data: await this.service.getUpcomingSchedule(query.limit) };
   }
 }

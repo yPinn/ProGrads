@@ -217,3 +217,39 @@ describe("AdmissionsService.getSchedule", () => {
     expect(item?.at).toBe("2025-04-01T00:00:00.000Z");
   });
 });
+
+describe("AdmissionsService.getUpcomingSchedule", () => {
+  it("forwards the limit and reuses the same flattening as getSchedule", async () => {
+    const findUpcomingEvents = vi.fn().mockResolvedValue([
+      {
+        event: "APPLICATION",
+        at: new Date("2026-08-01T00:00:00.000Z"),
+        endAt: null,
+        location: null,
+        sequence: null,
+        season: {
+          year: 2027,
+          admissionType: "MASTER",
+          school: { slug: "nccu", name: "國立政治大學" },
+        },
+      },
+    ]);
+
+    const service = makeService({ findUpcomingEvents });
+    const result = await service.getUpcomingSchedule(5);
+
+    expect(findUpcomingEvents).toHaveBeenCalledWith(5);
+    expect(result).toEqual([
+      {
+        school: { slug: "nccu", name: "國立政治大學" },
+        year: 2027,
+        admissionType: "MASTER",
+        event: "APPLICATION",
+        at: "2026-08-01T00:00:00.000Z",
+        endAt: null,
+        location: null,
+        sequence: null,
+      },
+    ]);
+  });
+});

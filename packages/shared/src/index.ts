@@ -10,3 +10,4 @@ export * from "./admission-content.js";
 export * from "./admission-stats-content.js";
 export * from "./faculty-content.js";
 export * from "./faculty.js";
+export * from "./stats.js";
