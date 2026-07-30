@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
+import type { AdmissionType } from "@prograds/shared";
 import { useAdmissions } from "~/composables/useAdmissions";
 import { useSchools } from "~/composables/useSchools";
 import { useDepartments } from "~/composables/useDepartments";
@@ -8,7 +9,7 @@ import { ADMISSION_TYPE_LABELS, ADMISSION_METHOD_LABELS } from "~/utils/admissio
 import { brochureUrl } from "~/utils/admission-brochure";
 import { admitRate } from "~/utils/admit-rate";
 import { seasonLine } from "~/utils/admission-season";
-import { practicableSubjects } from "~/utils/practicable-subjects";
+import { papersByTiebreak } from "~/utils/papers-by-tiebreak";
 import { icons } from "~/utils/icons";
 import { formatDateTime } from "~/utils/format";
 import { toSelectItems } from "~/utils/select";
@@ -23,6 +24,7 @@ useSeoMeta({
 const school = ref<string | undefined>();
 const dept = ref<string | undefined>();
 const selectedYear = ref<number | "all">("all");
+const selectedAdmissionType = ref<AdmissionType | "all">("all");
 
 // School list (near-static) + departments of the selected school (cascading).
 // isLoading (not isPending): a disabled query is "pending" but idle — selects shouldn't spin.
@@ -39,6 +41,7 @@ watch(school, () => {
 });
 watch(dept, () => {
   selectedYear.value = "all";
+  selectedAdmissionType.value = "all";
 });
 
 // useAdmissions stays disabled until both school + dept are set (no year param —
@@ -61,12 +64,81 @@ const yearTabs = computed(() => {
   ];
 });
 
-// Groups with rounds narrowed to the selected year (immutably); drop emptied groups.
+// Admission-type tabs from the loaded groups' rounds — only the types actually present (not
+// all 3 enum values), in the fixed exam→recommended→in_service order (ADMISSION_TYPE_LABELS'
+// key order). Hidden in the template unless there's more than one real type to choose between.
+const admissionTypeTabs = computed(() => {
+  const present = new Set<AdmissionType>();
+  for (const g of data.value ?? []) for (const r of g.rounds) present.add(r.admissionType);
+  const order = Object.keys(ADMISSION_TYPE_LABELS) as AdmissionType[];
+  return [
+    { label: "全部", value: "all" as const },
+    ...order
+      .filter((t) => present.has(t))
+      .map((t) => ({ label: ADMISSION_TYPE_LABELS[t], value: t })),
+  ];
+});
+
+// Drives the filter icon's active-state dot + accessible label — the popover panel itself
+// carries no visible trace once closed, so this is the only cue a filter is applied.
+const hasActiveFilter = computed(
+  () => selectedYear.value !== "all" || selectedAdmissionType.value !== "all",
+);
+const filterButtonLabel = computed(() =>
+  hasActiveFilter.value ? "篩選招生資料(已套用篩選)" : "篩選招生資料",
+);
+
+// One labeled toggle-group per facet (year / admission type), rendered as a single v-for in the
+// popover instead of a copy-pasted block per facet — adding a facet (e.g. applicant_type, once
+// its data is normalized — see tasks/todo.md) is one array entry, not a new template block.
+// Hidden once a facet has nothing to choose between (just "全部" + one real option).
+interface Facet {
+  key: string;
+  title: string;
+  ariaLabel: string;
+  tabularNums?: boolean;
+  tabs: { label: string; value: string | number }[];
+  selected: string | number;
+  onSelect: (value: string | number) => void;
+}
+
+const filterFacets = computed<Facet[]>(() =>
+  [
+    {
+      key: "year",
+      title: "年度",
+      ariaLabel: "篩選年度",
+      tabularNums: true,
+      tabs: yearTabs.value,
+      selected: selectedYear.value,
+      onSelect: (v: string | number) => (selectedYear.value = v as number | "all"),
+    },
+    {
+      key: "admissionType",
+      title: "管道",
+      ariaLabel: "篩選管道",
+      tabs: admissionTypeTabs.value,
+      selected: selectedAdmissionType.value,
+      onSelect: (v: string | number) => (selectedAdmissionType.value = v as AdmissionType | "all"),
+    },
+  ].filter((f) => f.tabs.length > 2),
+);
+const hasAnyFacet = computed(() => filterFacets.value.length > 0);
+
+// Groups with rounds narrowed to the selected year + admission type (immutably); drop emptied groups.
 const visibleGroups = computed(() => {
   const groups = data.value ?? [];
-  if (selectedYear.value === "all") return groups;
+  if (selectedYear.value === "all" && selectedAdmissionType.value === "all") return groups;
   return groups
-    .map((g) => ({ ...g, rounds: g.rounds.filter((r) => r.year === selectedYear.value) }))
+    .map((g) => ({
+      ...g,
+      rounds: g.rounds.filter(
+        (r) =>
+          (selectedYear.value === "all" || r.year === selectedYear.value) &&
+          (selectedAdmissionType.value === "all" ||
+            r.admissionType === selectedAdmissionType.value),
+      ),
+    }))
     .filter((g) => g.rounds.length > 0);
 });
 
@@ -140,11 +212,50 @@ const prefersReducedMotion = useReducedMotion();
       </AppList>
     </section>
 
-    <!-- State C: dept chosen — admissions with a year tab slot. -->
+    <!-- State C: dept chosen — admissions with a filter popover (year + admission type). -->
     <template v-else>
-      <header class="mb-section">
-        <h2 class="font-serif text-title-sm tracking-tight">{{ deptName }}</h2>
-        <p class="text-muted text-small">{{ schoolName }}</p>
+      <header class="mb-section flex items-start justify-between gap-4">
+        <div>
+          <h2 class="font-serif text-title-sm tracking-tight">{{ deptName }}</h2>
+          <p class="text-muted text-small">{{ schoolName }}</p>
+        </div>
+
+        <!-- Floating filter panel (UPopover), not a docked tab row: keeps the header's height
+             stable across depts regardless of how many facets that dept actually has, and stays
+             out of the content flow entirely when open. The dot on the trigger is the only
+             lingering cue once it's closed — otherwise a filtered view looks identical to an
+             unfiltered one. -->
+        <UPopover v-if="hasAnyFacet">
+          <UChip color="primary" size="sm" :show="hasActiveFilter">
+            <IconButton :icon="icons.filter" :label="filterButtonLabel" />
+          </UChip>
+
+          <template #content>
+            <div class="w-56 space-y-4 p-control">
+              <div v-for="facet in filterFacets" :key="facet.key">
+                <p class="text-caption text-muted mb-1.5 font-medium">{{ facet.title }}</p>
+                <div role="group" :aria-label="facet.ariaLabel" class="flex flex-wrap gap-1.5">
+                  <button
+                    v-for="t in facet.tabs"
+                    :key="t.value"
+                    type="button"
+                    :aria-pressed="facet.selected === t.value"
+                    class="focus-ring min-h-touch inline-flex items-center rounded-full border px-3 text-small transition-colors"
+                    :class="[
+                      facet.selected === t.value
+                        ? 'border-primary text-default'
+                        : 'border-default text-muted hover:text-default',
+                      facet.tabularNums ? 'tabular-nums' : '',
+                    ]"
+                    @click="facet.onSelect(t.value)"
+                  >
+                    {{ t.label }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </UPopover>
       </header>
 
       <QueryState
@@ -160,30 +271,6 @@ const prefersReducedMotion = useReducedMotion();
         </template>
 
         <template #empty>查無此校系的招生資料。</template>
-
-        <!-- Year slot: a client-side filter over the loaded rounds — a toggle-button group
-             (aria-pressed), not an ARIA tablist, since there are no associated tabpanels. -->
-        <div
-          role="group"
-          aria-label="篩選年度"
-          class="border-default mb-section flex flex-wrap gap-1 border-b"
-        >
-          <button
-            v-for="t in yearTabs"
-            :key="t.value"
-            type="button"
-            :aria-pressed="selectedYear === t.value"
-            class="focus-ring -mb-px inline-flex min-h-touch items-center border-b-2 px-3 text-small tabular-nums transition-colors"
-            :class="
-              selectedYear === t.value
-                ? 'border-primary text-default'
-                : 'border-transparent text-muted hover:text-default'
-            "
-            @click="selectedYear = t.value"
-          >
-            {{ t.label }}
-          </button>
-        </div>
 
         <section
           v-for="(g, gi) in visibleGroups"
@@ -216,26 +303,8 @@ const prefersReducedMotion = useReducedMotion();
                 </div>
 
                 <ul v-if="r.papers.length" class="text-small mt-2">
-                  <li v-for="(p, i) in r.papers" :key="i">
+                  <li v-for="p in papersByTiebreak(r.papers, r.tiebreak)" :key="p.name">
                     {{ p.name }}<span v-if="p.weight !== null"> ({{ p.weight }}%)</span>
-                    <span v-if="p.subjects.length" class="text-muted">
-                      — {{ p.subjects.map((s) => s.name).join("、") }}</span
-                    >
-                    <div
-                      v-if="practicableSubjects(p.subjects, practicableSlugs).length"
-                      class="mt-1 flex flex-wrap items-center gap-1"
-                    >
-                      <AppBadge
-                        v-for="s in practicableSubjects(p.subjects, practicableSlugs)"
-                        :key="s.slug"
-                        :to="`/questions?subject=${s.slug}`"
-                        intent="tag"
-                        size="sm"
-                        :aria-label="`練習考科:${s.name}(跨校)`"
-                      >
-                        {{ s.name }}
-                      </AppBadge>
-                    </div>
                   </li>
                 </ul>
 
@@ -246,6 +315,30 @@ const prefersReducedMotion = useReducedMotion();
                 <p v-if="seasonLine(r.season)" class="text-muted text-small mt-1">
                   {{ seasonLine(r.season) }}
                 </p>
+
+                <div v-if="r.papers.length" class="mt-2 space-y-1">
+                  <div
+                    v-for="p in papersByTiebreak(r.papers, r.tiebreak)"
+                    :key="p.name"
+                    class="flex flex-wrap items-center gap-1 text-small"
+                  >
+                    <span v-if="p.subjects.length" class="text-muted">{{ p.name }}:</span>
+                    <AppBadge
+                      v-for="s in p.subjects"
+                      :key="s.slug"
+                      :to="
+                        practicableSlugs.has(s.slug) ? `/questions?subject=${s.slug}` : undefined
+                      "
+                      intent="tag"
+                      size="sm"
+                      :aria-label="
+                        practicableSlugs.has(s.slug) ? `練習考科:${s.name}(跨校)` : undefined
+                      "
+                    >
+                      {{ s.name }}
+                    </AppBadge>
+                  </div>
+                </div>
               </div>
 
               <div class="text-small mt-3 flex flex-col gap-3 sm:mt-1 sm:h-full sm:justify-between">
@@ -263,18 +356,18 @@ const prefersReducedMotion = useReducedMotion();
                 </div>
                 <div class="flex gap-1">
                   <IconButton
-                    v-if="r.sourceUrl && /^https?:\/\//.test(r.sourceUrl)"
-                    :to="r.sourceUrl"
-                    :icon="icons.externalLink"
-                    label="系所官網"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  />
-                  <IconButton
                     v-if="brochureUrl(school, r.admissionCode)"
                     :to="brochureUrl(school, r.admissionCode)!"
                     :icon="icons.document"
                     label="簡章 PDF"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  />
+                  <IconButton
+                    v-if="r.sourceUrl && /^https?:\/\//.test(r.sourceUrl)"
+                    :to="r.sourceUrl"
+                    :icon="icons.externalLink"
+                    label="系所官網"
                     target="_blank"
                     rel="noopener noreferrer"
                   />
