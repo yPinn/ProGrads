@@ -11,7 +11,7 @@ describe("seasonLine", () => {
         interviewFee: 500,
         feeWaiver: ["low_income", "lower_middle_income"],
       }),
-    ).toBe("報名費 1,500 · 口試費 500 · 減免 低收入戶、中低收入戶 · 簡章公告 2025年11月12日");
+    ).toBe("報名費 1,500 · 口試費 500 · 簡章公告 2025年11月12日");
   });
 
   it("drops absent parts without leaving stray separators", () => {
@@ -25,7 +25,7 @@ describe("seasonLine", () => {
     ).toBe("簡章公告 2023年10月16日");
   });
 
-  it("falls back to the raw code for an unmapped waiver value", () => {
+  it("does not surface fee-waiver eligibility", () => {
     expect(
       seasonLine({
         announcedAt: null,
@@ -33,7 +33,7 @@ describe("seasonLine", () => {
         interviewFee: null,
         feeWaiver: ["disability"],
       }),
-    ).toBe("減免 disability");
+    ).toBe("");
   });
 
   it("returns an empty string when season is null", () => {
