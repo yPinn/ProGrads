@@ -121,6 +121,14 @@ const KNOWLEDGE_POINTS: KnowledgePointSeed[] = [
   },
   {
     subject: "ds",
+    groupSlug: "trees",
+    groupName: "Trees",
+    slug: "b-tree",
+    name: "B-tree",
+    aliases: ["B樹", "節點分裂", "插入", "最小度數"],
+  },
+  {
+    subject: "ds",
     groupSlug: "heap-and-priority-queue",
     groupName: "Heap and priority queue",
     slug: "heap",
@@ -155,6 +163,14 @@ const KNOWLEDGE_POINTS: KnowledgePointSeed[] = [
       "十六進位",
       "模除",
     ],
+  },
+  {
+    subject: "ds",
+    groupSlug: "disjoint-set",
+    groupName: "Disjoint set (union-find)",
+    slug: "disjoint-set-union",
+    name: "Disjoint set union (union-find)",
+    aliases: ["併查集", "並查集", "互斥集合", "加權聯集", "鏈結串列表示"],
   },
   {
     subject: "ds",
