@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 import { RegistrationYml } from "@prograds/shared";
 import { parse as parseYaml } from "yaml";
 import { readUnits as readAdmissionUnits } from "./report-admissions.js";
+import { readSeedSchools, schoolDisplayRank, schoolNameMap } from "./seed-schools.js";
 
 // Admission-stats coverage report. Cross-references admissions/<year>/<school>/[<season>/]
 // departments.yml (built = the admissions round is seeded) against admission-stats/<year>/
@@ -63,6 +64,7 @@ function readRegistrationUnits(root: string): Map<string, RegistrationUnit> {
 export interface AdmissionStatsCoverageUnit {
   year: number;
   school: string;
+  schoolName: string;
   season: string;
   present: boolean;
   rows: number;
@@ -87,6 +89,9 @@ export function computeAdmissionStatsCoverage(
       .map((u) => `${u.year}/${u.school}/${u.season}`),
   );
   const allKeys = new Set([...builtKeys, ...registration.keys()]);
+  const seedSchools = readSeedSchools();
+  const names = schoolNameMap(seedSchools);
+  const rank = schoolDisplayRank(seedSchools);
 
   const units = [...allKeys]
     .map((key): AdmissionStatsCoverageUnit => {
@@ -95,6 +100,7 @@ export function computeAdmissionStatsCoverage(
       return {
         year: Number.parseInt(yearStr, 10),
         school,
+        schoolName: names.get(school) ?? "",
         season,
         present: !!r,
         rows: r?.rows ?? 0,
@@ -104,7 +110,7 @@ export function computeAdmissionStatsCoverage(
     })
     .sort(
       (a, b) =>
-        b.year - a.year || a.school.localeCompare(b.school) || a.season.localeCompare(b.season),
+        b.year - a.year || rank(a.school) - rank(b.school) || a.season.localeCompare(b.season),
     );
 
   return {

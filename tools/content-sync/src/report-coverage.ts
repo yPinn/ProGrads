@@ -1,9 +1,10 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { pathToFileURL } from "node:url";
 import { FacultyYml } from "@prograds/shared";
 import { parse as parseYaml } from "yaml";
 import { parseFacultyPath } from "./faculty.js";
+import { readSeedSchools } from "./seed-schools.js";
 
 // Faculty coverage report. Cross-references the seed's schools/departments (source of truth)
 // against the faculty YAML files, and prints what is built vs missing plus per-file field
@@ -13,19 +14,6 @@ import { parseFacultyPath } from "./faculty.js";
 //   --gaps  list only the not-yet-built departments (grouped by track)
 //   --md    emit a Markdown table instead of the console layout
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SEED_FILE = path.resolve(HERE, "../../../packages/db/prisma/seed/schools.seed.ts");
-
-interface Dept {
-  slug: string;
-  name: string;
-  track: string;
-}
-interface School {
-  slug: string;
-  name: string;
-  depts: Dept[];
-}
 interface Built {
   members: number;
   withTitle: number;
@@ -34,33 +22,6 @@ interface Built {
   authored: number;
   withDegrees: number;
   asOf: string;
-}
-
-// Parse the seed (textually, like seed-refs) into ordered schools with dept name + track.
-export function readSeedSchools(): School[] {
-  const src = readFileSync(SEED_FILE, "utf8");
-  const schools: School[] = [];
-  let current: School | null = null;
-  for (const line of src.split(/\r?\n/)) {
-    // Dept rows carry a track and live inside braces: { slug: "x", name: "y", track: "z" },
-    const dept = /\{\s*slug:\s*"([^"]+)",\s*name:\s*"([^"]+)",\s*track:\s*"([^"]+)"\s*\}/.exec(
-      line,
-    );
-    if (dept && current) {
-      current.depts.push({ slug: dept[1]!, name: dept[2]!, track: dept[3]! });
-      continue;
-    }
-    // A standalone `slug: "x",` line opens a new school; its `name:` follows.
-    const schoolSlug = /^\s*slug:\s*"([^"]+)",\s*$/.exec(line);
-    if (schoolSlug) {
-      current = { slug: schoolSlug[1]!, name: "", depts: [] };
-      schools.push(current);
-      continue;
-    }
-    const schoolName = /^\s*name:\s*"([^"]+)",\s*$/.exec(line);
-    if (schoolName && current && current.name === "") current.name = schoolName[1]!;
-  }
-  return schools;
 }
 
 // Walk the faculty dir → per-file field tallies, keyed "school/dept". Orphans = files whose

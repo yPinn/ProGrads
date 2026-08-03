@@ -58,4 +58,25 @@ describe("computeAdmissionsCoverage", () => {
       assert.equal(fillable, 1);
     });
   });
+
+  it("does not mistake a school's own per-department raw-PDF subfolder for a season directory", () => {
+    withTempDir((root) => {
+      // Real-world shape: ntu/2026/departments.yml exists at the top level, plus a same-named
+      // subfolder holding raw per-dept source PDFs (not a "recommended"/"in_service" season).
+      mkdirSync(path.join(root, "2026", "ntu", "departments"), { recursive: true });
+      writeFileSync(
+        path.join(root, "2026", "ntu", "departments.yml"),
+        ["school: ntu", "year: 2026", "depts:", "  - dept: csie", "    groups: []"].join("\n"),
+      );
+      writeFileSync(path.join(root, "2026", "ntu", "departments", "701.pdf"), "");
+      writeFileSync(path.join(root, "2026", "ntu", "departments", "index.yml"), "not: a-unit-file");
+
+      const { units } = computeAdmissionsCoverage(root);
+      const seasons = units
+        .filter((u) => u.year === 2026 && u.school === "ntu")
+        .map((u) => u.season);
+
+      assert.deepEqual(seasons, ["exam"]);
+    });
+  });
 });

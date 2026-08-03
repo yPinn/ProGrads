@@ -55,6 +55,7 @@ describe("computeAdmissionStatsCoverage", () => {
       assert.equal(unit?.present, true);
       assert.equal(unit?.admissionsBuilt, true);
       assert.equal(unit?.rows, 1);
+      assert.equal(unit?.schoolName, "國立臺灣大學");
       assert.equal(fillable, 0);
     });
   });
@@ -71,6 +72,33 @@ describe("computeAdmissionStatsCoverage", () => {
       assert.equal(unit?.present, false);
       assert.equal(unit?.admissionsBuilt, true);
       assert.equal(fillable, 1);
+    });
+  });
+
+  it("resolves the ust pseudo-school (not in schools.seed) to its display-name override", () => {
+    withTempDirs((statsRoot, admissionsRoot) => {
+      mkdirSync(path.join(admissionsRoot, "2025", "ust"), { recursive: true });
+      writeFileSync(path.join(admissionsRoot, "2025", "ust", "prospectus.pdf"), "");
+
+      mkdirSync(path.join(statsRoot, "2025", "ust"), { recursive: true });
+      writeFileSync(
+        path.join(statsRoot, "2025", "ust", "registration.yml"),
+        [
+          "school: ust",
+          "year: 2025",
+          "admission_type: exam",
+          "rows:",
+          "  - official_code: ee",
+          "    name: 電機工程學系",
+          "    applicants: 50",
+        ].join("\n"),
+      );
+
+      const { units } = computeAdmissionStatsCoverage(statsRoot, admissionsRoot);
+      const unit = units.find((u) => u.year === 2025 && u.school === "ust");
+
+      assert.ok(unit);
+      assert.equal(unit?.schoolName, "台灣聯合大學系統");
     });
   });
 });

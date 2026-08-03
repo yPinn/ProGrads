@@ -80,6 +80,7 @@ export type QuestionsCoverage = z.infer<typeof QuestionsCoverageSchema>;
 export const AdmissionStatsCoverageUnitSchema = z.object({
   year: z.number().int(),
   school: z.string(),
+  schoolName: z.string(),
   season: z.string(),
   present: z.boolean(),
   rows: z.number().int(),

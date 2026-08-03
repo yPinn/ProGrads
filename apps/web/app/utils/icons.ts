@@ -19,6 +19,7 @@ export const icons = {
   // generic
   close: "i-lucide-x",
   warning: "i-lucide-triangle-alert",
+  info: "i-lucide-info",
   // external content
   externalLink: "i-lucide-external-link",
   document: "i-lucide-file-text",

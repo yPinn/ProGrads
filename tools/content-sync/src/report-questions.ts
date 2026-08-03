@@ -1,10 +1,11 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { pathToFileURL } from "node:url";
 import { type QuestionType, QuestionFrontmatter } from "@prograds/shared";
 import matter from "gray-matter";
 import { parseSections } from "./body.js";
 import { parseQuestionPath } from "./paths.js";
+import { readSeedSchools, schoolDisplayRank, schoolNameMap } from "./seed-schools.js";
 
 // Questions coverage report. Walks questions/<school>/<year>/<paper>/<qNN>.md and prints, per
 // (school, year, paper): question count, type mix, and how much of the AI-solve deliverable is
@@ -14,9 +15,6 @@ import { parseQuestionPath } from "./paths.js";
 // Usage: tsx src/report-questions.ts <questions-dir> [--gaps] [--md]
 //   --gaps  list only holes: seeded schools with no questions, and papers < 100% solved
 //   --md    emit a Markdown table instead of the console layout
-
-const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SEED_FILE = path.resolve(HERE, "../../../packages/db/prisma/seed/schools.seed.ts");
 
 // Fixed display order for the type mix (only non-zero types are printed).
 const TYPE_ORDER: QuestionType[] = ["mc", "essay", "calc", "proof", "cloze", "listening"];
@@ -37,22 +35,11 @@ interface Paper {
   bad: string[]; // per-file parse/contract errors
 }
 
-// School slug -> display name, parsed textually from the seed (source of truth for the roster).
-export function readSeedSchoolNames(): Map<string, string> {
-  const src = readFileSync(SEED_FILE, "utf8");
-  const names = new Map<string, string>();
-  let current: string | null = null;
-  for (const line of src.split(/\r?\n/)) {
-    const slug = /^\s*slug:\s*"([^"]+)",\s*$/.exec(line);
-    if (slug) {
-      current = slug[1]!;
-      if (!names.has(current)) names.set(current, "");
-      continue;
-    }
-    const name = /^\s*name:\s*"([^"]+)",\s*$/.exec(line);
-    if (name && current && names.get(current) === "") names.set(current, name[1]!);
-  }
-  return names;
+// Seed-only (no display-name overrides) — used for the CLI's "seeded schools with no
+// questions" breadth gap below, where a pseudo-school like "ust" would be a false positive
+// (it never has its own question papers).
+function readSeedSchoolNames(): Map<string, string> {
+  return new Map(readSeedSchools().map((s) => [s.slug, s.name]));
 }
 
 // Walk the questions dir → one Paper per (school, year, paper) directory.
@@ -155,14 +142,21 @@ export interface QuestionsCoverageResult {
 }
 
 export function computeQuestionsCoverage(root: string): QuestionsCoverageResult {
-  const schoolNames = readSeedSchoolNames();
+  const seedSchools = readSeedSchools();
+  // Seed-only (no display-name overrides): totalSeedSchools/missingSchools below count the real
+  // roster, not pseudo-schools like "ust" — those never have their own question papers.
+  const schoolNames = new Map(seedSchools.map((s) => [s.slug, s.name]));
+  const displayNames = schoolNameMap(seedSchools);
+  const rank = schoolDisplayRank(seedSchools);
   const all = readPapers(root);
   const orphans = all.find((p) => p.school === "" && p.year === 0)?.bad ?? [];
+  // year-first (not school-first) so same-year papers group across schools on the coverage
+  // page; main()'s own CLI sort below stays school-first for its school→year→paper console groups.
   const papers = all
     .filter((p) => p.school !== "" || p.year !== 0)
     .sort(
       (a, b) =>
-        a.school.localeCompare(b.school) || a.year - b.year || a.paper.localeCompare(b.paper),
+        b.year - a.year || rank(a.school) - rank(b.school) || a.paper.localeCompare(b.paper),
     );
 
   const schoolsWithQ = new Set(papers.map((p) => p.school));
@@ -173,7 +167,7 @@ export function computeQuestionsCoverage(root: string): QuestionsCoverageResult 
   return {
     papers: papers.map((p) => ({
       school: p.school,
-      schoolName: schoolNames.get(p.school) ?? "",
+      schoolName: displayNames.get(p.school) ?? "",
       year: p.year,
       paper: p.paper,
       count: p.count,

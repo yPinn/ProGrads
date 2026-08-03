@@ -1,8 +1,14 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { pathToFileURL } from "node:url";
 import { DepartmentsYml } from "@prograds/shared";
 import { parse as parseYaml } from "yaml";
+import {
+  type SeedDept,
+  readSeedSchools,
+  schoolDisplayRank,
+  schoolNameMap,
+} from "./seed-schools.js";
 
 // Admissions coverage report. Cross-references the seed's schools/EECS departments (source of
 // truth) against admissions/<year>/<school>/[<season>/]{schedule.yml,departments.yml}, and prints
@@ -27,19 +33,6 @@ export const TRACK_SCOPES: Record<string, { label: string; tracks: Set<string> |
   all: { label: "全部", tracks: null },
 };
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SEED_FILE = path.resolve(HERE, "../../../packages/db/prisma/seed/schools.seed.ts");
-
-interface Dept {
-  slug: string;
-  name: string;
-  track: string;
-}
-interface School {
-  slug: string;
-  name: string;
-  depts: Dept[];
-}
 export interface Unit {
   year: number;
   school: string;
@@ -50,31 +43,6 @@ export interface Unit {
   coveredDepts: string[]; // dept slugs with at least one group
   groups: number;
   bad?: string; // path/contract error
-}
-
-// Parse the seed (textually, like report-coverage) into ordered schools with dept name + track.
-export function readSeedSchools(): School[] {
-  const src = readFileSync(SEED_FILE, "utf8");
-  const schools: School[] = [];
-  let current: School | null = null;
-  for (const line of src.split(/\r?\n/)) {
-    const dept = /\{\s*slug:\s*"([^"]+)",\s*name:\s*"([^"]+)",\s*track:\s*"([^"]+)"\s*\}/.exec(
-      line,
-    );
-    if (dept && current) {
-      current.depts.push({ slug: dept[1]!, name: dept[2]!, track: dept[3]! });
-      continue;
-    }
-    const schoolSlug = /^\s*slug:\s*"([^"]+)",\s*$/.exec(line);
-    if (schoolSlug) {
-      current = { slug: schoolSlug[1]!, name: "", depts: [] };
-      schools.push(current);
-      continue;
-    }
-    const schoolName = /^\s*name:\s*"([^"]+)",\s*$/.exec(line);
-    if (schoolName && current && current.name === "") current.name = schoolName[1]!;
-  }
-  return schools;
 }
 
 // Walk the admissions dir → one Unit per (year, school, season) directory.
@@ -89,7 +57,10 @@ export function readUnits(root: string): Unit[] {
     // <year>/<school>/<file> or <year>/<school>/<season>/<file>
     if (parts.length !== 3 && parts.length !== 4) continue;
     const file = parts.at(-1)!;
-    if (!/\.(ya?ml|pdf)$/.test(file)) continue;
+    // Only these three filenames define a unit — anything else (e.g. ntu/2026/departments/701.pdf,
+    // a school's own raw-PDF subfolder) would otherwise be mistaken for a "season" directory.
+    if (file !== "prospectus.pdf" && file !== "schedule.yml" && file !== "departments.yml")
+      continue;
     const year = Number.parseInt(parts[0]!, 10);
     if (!Number.isInteger(year)) continue;
     const school = parts[1]!;
@@ -107,7 +78,7 @@ export function readUnits(root: string): Unit[] {
     };
     if (file === "prospectus.pdf") unit.prospectus = true;
     else if (file === "schedule.yml") unit.schedule = true;
-    else if (file === "departments.yml") {
+    else {
       unit.departments = true;
       try {
         const yml = DepartmentsYml.parse(parseYaml(readFileSync(path.join(root, rel), "utf8")));
@@ -119,9 +90,10 @@ export function readUnits(root: string): Unit[] {
     }
     units.set(key, unit);
   }
+  const rank = schoolDisplayRank(readSeedSchools());
   return [...units.values()].sort(
     (a, b) =>
-      b.year - a.year || a.school.localeCompare(b.school) || a.season.localeCompare(b.season),
+      b.year - a.year || rank(a.school) - rank(b.school) || a.season.localeCompare(b.season),
   );
 }
 
@@ -147,7 +119,8 @@ export function computeAdmissionsCoverage(
   const scope = TRACK_SCOPES[trackScope]!;
   const schools = readSeedSchools();
   const seedBySlug = new Map(schools.map((s) => [s.slug, s]));
-  const scopedDepts = (slug: string): Dept[] =>
+  const names = schoolNameMap(schools);
+  const scopedDepts = (slug: string): SeedDept[] =>
     (seedBySlug.get(slug)?.depts ?? []).filter(
       (d) => scope.tracks === null || scope.tracks.has(d.track),
     );
@@ -157,7 +130,7 @@ export function computeAdmissionsCoverage(
     const covered = scoped.filter((d) => u.coveredDepts.includes(d.slug)).length;
     return {
       ...u,
-      schoolName: seedBySlug.get(u.school)?.name ?? "",
+      schoolName: names.get(u.school) ?? "",
       scopeDeptTotal: scoped.length,
       scopeDeptCovered: covered,
       scopeLabel: scope.label,
@@ -199,7 +172,7 @@ function main(): void {
   const units = readUnits(root);
 
   // In-scope seed depts for a school (empty for non-seed schools like ust).
-  const eecsDepts = (slug: string): Dept[] =>
+  const eecsDepts = (slug: string): SeedDept[] =>
     (seedBySlug.get(slug)?.depts ?? []).filter(
       (d) => scope.tracks === null || scope.tracks.has(d.track),
     );
