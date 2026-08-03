@@ -20,6 +20,10 @@ export const icons = {
   close: "i-lucide-x",
   warning: "i-lucide-triangle-alert",
   info: "i-lucide-info",
+  // coverage / inventory presence (distinct from question-grading correct/wrong above —
+  // "not built yet" isn't wrong, it's just absent)
+  present: "i-lucide-check",
+  absent: "i-lucide-minus",
   // external content
   externalLink: "i-lucide-external-link",
   document: "i-lucide-file-text",

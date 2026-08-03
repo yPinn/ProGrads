@@ -14,7 +14,7 @@ const { data, isPending, isError, error, refetch } = useCoverage();
 
 const pct = (num: number, den: number): string =>
   den === 0 ? "—" : `${Math.round((100 * num) / den)}%`;
-const markGlyph = (b: boolean): string => (b ? "✓" : "–");
+const markIcon = (b: boolean): string => (b ? icons.present : icons.absent);
 const markClass = (b: boolean): string => (b ? "text-success-ink" : "text-dimmed");
 // season is the admission_type value itself (D22); exam is the unlabeled default.
 const seasonSuffix = (season: string): string =>
@@ -150,7 +150,13 @@ const UST_NOTE =
                   <td class="p-2">{{ d.schoolName }}</td>
                   <td class="p-2">{{ d.deptName }}</td>
                   <td class="text-muted p-2">{{ d.track }}</td>
-                  <td class="p-2" :class="markClass(d.built)">{{ markGlyph(d.built) }}</td>
+                  <td class="p-2">
+                    <UIcon
+                      :name="markIcon(d.built)"
+                      :class="markClass(d.built)"
+                      aria-hidden="true"
+                    />
+                  </td>
                   <td class="p-2 text-right tabular-nums">{{ d.built ? d.members : "—" }}</td>
                   <td class="p-2 text-right tabular-nums">{{ pct(d.withTitle, d.members) }}</td>
                   <td class="p-2 text-right tabular-nums">{{ pct(d.withResearch, d.members) }}</td>
@@ -216,12 +222,26 @@ const UST_NOTE =
                     class="border-default/60 border-b last:border-b-0"
                   >
                     <td class="p-2">{{ u.schoolName || u.school }}{{ seasonSuffix(u.season) }}</td>
-                    <td class="p-2" :class="markClass(u.prospectus)">
-                      {{ markGlyph(u.prospectus) }}
+                    <td class="p-2">
+                      <UIcon
+                        :name="markIcon(u.prospectus)"
+                        :class="markClass(u.prospectus)"
+                        aria-hidden="true"
+                      />
                     </td>
-                    <td class="p-2" :class="markClass(u.schedule)">{{ markGlyph(u.schedule) }}</td>
-                    <td class="p-2" :class="markClass(u.departments)">
-                      {{ markGlyph(u.departments) }}
+                    <td class="p-2">
+                      <UIcon
+                        :name="markIcon(u.schedule)"
+                        :class="markClass(u.schedule)"
+                        aria-hidden="true"
+                      />
+                    </td>
+                    <td class="p-2">
+                      <UIcon
+                        :name="markIcon(u.departments)"
+                        :class="markClass(u.departments)"
+                        aria-hidden="true"
+                      />
                     </td>
                     <td class="p-2 text-right tabular-nums">{{ u.groups || "—" }}</td>
                     <td class="p-2 tabular-nums">
@@ -371,10 +391,20 @@ const UST_NOTE =
                     class="border-default/60 border-b last:border-b-0"
                   >
                     <td class="p-2">{{ u.schoolName || u.school }}{{ seasonSuffix(u.season) }}</td>
-                    <td class="p-2" :class="markClass(u.admissionsBuilt)">
-                      {{ markGlyph(u.admissionsBuilt) }}
+                    <td class="p-2">
+                      <UIcon
+                        :name="markIcon(u.admissionsBuilt)"
+                        :class="markClass(u.admissionsBuilt)"
+                        aria-hidden="true"
+                      />
                     </td>
-                    <td class="p-2" :class="markClass(u.present)">{{ markGlyph(u.present) }}</td>
+                    <td class="p-2">
+                      <UIcon
+                        :name="markIcon(u.present)"
+                        :class="markClass(u.present)"
+                        aria-hidden="true"
+                      />
+                    </td>
                     <td class="p-2 text-right tabular-nums">{{ u.present ? u.rows : "—" }}</td>
                   </tr>
                 </template>
