@@ -37,6 +37,7 @@ export default tseslint.config(
       "apps/**",
       "packages/**",
       "tools/**",
+      "tasks/**",
     ],
   },
   ...base,

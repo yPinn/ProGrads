@@ -9,3 +9,4 @@ pnpm-lock.yaml
 packages/db/generated
 **/*.gen.ts
 CHANGELOG.md
+tasks
