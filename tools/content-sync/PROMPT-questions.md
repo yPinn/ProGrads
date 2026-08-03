@@ -46,6 +46,7 @@
   `pnpm --filter @prograds/pdf-extract crop <pdf> <out.png> <page> <yTop> <yBot> [xL] [xR] [scale]`
   （座標為頁面比例 0–1，與頁面尺寸無關；單張 PNG 寬度建議 ≤1900px）
 - Tier1 萃取不輸出 `model_used`、`confidence`、`review_status`；這些只由 AI 解題 pipeline 補上。
+- 萃取前查 `packages/db/prisma/seed/knowledge-points.seed.ts`：目前只有 `ds`／`algo`／`english` 建有分類池，其餘科目的 `knowledge_point_slugs` 一律留空。
 
 ---
 
@@ -73,6 +74,7 @@ source_url: ""
 license_status: school_official
 group: ""
 knowledge_points: [{zh短語}]
+knowledge_point_slugs: [{比對 knowledge-points.seed.ts 後的 canonical slug；該科目尚無分類池則留 []}]
 ---
 
 ## 題目
@@ -93,17 +95,18 @@ A
 
 ## 欄位規則
 
-| 欄位               | 說明                                                                            |
-| ------------------ | ------------------------------------------------------------------------------- |
-| `question_id`      | `{school}-{year}-{paper}-q01`（子題 `q01a` / `q01b`），必須與路徑推導值一致     |
-| `question_type`    | `mc` 選擇題 / `essay` 問答申論 / `calc` 計算 / `proof` 推導證明                 |
-| `points`           | 題幹標示的配分 (如 `(5pts)`→`5`、`(10 points)`→`10`);未標示或全卷均一則省略此行 |
-| `subjects`         | 確定的 slug 才填，不確定留 `[]`                                                 |
-| `departments`      | 考此卷的系所 slugs；共用卷列多個，未知時先向用戶確認                            |
-| `knowledge_points` | 中文短語，≤5 個                                                                 |
-| `license_status`   | `school_official`（預設）；政府統一考試用 `national_exam`                       |
-| `group`            | 題組或分卷輔助 metadata；不確定或不適用時空字串 `""`                            |
-| `source_url`       | 用戶補填，輸出時留 `""`                                                         |
+| 欄位                    | 說明                                                                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `question_id`           | `{school}-{year}-{paper}-q01`（子題 `q01a` / `q01b`），必須與路徑推導值一致                                        |
+| `question_type`         | `mc` 選擇題 / `essay` 問答申論 / `calc` 計算 / `proof` 推導證明                                                    |
+| `points`                | 題幹標示的配分 (如 `(5pts)`→`5`、`(10 points)`→`10`);未標示或全卷均一則省略此行                                    |
+| `subjects`              | 確定的 slug 才填，不確定留 `[]`                                                                                    |
+| `departments`           | 考此卷的系所 slugs；共用卷列多個，未知時先向用戶確認                                                               |
+| `knowledge_points`      | 中文短語，≤5 個                                                                                                    |
+| `knowledge_point_slugs` | 科目已在 seed 分類池中才填；比對 `knowledge_points` 與池中 slug 的 name/aliases，命中才填（可多筆）；未建池留 `[]` |
+| `license_status`        | `school_official`（預設）；政府統一考試用 `national_exam`                                                          |
+| `group`                 | 題組或分卷輔助 metadata；不確定或不適用時空字串 `""`                                                               |
+| `source_url`            | 用戶補填，輸出時留 `""`                                                                                            |
 
 ## 區塊規則
 
