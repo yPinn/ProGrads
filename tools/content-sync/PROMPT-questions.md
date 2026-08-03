@@ -48,6 +48,34 @@
 - Tier1 萃取不輸出 `model_used`、`confidence`、`review_status`；這些只由 AI 解題 pipeline 補上。
 - 萃取前查 `packages/db/prisma/seed/knowledge-points.seed.ts`：目前只有 `ds`／`algo`／`english` 建有分類池，其餘科目的 `knowledge_point_slugs` 一律留空。
 
+## 共用聯招卷（跨校，如台聯大）
+
+`Exam` 是 `(school, year, admissionType)` 1:1 校方，`departments` 只能引用同校 seed（`validate/questions.ts` 的 `schoolDepts.get(path_.school)`、`sync.ts` 的 `resolver.department(school.id, d)` 都鎖死同校）。一卷被**多校**共用（如台灣聯合大學系統碩士班聯合招生「台聯大聯招」電機類）不建跨校實體，改比照 `admission-stats` 既有慣例——各校各自一份：
+
+- 原始 PDF 只存一份：`raw/ust/{year}/{subject-slug}.pdf`（不分校）。
+- 逐校萃取進 `questions/{school}/{year}/{subject-slug}-ust/qNN.md`：markdown 內容只手動萃取一次，依 `admissions/{year}/{school}/departments.yml` 已標「台聯大聯招」的區塊，複製到每個實際採用該卷的 host school 路徑；`departments` 只列該校自己的系所 slug。
+- paper slug **必須加 `-ust` 後綴**（如 `electronics-ust`），不可省略：同校同科目常同時存在獨招卷與台聯大卷（例：NCU `ee` 電子組=台聯大`electronics`、固態組=獨招自己的`electronics`；NTHU `isa`所自己的獨招卷也考`[ds, algo]`）。沒有後綴會讓 sync 依 `(examId, slug)` 誤合併成同一個 ExamSubject，安靜吃掉資料。`subjects:` 欄位不受影響，仍填概念層科目 slug（如 `electronics`）；`exam_subject` 顯示名也不帶 `-ust`。
+
+台聯大成員校為中央/政大/陽明交通/清華，但電機類只有中央(ncu)/清華(nthu)/陽明交通(nycu)有對映 seed 系所（政大無工學院，見 `schools.seed.ts` 註解）；政大在台聯大的角色是人文/文化研究類，目前不在本專案 admissions 內容範圍內，故不適用本節。
+
+2026 電機類已知對照（依 `admissions/2026/{school}/departments.yml` 台聯大區塊彙整；若簡章逐年調整需重新核對）：
+
+| paper slug (`-ust`) | 使用的 host school + dept                                                                                                                                                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `circuits-ust`      | nthu-ee(325甲，二擇一之一)                                                                                                                                                                                                            |
+| `control-ust`       | nthu-ee(325甲，二擇一之一)、nycu-ctrl(313乙A、315丙C二擇一之一)                                                                                                                                                                       |
+| `electronics-ust`   | ncu-ee(301電子組)、nthu-ee(327丙)、nthu-elec(329)、nthu-photonics(328二擇一之一)、nycu-elec(304甲二擇一之一)、nycu-ee(308甲/310)、nycu-semi(311)、nycu-ctrl(315丙C)、nycu-comm(317乙/319丙B三擇一之一)、nycu-photonics(320三選二之一) |
+| `em-ust`            | nthu-elec(329)、nthu-photonics(328)、nycu-elec(304甲二擇一之一)、nycu-comm(317乙/319丙B)、nycu-photonics(320)                                                                                                                         |
+| `modphys-ust`       | nthu-elec(329)、nthu-photonics(328二擇一之一)、nycu-elec(304甲二擇一之一)、nycu-comm(317乙/319丙B三擇一之一)、nycu-photonics(320三選二之一)                                                                                           |
+| `edevices-ust`      | nthu-elec(329)、nycu-elec(304甲二擇一之一)                                                                                                                                                                                            |
+| `signals-ust`       | nthu-ee(326乙，二擇一之一)、nycu-elec(306乙B)、nycu-ctrl(314乙B)、nycu-comm 未用（comm 用 commsys）                                                                                                                                   |
+| `commsys-ust`       | nthu-ee(326乙)、nthu-comm(330)、nycu-elec(306乙B)、nycu-ctrl(314乙B)、nycu-comm(316甲/318丙A)                                                                                                                                         |
+| `engmath-b-ust`     | nycu-elec(306乙B)、nycu-ctrl(313乙A/314乙B/315丙C 二擇一之一)、nycu-comm(316甲/318丙A)、nycu-photonics(320二擇一之一)                                                                                                                 |
+| `engmath-c-ust`     | nthu-elec(329)、nthu-photonics(328)、nycu-ctrl(313乙A/315丙C 二擇一之一)、nycu-comm(317乙/319丙B三擇一之一)、nycu-photonics(320二擇一之一)                                                                                            |
+| `ds-ust`            | 代碼 3002；無對映系所（電機類「資料結構」對映生醫科學與工程學系台聯大302/303組，非 seed，暫不收）                                                                                                                                     |
+
+「工程數學A」該年無試題可略過；`edevices` 對映簡章「固態電子元件」。化學類／物理類目前無任何 seed 系所對映（`schools.seed.ts` 無 chem/physics track 系所），不收。
+
 ---
 
 ## 任務
