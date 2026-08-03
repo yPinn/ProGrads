@@ -74,7 +74,9 @@
 | `engmath-c-ust`     | nthu-elec(329)、nthu-photonics(328)、nycu-ctrl(313乙A/315丙C 二擇一之一)、nycu-comm(317乙/319丙B三擇一之一)、nycu-photonics(320二擇一之一)                                                                                            |
 | `ds-ust`            | 代碼 3002；無對映系所（電機類「資料結構」對映生醫科學與工程學系台聯大302/303組，非 seed，暫不收）                                                                                                                                     |
 
-「工程數學A」該年無試題可略過；`edevices` 對映簡章「固態電子元件」。化學類／物理類目前無任何 seed 系所對映（`schools.seed.ts` 無 chem/physics track 系所），不收。
+「工程數學A」代碼 3003（部分年度無試題）；`edevices` 對映簡章「固態電子元件」。化學類／物理類目前無任何 seed 系所對映（`schools.seed.ts` 無 chem/physics track 系所），不收，但原始檔留著備用（`raw/ust/{year}/chem-physics/`）。
+
+原始下載檔名的代碼規律（三個學年度驗證一致，`_`=學年度末兩碼）：`ec1_1`固態電子元件、`ec1_11`訊號與系統、`ec1_2`近代物理、`ec1_3`控制系統、`ec1_4`資料結構、`ec1_5`電子學、`ec1_6`電路學、`ec1_7`電磁學、`ecd1_`通訊系統、`ecw1_a/b/c`工程數學A/B/C。**每年仍應實際開圖核對**再 rename——原始檔名不保證年年沿用同一套內部代碼分配。
 
 ---
 
