@@ -19,7 +19,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@nuxt/image": "^2.0.0",
+    "@nuxt/image": "^2.1.0",
     "@nuxt/ui": "^4.10.0",
     "@nuxtjs/i18n": "^10.4.1",
     "@nuxtjs/mdc": "^0.22.2",
