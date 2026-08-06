@@ -15,8 +15,8 @@
     "gray-matter": "^4.0.3"
   },
   "devDependencies": {
-    "@types/node": "^25.9.3",
-    "tsx": "^4.20.6",
-    "typescript": "^6.0.3"
+    "@types/node": "^26.1.2",
+    "tsx": "^4.23.5",
+    "typescript": "^7.0.2"
   }
 }
