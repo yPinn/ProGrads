@@ -193,7 +193,12 @@ const UST_NOTE =
                     class="border-default/60 border-b last:border-b-0"
                   >
                     <td class="p-2">{{ p.schoolName || p.school }}</td>
-                    <td class="p-2">{{ p.paper }}</td>
+                    <td class="p-2">
+                      <div>{{ p.paper }}</div>
+                      <div v-if="p.subjectNames" class="text-muted text-caption">
+                        {{ p.subjectNames }}
+                      </div>
+                    </td>
                     <td class="p-2 text-right tabular-nums">{{ p.count }}</td>
                     <td class="text-muted p-2">{{ p.typeMix }}</td>
                     <td class="p-2 text-right tabular-nums">{{ pct(p.answered, p.count) }}</td>

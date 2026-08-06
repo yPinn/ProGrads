@@ -1,13 +1,14 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { SCHOOLS } from "@prograds/db/seed/schools";
 
-// Single source of truth for parsing packages/db/prisma/seed/schools.seed.ts — the report-*.ts
-// coverage modules previously each reimplemented this parse independently and had started to
-// drift (see schoolNameMap below). Import from here instead of writing another parser.
+// Single source of truth for schools.seed.ts's SCHOOLS roster, so report-*.ts modules don't
+// each reimplement slug→name lookups (see schoolNameMap below).
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SEED_FILE = path.resolve(HERE, "../../../packages/db/prisma/seed/schools.seed.ts");
+// slug/name pair → lookup map. Shared by schoolNameMap and seed-subjects.ts's subjectNameMap.
+export function toNameMap<T extends { slug: string; name: string }>(
+  items: T[],
+): Map<string, string> {
+  return new Map(items.map((s) => [s.slug, s.name]));
+}
 
 export interface SeedDept {
   slug: string;
@@ -20,32 +21,10 @@ export interface SeedSchool {
   depts: SeedDept[];
 }
 
-// Parsed in SCHOOLS array order (四大 → 政大 → 四中 → 其他); schoolDisplayRank below relies on
-// this order and does not re-sort.
+// SCHOOLS array order (四大 → 政大 → 四中 → 其他); schoolDisplayRank below relies on this order
+// and does not re-sort.
 export function readSeedSchools(): SeedSchool[] {
-  const src = readFileSync(SEED_FILE, "utf8");
-  const schools: SeedSchool[] = [];
-  let current: SeedSchool | null = null;
-  for (const line of src.split(/\r?\n/)) {
-    // Dept rows carry a track and live inside braces: { slug: "x", name: "y", track: "z" },
-    const dept = /\{\s*slug:\s*"([^"]+)",\s*name:\s*"([^"]+)",\s*track:\s*"([^"]+)"\s*\}/.exec(
-      line,
-    );
-    if (dept && current) {
-      current.depts.push({ slug: dept[1]!, name: dept[2]!, track: dept[3]! });
-      continue;
-    }
-    // A standalone `slug: "x",` line opens a new school; its `name:` follows.
-    const schoolSlug = /^\s*slug:\s*"([^"]+)",\s*$/.exec(line);
-    if (schoolSlug) {
-      current = { slug: schoolSlug[1]!, name: "", depts: [] };
-      schools.push(current);
-      continue;
-    }
-    const schoolName = /^\s*name:\s*"([^"]+)",\s*$/.exec(line);
-    if (schoolName && current && current.name === "") current.name = schoolName[1]!;
-  }
-  return schools;
+  return SCHOOLS.map((s) => ({ slug: s.slug, name: s.name, depts: s.departments }));
 }
 
 // Curated display rank (四大 → 政大 → 四中 → 其他 = schools.seed.ts's SCHOOLS array position,
@@ -69,7 +48,7 @@ const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
 // non-seed pseudo-schools (this is the exact drift the module-level comment above warns about:
 // report-questions.ts did this and silently rendered "" for ust before this helper existed).
 export function schoolNameMap(schools: SeedSchool[]): Map<string, string> {
-  const names = new Map(schools.map((s) => [s.slug, s.name]));
+  const names = toNameMap(schools);
   for (const [slug, name] of Object.entries(DISPLAY_NAME_OVERRIDES)) {
     if (!names.has(slug)) names.set(slug, name);
   }

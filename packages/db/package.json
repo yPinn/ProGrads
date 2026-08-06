@@ -9,6 +9,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./seed/schools": {
+      "types": "./dist/prisma/seed/schools.seed.d.ts",
+      "import": "./dist/prisma/seed/schools.seed.js"
+    },
+    "./seed/taxonomy": {
+      "types": "./dist/prisma/seed/taxonomy.seed.d.ts",
+      "import": "./dist/prisma/seed/taxonomy.seed.js"
     }
   },
   "scripts": {

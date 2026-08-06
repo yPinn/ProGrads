@@ -59,6 +59,7 @@ export const QuestionsCoveragePaperSchema = z.object({
   paper: z.string(),
   count: z.number().int(),
   typeMix: z.string(),
+  subjectNames: z.string(),
   answered: z.number().int(),
   solved: z.number().int(),
   withKp: z.number().int(),

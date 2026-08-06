@@ -5,7 +5,8 @@ import { type QuestionType, QuestionFrontmatter } from "@prograds/shared";
 import matter from "gray-matter";
 import { parseSections } from "./body.js";
 import { parseQuestionPath } from "./paths.js";
-import { readSeedSchools, schoolDisplayRank, schoolNameMap } from "./seed-schools.js";
+import { readSeedSchools, schoolDisplayRank, schoolNameMap, toNameMap } from "./seed-schools.js";
+import { readSeedSubjects, subjectNameMap } from "./seed-subjects.js";
 
 // Questions coverage report. Walks questions/<school>/<year>/<paper>/<qNN>.md and prints, per
 // (school, year, paper): question count, type mix, and how much of the AI-solve deliverable is
@@ -39,7 +40,7 @@ interface Paper {
 // questions" breadth gap below, where a pseudo-school like "ust" would be a false positive
 // (it never has its own question papers).
 function readSeedSchoolNames(): Map<string, string> {
-  return new Map(readSeedSchools().map((s) => [s.slug, s.name]));
+  return toNameMap(readSeedSchools());
 }
 
 // Walk the questions dir → one Paper per (school, year, paper) directory.
@@ -115,6 +116,13 @@ const typeMix = (types: Map<QuestionType, number>): string =>
     .map((t) => `${t}${types.get(t)}`)
     .join("/");
 
+// Sorted for determinism — frontmatter subject order is per-question, not meaningful per-paper.
+const subjectNames = (subjects: Set<string>, names: Map<string, string>): string =>
+  [...subjects]
+    .map((s) => names.get(s) ?? s)
+    .sort()
+    .join("、");
+
 // JSON-friendly shape for the coverage dev page (apps/web /coverage) — one flat row per built
 // paper (the type Map collapses to the same "mc4/essay2" string the CLI prints).
 export interface QuestionsCoveragePaper {
@@ -124,6 +132,7 @@ export interface QuestionsCoveragePaper {
   paper: string;
   count: number;
   typeMix: string;
+  subjectNames: string;
   answered: number;
   solved: number;
   withKp: number;
@@ -145,9 +154,10 @@ export function computeQuestionsCoverage(root: string): QuestionsCoverageResult 
   const seedSchools = readSeedSchools();
   // Seed-only (no display-name overrides): totalSeedSchools/missingSchools below count the real
   // roster, not pseudo-schools like "ust" — those never have their own question papers.
-  const schoolNames = new Map(seedSchools.map((s) => [s.slug, s.name]));
+  const schoolNames = toNameMap(seedSchools);
   const displayNames = schoolNameMap(seedSchools);
   const rank = schoolDisplayRank(seedSchools);
+  const subjectNamesBySlug = subjectNameMap(readSeedSubjects());
   const all = readPapers(root);
   const orphans = all.find((p) => p.school === "" && p.year === 0)?.bad ?? [];
   // year-first (not school-first) so same-year papers group across schools on the coverage
@@ -172,6 +182,7 @@ export function computeQuestionsCoverage(root: string): QuestionsCoverageResult 
       paper: p.paper,
       count: p.count,
       typeMix: typeMix(p.types),
+      subjectNames: subjectNames(p.subjects, subjectNamesBySlug),
       answered: p.answered,
       solved: p.solved,
       withKp: p.withKp,

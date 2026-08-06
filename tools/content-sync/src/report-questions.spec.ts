@@ -56,6 +56,7 @@ describe("computeQuestionsCoverage", () => {
       assert.ok(paper, "the ntu/2025/dsa-a paper should be present");
       assert.equal(paper?.count, 1);
       assert.equal(paper?.typeMix, "mc1");
+      assert.equal(paper?.subjectNames, "演算法");
       assert.equal(paper?.answered, 1);
       assert.equal(paper?.solved, 1);
       assert.equal(result.totalQuestions, 1);

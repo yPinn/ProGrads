@@ -10,7 +10,8 @@ import type { PrismaClient } from "../../generated/client/client.ts";
 
 type DeptSeed = { slug: string; name: string; track: string };
 
-const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
+// Exported for tools/content-sync (no live DB there).
+export const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
   // ── 四大（台清交成）──────────────────────────────────────────
   {
     slug: "ntu",

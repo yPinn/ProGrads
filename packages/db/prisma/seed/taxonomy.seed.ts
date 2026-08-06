@@ -65,7 +65,8 @@ const TAXONOMY: { slug: string; name: string; tracks: TrackSeed[] }[] = [
   },
 ];
 
-const SUBJECTS: TrackSeed[] = [
+// Exported for tools/content-sync (no live DB there).
+export const SUBJECTS: TrackSeed[] = [
   { slug: "ds", name: "資料結構" },
   { slug: "algo", name: "演算法" },
   { slug: "co", name: "計算機組織與結構" },
