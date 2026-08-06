@@ -126,6 +126,8 @@ const SCHOOLS: { slug: string; name: string; departments: DeptSeed[] }[] = [
       { slug: "csie", name: "資訊工程學系", track: "cs" },
       { slug: "ee", name: "電機工程學系", track: "ee" },
       { slug: "comm", name: "通訊工程學系", track: "ee" },
+      // 台聯大聯招電機類(代碼300) 302/303 兩班組共用系名; track 借用 ee(已含 ds/algo/engmath)。
+      { slug: "biomed", name: "生醫科學與工程學系", track: "ee" },
       { slug: "im", name: "資訊管理學系", track: "info-mgmt" },
       // 管理學院 (師資軸擴充; 考科軸暫未涵蓋)
       { slug: "ba", name: "企業管理學系", track: "business-admin" },

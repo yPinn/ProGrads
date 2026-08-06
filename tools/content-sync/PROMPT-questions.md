@@ -72,7 +72,7 @@
 | `commsys-ust`       | nthu-ee(326乙)、nthu-comm(330)、nycu-elec(306乙B)、nycu-ctrl(314乙B)、nycu-comm(316甲/318丙A)                                                                                                                                         |
 | `engmath-b-ust`     | nycu-elec(306乙B)、nycu-ctrl(313乙A/314乙B/315丙C 二擇一之一)、nycu-comm(316甲/318丙A)、nycu-photonics(320二擇一之一)                                                                                                                 |
 | `engmath-c-ust`     | nthu-elec(329)、nthu-photonics(328)、nycu-ctrl(313乙A/315丙C 二擇一之一)、nycu-comm(317乙/319丙B三擇一之一)、nycu-photonics(320二擇一之一)                                                                                            |
-| `ds-ust`            | 代碼 3002；無對映系所（電機類「資料結構」對映生醫科學與工程學系台聯大302/303組，非 seed，暫不收）                                                                                                                                     |
+| `ds-ust`            | 代碼 3002；ncu-biomed(302生醫資電組，與工程數學B二擇一之一；303資電組不考本科)                                                                                                                                                        |
 
 「工程數學A」代碼 3003（部分年度無試題）；`edevices` 對映簡章「固態電子元件」。化學類／物理類目前無任何 seed 系所對映（`schools.seed.ts` 無 chem/physics track 系所），不收，但原始檔留著備用（`raw/ust/{year}/chem-physics/`）。
 
