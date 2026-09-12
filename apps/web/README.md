@@ -12,7 +12,7 @@ pnpm --filter @prograds/web test      # Vitest（@nuxt/test-utils）
 ```
 
 已啟用模組：Nuxt UI（Tailwind v4）、MDC、Image、SEO、i18n（zh-TW）、Pinia、@nuxt/eslint。
-函式庫：TanStack Query（已接 plugin）/Table、vee-validate + Zod 3、echarts/vue-echarts、Schedule-X。
+函式庫：TanStack Query（已接 plugin）、vee-validate + Zod 3、echarts/vue-echarts、Schedule-X。
 
 App 骨架（`app/`）：`app.vue`（`UApp` + `NuxtLayout`/`NuxtPage`）、`layouts/default.vue`、`error.vue`、
 `pages/index.vue`、`app.config.ts`（Nuxt UI 主題色）。主題自訂見 `app/app.config.ts` 與 `assets/css/main.css`。

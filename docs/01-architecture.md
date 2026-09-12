@@ -117,13 +117,16 @@ pnpm workspaces + Turborepo。結構：`apps/web`(Nuxt)、`apps/api`(Nest)、`pa
 ### 前端（Nuxt）
 
 Nuxt 3/4；UI Nuxt UI + Tailwind；狀態 Pinia；動態取資料 TanStack Query (Vue)；表單 VeeValidate + Zod；
-內容由 API 驅動，Markdown 題幹/解析以 Nuxt MDC + KaTeX + Shiki 渲染；圖表 vue-echarts；行事曆 Schedule-X；表格 TanStack Table；
+內容由 API 驅動，Markdown 題幹/解析以 Nuxt MDC + KaTeX + Shiki 渲染；圖表 vue-echarts；行事曆 Schedule-X；
 SEO `@nuxtjs/seo`；i18n `@nuxtjs/i18n`；`@nuxt/image`、`@nuxt/icon`。
 
-> **現況**：`vue-echarts`/`echarts`、`@tanstack/vue-table`、`vee-validate`/`@vee-validate/zod`
-> 已裝但 `app/` 內尚無任何引用（圖表/表格/表單功能尚未接線）——見
+> **現況**：`vue-echarts`/`echarts`、`vee-validate`/`@vee-validate/zod`
+> 已裝但 `app/` 內尚無任何引用（圖表/表單功能尚未接線）——見
 > [09-roadmap.md](09-roadmap.md) 的技術與文件缺口。其餘（Pinia、
 > TanStack Query、Nuxt MDC、Schedule-X、@nuxtjs/seo/i18n、@nuxt/image）皆已接線使用中。
+>
+> `@tanstack/vue-table` 原列為表格方案,已於未使用狀態下移除(無排程功能會用到；招生頁的表格
+> 呈現是純文字/HTML table,非此套件)。
 
 ### 後端（NestJS）
 
