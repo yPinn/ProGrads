@@ -55,6 +55,10 @@ jobs:
   content:
     name: content
     runs-on: ubuntu-latest
+    # Dependabot-triggered runs use a separate secrets context that doesn't carry
+    # CONTENT_DEPLOY_KEY, so the checkout below always 404s for them — skip rather
+    # than show a permanent false-red on every dependency PR.
+    if: github.actor != 'dependabot[bot]'
     steps:
       - uses: actions/checkout@v7
 
