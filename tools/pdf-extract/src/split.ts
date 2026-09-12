@@ -59,7 +59,9 @@ for (const { name, start, end } of ranges) {
   doc.rearrangePages(keep);
 
   const outPath = path.join(outDir, `${name}.pdf`);
-  doc.save(outPath);
+  // mupdf 1.28.1 tightened PDFDocument.save()'s type to require the options arg
+  // (still optional at runtime — ensureOptions() treats undefined same as omitted).
+  doc.save(outPath, undefined);
   // eslint-disable-next-line no-console
   console.log(`  + ${name}.pdf (pages ${start}-${end} -> ${outPath})`);
   doc.destroy();

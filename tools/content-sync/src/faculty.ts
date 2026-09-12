@@ -4,8 +4,7 @@ import { parse as parseYaml } from "yaml";
 import type { Resolver } from "./sync.js";
 
 export type FacultyResult =
-  | { school: string; dept: string; members: number; theses: number }
-  | { skipped: string };
+  { school: string; dept: string; members: number; theses: number } | { skipped: string };
 
 // faculty/<school>/<dept>.yml; school/dept are cross-checked against the file body.
 export function parseFacultyPath(relPath: string): { school: string; dept: string } {

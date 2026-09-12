@@ -12,11 +12,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "mupdf": "^1.28.0"
+    "mupdf": "^1.28.1"
   },
   "devDependencies": {
-    "@types/node": "^25.9.3",
-    "tsx": "^4.20.6",
+    "@types/node": "^25.9.6",
+    "tsx": "^4.23.13",
     "typescript": "^6.0.3"
   }
 }

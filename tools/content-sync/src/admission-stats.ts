@@ -4,8 +4,7 @@ import { parse as parseYaml } from "yaml";
 import type { Resolver } from "./sync.js";
 
 export type RegistrationResult =
-  | { school: string; matched: number; unmatched: number }
-  | { skipped: string };
+  { school: string; matched: number; unmatched: number } | { skipped: string };
 
 // admission-stats/<year>/<school>/[<season>/]registration.yml; year/school are cross-checked
 // against the file body. The season segment IS the admission_type verbatim (shared

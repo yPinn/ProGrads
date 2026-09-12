@@ -4,12 +4,10 @@ import { parse as parseYaml } from "yaml";
 import type { Resolver } from "./sync.js";
 
 export type ScheduleResult =
-  | { seasonId: string; events: number; slots: number }
-  | { skipped: string };
+  { seasonId: string; events: number; slots: number } | { skipped: string };
 
 export type DepartmentsResult =
-  | { school: string; groups: number; rounds: number; papers: number }
-  | { skipped: string };
+  { school: string; groups: number; rounds: number; papers: number } | { skipped: string };
 
 // Date-only values are stored at Taipei midnight, matching the content convention
 // (T00:00:00+08:00). Full datetimes already carry their offset, so use them as-is.
