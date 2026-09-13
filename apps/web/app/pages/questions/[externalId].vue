@@ -16,6 +16,7 @@ const { data: q, isPending, isError, error, refetch, suspense } = useQuestion(ex
 
 // 標準解析預設收合(查閱頁不代答,但也不該一進頁面就把答案攤開);切題(上一題/下一題)時重新收合。
 const showAnswer = ref(false);
+const showReportDialog = ref(false);
 watch(externalId, () => {
   showAnswer.value = false;
 });
@@ -82,6 +83,12 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onArrowNav));
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
               <h1 class="font-serif text-title-md tracking-tight">{{ q.examSubject.name }}</h1>
               <AppBadge intent="meta">{{ QUESTION_TYPE_LABELS[q.type] }}</AppBadge>
+              <IconButton
+                :icon="icons.report"
+                label="回報此題錯誤"
+                class="ml-auto"
+                @click="showReportDialog = true"
+              />
             </div>
             <p class="text-muted text-small mt-1">
               {{ q.exam.school.name }} {{ q.exam.year }} ·
@@ -189,5 +196,11 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onArrowNav));
         </article>
       </QueryState>
     </div>
+
+    <ErrorReportDialog
+      v-if="q"
+      v-model:open="showReportDialog"
+      :question-external-id="q.externalId"
+    />
   </UContainer>
 </template>

@@ -148,6 +148,16 @@ function choiceState(
   if (isCorrect) return "correct";
   return isSelected(q.externalId, label) ? "wrong" : "muted";
 }
+
+// One shared dialog for the whole paper (not one per question) — reportingQuestionId tracks
+// which question it's currently reporting on; closing the dialog clears it back to null.
+const reportingQuestionId = ref<string | null>(null);
+const reportDialogOpen = computed({
+  get: () => reportingQuestionId.value !== null,
+  set: (v: boolean) => {
+    if (!v) reportingQuestionId.value = null;
+  },
+});
 </script>
 
 <template>
@@ -255,6 +265,12 @@ function choiceState(
                   :class="isQuestionCorrect(q) ? 'text-primary' : 'text-error'"
                   aria-hidden="true"
                 />
+                <IconButton
+                  :icon="icons.report"
+                  label="回報此題錯誤"
+                  class="ml-auto"
+                  @click="reportingQuestionId = q.externalId"
+                />
               </div>
 
               <RenderBoundary label="題幹">
@@ -348,5 +364,11 @@ function choiceState(
         </div>
       </template>
     </UModal>
+
+    <ErrorReportDialog
+      v-if="reportingQuestionId"
+      v-model:open="reportDialogOpen"
+      :question-external-id="reportingQuestionId"
+    />
   </UContainer>
 </template>

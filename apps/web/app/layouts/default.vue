@@ -81,7 +81,14 @@ const mobileNavOpen = ref(false);
 
     <footer class="border-default text-muted mt-16 border-t">
       <UContainer class="text-small flex h-16 items-center justify-between gap-4 tracking-wide">
-        <span>© {{ new Date().getFullYear() }} ProGrads · 研究所備考資訊平台</span>
+        <div class="flex items-center gap-4">
+          <span>© {{ new Date().getFullYear() }} ProGrads · 研究所備考資訊平台</span>
+          <NuxtLink
+            to="/legal/dmca"
+            class="focus-ring hover:text-default inline-flex min-h-touch items-center transition-colors"
+            >DMCA / 內容通知</NuxtLink
+          >
+        </div>
         <nav v-if="isDev" aria-label="開發工具" class="flex gap-4">
           <NuxtLink
             to="/styleguide"

@@ -10,6 +10,9 @@ export const envSchema = z.object({
   // Absolute path to a checked-out ProGrads-content; gates the dev-only /coverage endpoint
   // (see app.module.ts). Unset in every deployment — the content repo never ships there.
   CONTENT_DIR: z.string().optional(),
+  // Global rate-limit window (ms) and request cap per window; see app.module.ts ThrottlerModule.
+  THROTTLE_TTL: z.coerce.number().int().positive().default(60_000),
+  THROTTLE_LIMIT: z.coerce.number().int().positive().default(100),
 });
 
 export type Env = z.infer<typeof envSchema>;

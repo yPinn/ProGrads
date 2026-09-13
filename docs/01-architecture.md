@@ -116,17 +116,18 @@ pnpm workspaces + Turborepo。結構：`apps/web`(Nuxt)、`apps/api`(Nest)、`pa
 
 ### 前端（Nuxt）
 
-Nuxt 3/4；UI Nuxt UI + Tailwind；狀態 Pinia；動態取資料 TanStack Query (Vue)；表單 VeeValidate + Zod；
-內容由 API 驅動，Markdown 題幹/解析以 Nuxt MDC + KaTeX + Shiki 渲染；圖表 vue-echarts；行事曆 Schedule-X；
-SEO `@nuxtjs/seo`；i18n `@nuxtjs/i18n`；`@nuxt/image`、`@nuxt/icon`。
+Nuxt 3/4；UI Nuxt UI + Tailwind；狀態 Pinia；動態取資料 TanStack Query (Vue)；表單 Nuxt UI
+原生 `UForm` + Zod schema；內容由 API 驅動，Markdown 題幹/解析以 Nuxt MDC + KaTeX + Shiki 渲染；
+圖表 vue-echarts；行事曆 Schedule-X；SEO `@nuxtjs/seo`；i18n `@nuxtjs/i18n`；`@nuxt/image`、
+`@nuxt/icon`。
 
-> **現況**：`vue-echarts`/`echarts`、`vee-validate`/`@vee-validate/zod`
-> 已裝但 `app/` 內尚無任何引用（圖表/表單功能尚未接線）——見
-> [09-roadmap.md](09-roadmap.md) 的技術與文件缺口。其餘（Pinia、
-> TanStack Query、Nuxt MDC、Schedule-X、@nuxtjs/seo/i18n、@nuxt/image）皆已接線使用中。
+> **現況**：`vue-echarts`/`echarts` 已裝但 `app/` 內尚無任何引用(圖表功能尚未接線)——見
+> [09-roadmap.md](09-roadmap.md) 的技術與文件缺口。其餘(Pinia、TanStack Query、Nuxt MDC、
+> Schedule-X、@nuxtjs/seo/i18n、@nuxt/image、`UForm`)皆已接線使用中。
 >
 > `@tanstack/vue-table` 原列為表格方案,已於未使用狀態下移除(無排程功能會用到；招生頁的表格
-> 呈現是純文字/HTML table,非此套件)。
+> 呈現是純文字/HTML table,非此套件)。`vee-validate`/`@vee-validate/zod` 同理已移除——全站表單
+> (如錯誤回報)改用 Nuxt UI 原生 `UForm` 直接吃 Zod schema,不需要額外的表單驗證層。
 
 ### 後端（NestJS）
 
@@ -135,9 +136,10 @@ NestJS + `@nestjs/platform-fastify`；設定 `@nestjs/config`(+Zod)；DTO `nestj
 快取 `@nestjs/cache-manager` + Redis；佇列 BullMQ；排程 `@nestjs/schedule`；日誌 nestjs-pino；
 `@fastify/helmet`、`@nestjs/terminus`。
 
-> **現況**：僅 `@nestjs/config`、`nestjs-zod`、`@nestjs/swagger`、`nestjs-pino`、
-> `@fastify/helmet` 已安裝並接線。**尚未安裝**：`@nestjs/jwt`+passport-jwt（延至第二階段，
-> 見 D17）、`@nestjs/throttler`（見 [09-roadmap.md](09-roadmap.md) P4，公開端點目前**零限流**）、
+> **現況**：`@nestjs/config`、`nestjs-zod`、`@nestjs/swagger`、`nestjs-pino`、`@fastify/helmet`、
+> `@nestjs/throttler` 已安裝並接線。`@nestjs/throttler` 用 in-memory `ThrottlerStorage`
+> (單一 process 前提下安全，見 app.module.ts)；Cloudflare 側規則待於 CF dashboard 手動設定，
+> 不在 repo 範圍。**尚未安裝**：`@nestjs/jwt`+passport-jwt（延至第二階段，見 D17）、
 > `@nestjs/cache-manager`+Redis、BullMQ、`@nestjs/schedule`、`@nestjs/terminus`。
 
 ### DB / AI / 通知

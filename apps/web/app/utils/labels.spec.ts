@@ -4,6 +4,7 @@ import {
   AdmissionEvent,
   AdmissionType,
   DegreeLevel,
+  ErrorReportType,
   QuestionType,
   ReviewStatus,
   ThesisRole,
@@ -11,6 +12,7 @@ import {
 import { ADMISSION_EVENT_LABELS, ADMISSION_TYPE_LABELS } from "./admission-labels";
 import { DEGREE_LEVEL_LABELS, THESIS_ROLE_LABELS } from "./faculty-labels";
 import { QUESTION_TYPE_LABELS, REVIEW_STATUS_LABELS } from "./question-labels";
+import { ERROR_REPORT_TYPE_LABELS } from "./report-labels";
 
 // Guards against enum drift: if a shared enum gains a value, the label map must cover it.
 describe("enum label maps stay in sync with shared enums", () => {
@@ -21,6 +23,7 @@ describe("enum label maps stay in sync with shared enums", () => {
     ["ReviewStatus", ReviewStatus.options, REVIEW_STATUS_LABELS],
     ["DegreeLevel", DegreeLevel.options, DEGREE_LEVEL_LABELS],
     ["ThesisRole", ThesisRole.options, THESIS_ROLE_LABELS],
+    ["ErrorReportType", ErrorReportType.options, ERROR_REPORT_TYPE_LABELS],
   ] as const;
 
   it.each(cases)("%s has a non-empty label for every value", (_name, options, labels) => {

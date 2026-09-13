@@ -17,8 +17,8 @@
 
 - [x] 全站清楚標示「AI 生成解析，僅供參考」（`apps/web/app/pages/questions/[externalId].vue`、`.../paper/[id].vue`）。
 - [x] 顯示 `review_status`：`ai_generated` / `ai_reviewed` / `human_verified` / `flagged`（同上兩頁）。
-- [ ] 題目/解析頁提供錯誤回報入口，至少可送出題目 id、錯誤類型、使用者描述——尚未實作。
-- [ ] 補上 DMCA / 授權取下流程說明與聯絡入口——尚未實作。
+- [x] 題目/解析頁提供錯誤回報入口，送出題目 id、錯誤類型、使用者描述（`apps/api/src/modules/reports/`、`apps/web/app/components/ErrorReportDialog.vue`）。
+- [x] 補上 DMCA / 授權取下流程說明與聯絡入口（`apps/web/app/pages/legal/dmca.vue`，聯絡方式為 GitHub Issues）。
 
 理由：這是產品護城河「AI 解題」的信任底座，成本低於線上 AI 追問，且直接降低合規與品質風險。
 
@@ -59,11 +59,12 @@
 目標：公開前避免低成本濫用與營運風險。
 
 - [x] CORS、helmet、統一錯誤信封已全域接線（`apps/api/src/main.ts`、`common/http-exception.filter.ts`）。
-- [ ] `@nestjs/throttler` + Cloudflare rate limit——尚未安裝，公開端點目前**零限流**。
+- [x] `@nestjs/throttler` 已於應用層接線（全域預設 + `/reports` 更嚴格的單獨限制，`apps/api/src/app.module.ts`）。Cloudflare 側規則需自行於 CF dashboard 設定，不在 repo 範圍。
 
 原則（持續適用，非單次任務）：公開內容端點維持免登入；高成本功能一律 gated 或延後。
 
-理由：AI 追問、訂閱與公開 API 都會提高濫用面；限流應早於線上 AI 與通知大量使用。目前只缺限流一項。
+理由：AI 追問、訂閱與公開 API 都會提高濫用面；限流應早於線上 AI 與通知大量使用。應用層已完成，僅
+Cloudflare dashboard 端規則待手動設定。
 
 ## 明確延後
 

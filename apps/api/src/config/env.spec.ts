@@ -13,6 +13,8 @@ describe("validateEnv", () => {
       HOST: "0.0.0.0",
       DATABASE_URL: "postgres://localhost:5432/app",
       WEB_BASE_URL: "http://localhost:3000",
+      THROTTLE_TTL: 60_000,
+      THROTTLE_LIMIT: 100,
     });
   });
 

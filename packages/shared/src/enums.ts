@@ -48,3 +48,9 @@ export type AdmissionEvent = z.infer<typeof AdmissionEvent>;
 // Mirrors the DB ExamMethod enum (schema.prisma); keep in sync. Written / review / oral.
 export const ExamMethod = z.enum(["written", "review", "interview"]);
 export type ExamMethod = z.infer<typeof ExamMethod>;
+
+// Mirrors the DB ErrorReportType enum (schema.prisma); keep in sync.
+export const ErrorReportType = z
+  .enum(["wrong_answer", "wrong_explanation", "typo", "other"])
+  .describe("錯誤類型:答案錯誤 / 解析錯誤 / 錯字格式 / 其他");
+export type ErrorReportType = z.infer<typeof ErrorReportType>;

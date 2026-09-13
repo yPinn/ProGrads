@@ -28,6 +28,8 @@ export const icons = {
   externalLink: "i-lucide-external-link",
   document: "i-lucide-file-text",
   trend: "i-lucide-trending-up",
+  // trust loop
+  report: "i-lucide-flag",
 } as const;
 
 export type IconName = keyof typeof icons;

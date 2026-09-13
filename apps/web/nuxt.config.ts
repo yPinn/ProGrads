@@ -72,6 +72,8 @@ export default defineNuxtConfig({
   nitro: { preset: process.env.NODE_ENV === "production" ? "cloudflare-pages" : undefined },
   routeRules: {
     "/": { prerender: true },
+    // Static legal content, no API data — safe to prerender at build time like "/".
+    "/legal/dmca": { prerender: true },
     // Content pages render server-side per request (not build-time prerender: the edge can't
     // reach the origin DB at build time, and enumerating every question/dept route up front
     // doesn't scale). useApiQuery prefetches during SSR so the response HTML carries real

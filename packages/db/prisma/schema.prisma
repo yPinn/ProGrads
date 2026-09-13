@@ -54,6 +54,19 @@ enum Confidence {
   low
 }
 
+enum ErrorReportType {
+  wrong_answer // 答案錯誤
+  wrong_explanation // 解析錯誤
+  typo // 錯字/格式問題
+  other // 其他
+}
+
+enum ErrorReportStatus {
+  open
+  resolved
+  dismissed
+}
+
 enum AdmissionEvent {
   account_open // 取得繳費帳號 (報名前置)
   registration_start
@@ -256,10 +269,27 @@ model Question {
   explanation     Explanation?
   subjects        QuestionSubject[]
   knowledgePoints QuestionKnowledgePoint[]
+  errorReports    ErrorReport[]
   createdAt       DateTime                 @default(now())
   updatedAt       DateTime                 @updatedAt
 
   @@index([examSubjectId])
+}
+
+// User-submitted report of a problem with a question or its explanation. Public,
+// unauthenticated submission (see P0 trust-loop roadmap item) — no user relation.
+model ErrorReport {
+  id          String            @id @default(cuid())
+  questionId  String
+  question    Question          @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  type        ErrorReportType
+  description String
+  status      ErrorReportStatus @default(open)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([questionId])
+  @@index([status])
 }
 
 // Granular practice mapping: a question to one-or-more subjects.
