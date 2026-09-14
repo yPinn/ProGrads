@@ -38,7 +38,7 @@
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "tailwindcss": "^4.3.3",
-    "temporal-polyfill": "1.0.1",
+    "temporal-polyfill": "1.0.5",
     "vue": "^3.5.40",
     "vue-echarts": "^8.0.1",
     "vue-router": "^5.2.0",
