@@ -1,7 +1,6 @@
 <script setup lang="ts">
 defineProps<{
   title: string;
-  description: string;
   items: { label: string; value: string }[];
   pending?: boolean;
   failed?: boolean;
@@ -15,10 +14,7 @@ const emit = defineEmits<{ select: [value: string]; retry: [] }>();
   <section
     class="border-default grid gap-5 border-y py-7 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]"
   >
-    <div>
-      <h2 class="font-serif text-title-md">{{ title }}</h2>
-      <p class="text-muted text-small mt-2 max-w-prose">{{ description }}</p>
-    </div>
+    <h2 class="font-serif text-title-md self-center">{{ title }}</h2>
     <div class="self-center">
       <p v-if="pending" role="status" class="text-muted text-small">正在載入可瀏覽的項目…</p>
       <div v-else-if="failed" class="flex flex-wrap items-center gap-3">

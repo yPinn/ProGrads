@@ -11,7 +11,7 @@ import {
 import { formatDateRange } from "~/utils/format";
 
 useSeoMeta({
-  title: "研究所招生日程",
+  title: "招生日程",
   description: "用清單與月曆查詢各校研究所報名起訖、筆試、面試及放榜日期，並切換學年瀏覽。",
 });
 
@@ -39,11 +39,7 @@ const prefersReducedMotion = useReducedMotion();
 </script>
 
 <template>
-  <AppPage
-    eyebrow="Schedule · 招生日程"
-    title="招生日程"
-    description="各校研究所招生事件時程：依報名、考試、甄選、放榜四階段分組。"
-  >
+  <AppPage title="招生日程" description="用清單與月曆查看各校報名、考試及放榜日期。">
     <template #actions>
       <USelect v-model="year" :items="yearOptions" aria-label="學年" class="w-36" />
     </template>

@@ -5,7 +5,7 @@ import { formatDateRange } from "~/utils/format";
 import { icons } from "~/utils/icons";
 
 useSeoMeta({
-  title: "研究所考古題與招生資訊",
+  title: "研究所備考",
   description:
     "練習台灣各校研究所歷屆考古題，查詢系所招生名額、採計考科、報名與考試日期，以及師資研究方向。",
 });
@@ -28,13 +28,7 @@ const sections = [
   },
 ];
 
-// 近期招生日程提醒:跨學年、依絕對時間撈最近幾筆,時效性內容鼓勵回訪。 Fails silently
-// (hidden, no error UI) — the homepage is an entry point and shouldn't surface a broken widget.
-const {
-  data: upcoming,
-  isPending: upcomingPending,
-  isError: upcomingError,
-} = useUpcomingSchedules(5);
+const { data: upcoming } = useUpcomingSchedules(5);
 </script>
 
 <template>
@@ -44,6 +38,9 @@ const {
         <h1 class="font-serif text-title-lg sm:text-display max-w-2xl text-balance tracking-tight">
           研究所備考作戰中心
         </h1>
+        <p class="text-muted text-body mt-5 max-w-prose leading-relaxed">
+          練習各校研究所考古題，查招生簡章、考試日期和師資研究方向。
+        </p>
         <AppButton to="/questions" class="mt-7 min-h-touch" :trailing-icon="icons.next">
           開始刷題
         </AppButton>
@@ -71,7 +68,7 @@ const {
       </ul>
     </AppCard>
 
-    <section v-if="!upcomingError" aria-label="近期招生日程" class="mt-section">
+    <section v-if="upcoming?.length" aria-label="近期招生日程" class="mt-section">
       <div class="mb-4 flex items-baseline justify-between">
         <h2 class="font-serif text-title-sm tracking-tight">近期招生日程</h2>
         <NuxtLink to="/schedules" class="text-muted text-small hover:text-default"
@@ -79,15 +76,7 @@ const {
         >
       </div>
 
-      <AppList v-if="upcomingPending" as="div">
-        <div v-for="n in 5" :key="n" class="flex items-center gap-4 px-5 py-4">
-          <USkeleton class="h-4 w-40 shrink-0" />
-          <USkeleton class="h-5 w-16" />
-          <USkeleton class="h-4 w-32" />
-        </div>
-      </AppList>
-
-      <AppList v-else-if="upcoming && upcoming.length">
+      <AppList>
         <AppListRow
           v-for="item in upcoming"
           :key="`${item.school.slug}-${item.event}-${item.at}`"
@@ -100,8 +89,6 @@ const {
           <AppBadge intent="meta" size="sm">{{ ADMISSION_EVENT_LABELS[item.event] }}</AppBadge>
         </AppListRow>
       </AppList>
-
-      <p v-else class="text-muted text-small">近期尚無公告的招生日程。</p>
     </section>
   </UContainer>
 </template>

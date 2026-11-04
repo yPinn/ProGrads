@@ -7,7 +7,7 @@ import { QUESTION_TYPE_LABELS } from "~/utils/question-labels";
 import { toSelectItems } from "~/utils/select";
 
 useSeoMeta({
-  title: "研究所考古題歷年趨勢",
+  title: "考題趨勢",
   description: "依考科與學校查看研究所考古題的題型與考點分布，了解歷年出題變化。",
 });
 
@@ -66,11 +66,7 @@ function typeLabel(key: string): string {
 </script>
 
 <template>
-  <AppPage
-    eyebrow="Trends · 歷年趨勢"
-    title="歷年趨勢"
-    description="依考科檢視單一學校歷屆考題的題型、考點分佈隨年份的變化。"
-  >
+  <AppPage title="歷年趨勢" description="選擇考科與學校，比較歷年的題型和考點。">
     <AppCard class="mb-section flex flex-wrap items-end gap-control">
       <USelectMenu
         v-model="subject"

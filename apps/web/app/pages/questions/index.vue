@@ -6,7 +6,7 @@ import { useQuestionFacets } from "~/composables/useQuestionFacets";
 import { icons } from "~/utils/icons";
 
 useSeoMeta({
-  title: "研究所歷屆考古題",
+  title: "研究所考古題",
   description: "依考科、學校與年度查找台灣各校研究所歷屆考古題，逐題練習或進行整卷測驗。",
 });
 
@@ -89,11 +89,7 @@ const prefersReducedMotion = useReducedMotion();
 </script>
 
 <template>
-  <AppPage
-    eyebrow="Question Bank · 考古題"
-    title="考古題"
-    description="跨校練單科:依考科、學校、年度、題型檢索研究所歷屆考題。"
-  >
+  <AppPage title="考古題" description="依考科、學校或年度找題，可逐題練習或進行整卷測驗。">
     <AppCard class="mb-section flex flex-wrap items-end gap-control">
       <USelectMenu
         v-model="subject"

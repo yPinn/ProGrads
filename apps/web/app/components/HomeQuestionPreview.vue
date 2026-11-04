@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import type { MDCNode, MDCRoot } from "@nuxtjs/mdc";
 import { computed, onMounted, shallowRef } from "vue";
+import { useQuestion } from "~/composables/useQuestion";
 import { useQuestions } from "~/composables/useQuestions";
 import { QUESTION_TYPE_LABELS } from "~/utils/question-labels";
 
@@ -15,6 +17,32 @@ const { data, isError, isFetching, refetch } = useQuestions(
 const selected = shallowRef(0);
 const pool = computed(() => data.value?.items ?? []);
 const question = computed(() => pool.value[selected.value] ?? pool.value[0]);
+const { data: questionDetail, isPending: detailPending } = useQuestion(
+  () => question.value?.externalId ?? "",
+);
+
+const previewParserOptions = {
+  highlight: false,
+  rehype: { plugins: { "rehype-katex": false } },
+} as const;
+const blockTags = new Set(["br", "h1", "h2", "h3", "li", "p", "pre", "td", "th"]);
+
+function nodeText(node: MDCNode | MDCRoot): string {
+  if (node.type === "text") return node.value;
+  if (node.type === "comment") return "";
+  const text = node.children.map(nodeText).join("");
+  if (node.type === "element" && node.tag === "img") {
+    return typeof node.props?.alt === "string" ? node.props.alt : "";
+  }
+  return node.type === "element" && blockTags.has(node.tag) ? text + " " : text;
+}
+
+function previewText(body: MDCRoot): string {
+  const characters = Array.from(nodeText(body).replace(/\s+/g, " ").trim());
+  return characters.length > 240
+    ? characters.slice(0, 240).join("").trimEnd() + "…"
+    : characters.join("");
+}
 
 function shuffle() {
   const alternatives = pool.value.filter((item) => item.externalId !== question.value?.externalId);
@@ -31,12 +59,28 @@ function shuffle() {
       <div aria-live="polite" class="mt-6 border-y border-current/25 py-5 font-sans">
         <template v-if="question">
           <p class="text-small text-(--board-accent-ink)">
-            {{ question.exam.school.name }} · {{ question.exam.year }} 年考題
+            {{ question.exam.school.name }} · {{ question.exam.year }} 年 ·
+            {{ question.examSubject.name }}
           </p>
-          <p class="font-serif text-title-md mt-2 break-words">{{ question.examSubject.name }}</p>
-          <p class="text-small mt-2">
+          <p class="text-caption mt-1">
             第 {{ question.number }} 題 · {{ QUESTION_TYPE_LABELS[question.type] }}
           </p>
+          <MDC
+            v-if="questionDetail?.contentMd"
+            :key="question.externalId"
+            v-slot="{ body }"
+            :value="questionDetail.contentMd"
+            :parser-options="previewParserOptions"
+            partial
+          >
+            <p v-if="body" class="font-serif text-reading mt-3 line-clamp-4 wrap-anywhere">
+              {{ previewText(body) }}
+            </p>
+          </MDC>
+          <div v-else-if="detailPending" aria-hidden="true" class="mt-4 space-y-2">
+            <USkeleton class="h-3 w-full bg-current/15" />
+            <USkeleton class="h-3 w-2/3 bg-current/15" />
+          </div>
         </template>
         <template v-else>
           <p class="text-small text-(--board-accent-ink)">資料結構 · 示範題</p>

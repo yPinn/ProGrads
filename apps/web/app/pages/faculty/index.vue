@@ -8,7 +8,7 @@ import { useDepartments } from "~/composables/useDepartments";
 import { toSelectItems } from "~/utils/select";
 
 useSeoMeta({
-  title: "研究所師資與研究方向",
+  title: "師資陣容",
   description: "依學校或所別瀏覽研究所師資，查詢教師的研究方向、實驗室與代表論文。",
 });
 
@@ -89,11 +89,7 @@ const prefersReducedMotion = useReducedMotion();
 </script>
 
 <template>
-  <AppPage
-    eyebrow="Faculty · 師資陣容"
-    title="師資陣容"
-    description="各校系所師資:職級、研究方向、實驗室與代表論文佐證。"
-  >
+  <AppPage title="師資陣容" description="依學校或所別查看老師的研究方向與實驗室。">
     <AppCard class="mb-section flex flex-wrap items-end gap-control">
       <UFieldGroup aria-label="瀏覽方式">
         <!-- Segmented control (a UFieldGroup of toggle buttons), not a single-action button — this
@@ -154,8 +150,7 @@ const prefersReducedMotion = useReducedMotion();
       <!-- State A: no school chosen yet. -->
       <BrowseStart
         v-if="!school"
-        title="從一所學校認識系所師資"
-        description="先選學校再選系所，查看老師的研究方向與實驗室。想跨校比較時，可以切換成依所別瀏覽。"
+        title="快速選擇學校"
         :items="schoolItems"
         :pending="schoolsLoading"
         :failed="schoolsFailed"
@@ -235,8 +230,7 @@ const prefersReducedMotion = useReducedMotion();
       <!-- State A: no track chosen yet. -->
       <BrowseStart
         v-if="!track"
-        title="比較同一領域的各校師資"
-        description="選一個感興趣的所別，集中瀏覽不同學校的老師與研究方向。"
+        title="快速選擇所別"
         :items="trackItems"
         :pending="tracksLoading"
         :failed="tracksFailed"

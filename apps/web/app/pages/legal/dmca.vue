@@ -11,7 +11,6 @@ useSeoMeta({
   <UContainer class="py-page">
     <div class="mx-auto max-w-reading">
       <PageHeader
-        eyebrow="法律資訊"
         title="DMCA / 內容通知"
         description="收錄範圍、AI 解析定位，以及如何回報內容爭議或要求取下。"
       />

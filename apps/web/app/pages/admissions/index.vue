@@ -15,7 +15,7 @@ import { formatDateTime } from "~/utils/format";
 import { toSelectItems } from "~/utils/select";
 
 useSeoMeta({
-  title: "研究所報名資訊",
+  title: "報名資訊",
   description:
     "依學校與系所查詢研究所招生名額、報名與錄取人數、採計考科及占分，並查看面試方式與招生簡章。",
 });
@@ -158,11 +158,7 @@ const prefersReducedMotion = useReducedMotion();
 </script>
 
 <template>
-  <AppPage
-    eyebrow="Admissions · 報名資訊"
-    title="報名資訊"
-    description="各校系所招生組別:名額、報名/錄取人數、採計考科與佔分、面試與簡章。"
-  >
+  <AppPage title="報名資訊" description="選擇學校與系所，查看名額、採計方式與簡章。">
     <AppCard class="mb-section flex flex-wrap items-end gap-control">
       <USelectMenu
         v-model="school"
@@ -190,8 +186,7 @@ const prefersReducedMotion = useReducedMotion();
     <!-- State A: no school chosen yet. -->
     <BrowseStart
       v-if="!school"
-      title="先選一間想報考的學校"
-      description="接著選系所，就能查看各組的名額、採計方式與簡章。也可以用上方選單搜尋其他學校。"
+      title="快速選擇學校"
       :items="schoolItems"
       :pending="schoolsLoading"
       :failed="schoolsFailed"

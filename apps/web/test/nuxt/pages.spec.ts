@@ -64,6 +64,8 @@ describe("index page", () => {
   it("renders the landing heading and the fallback practice exercise", async () => {
     const wrapper = await mountSuspended(IndexPage);
     expect(wrapper.text()).toContain("研究所備考作戰中心");
+    expect(wrapper.text()).toContain("練習各校研究所考古題");
+    expect(wrapper.find('section[aria-label="近期招生日程"]').exists()).toBe(false);
     const board = wrapper.get('section[aria-labelledby="home-question-title"]').get(".board");
     expect(board.classes()).toContain("board");
     expect(board.text()).toContain("練習黑板");
