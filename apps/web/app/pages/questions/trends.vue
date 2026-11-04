@@ -7,8 +7,8 @@ import { QUESTION_TYPE_LABELS } from "~/utils/question-labels";
 import { toSelectItems } from "~/utils/select";
 
 useSeoMeta({
-  title: "歷年趨勢",
-  description: "依考科檢視單一學校歷屆考題的題型、考點分佈隨年份的變化。",
+  title: "研究所考古題歷年趨勢",
+  description: "依考科與學校查看研究所考古題的題型與考點分布，了解歷年出題變化。",
 });
 
 // Subject-centric flow (mirrors /admissions's school→dept two-select shell): subject is required

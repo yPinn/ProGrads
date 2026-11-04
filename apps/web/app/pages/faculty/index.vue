@@ -8,8 +8,8 @@ import { useDepartments } from "~/composables/useDepartments";
 import { toSelectItems } from "~/utils/select";
 
 useSeoMeta({
-  title: "師資陣容",
-  description: "各校系所師資:職級、研究方向、實驗室與代表論文佐證。",
+  title: "研究所師資與研究方向",
+  description: "依學校或所別瀏覽研究所師資，查詢教師的研究方向、實驗室與代表論文。",
 });
 
 // Two axes onto the same roster: by school (學校→系所) or by track (所別→各校).

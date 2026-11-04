@@ -44,7 +44,11 @@ useSeoMeta({
   title: () =>
     q.value
       ? `${q.value.examSubject.name} ${q.value.exam.school.name} ${q.value.exam.year} 第 ${q.value.number} 題`
-      : "題目",
+      : "研究所考古題詳情",
+  description: () =>
+    q.value
+      ? `練習${q.value.exam.school.name}${q.value.exam.year} 學年${q.value.examSubject.name}考古題第 ${q.value.number} 題，查看題目與作答解析。`
+      : undefined,
 });
 
 // Same-paper prev/next via arrow keys (prev/next come from the detail API). Ignore modifier

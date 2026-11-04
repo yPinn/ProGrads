@@ -18,7 +18,11 @@ useSeoMeta({
   title: () =>
     paper.value
       ? `${paper.value.examSubject.name} ${paper.value.exam.school.name} ${paper.value.exam.year} 測驗`
-      : "整卷測驗",
+      : "研究所考古題整卷測驗",
+  description: () =>
+    paper.value
+      ? `練習${paper.value.exam.school.name}${paper.value.exam.year} 學年${paper.value.examSubject.name}歷屆試卷，完成後查看作答結果。`
+      : undefined,
 });
 
 const timer = useStopwatch();

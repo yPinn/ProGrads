@@ -5,25 +5,26 @@ import { formatDateRange } from "~/utils/format";
 import { icons } from "~/utils/icons";
 
 useSeoMeta({
-  title: "ProGrads",
-  description: "研究所備考作戰中心:報名資訊、考古題、招生日程、師資陣容。",
+  title: "研究所考古題與招生資訊",
+  description:
+    "練習台灣各校研究所歷屆考古題，查詢系所招生名額、採計考科、報名與考試日期，以及師資研究方向。",
 });
 
 const sections = [
   {
     to: "/admissions",
     label: "報名資訊",
-    description: "查各系所招生名額、採計考科與簡章，決定要報哪些組別。",
+    icon: icons.document,
   },
   {
     to: "/schedules",
     label: "招生日程",
-    description: "從報名到放榜，用月曆和清單掌握各校時程。",
+    icon: icons.calendar,
   },
   {
     to: "/faculty",
     label: "師資陣容",
-    description: "按學校或所別找老師，從研究方向和實驗室認識系所。",
+    icon: icons.faculty,
   },
 ];
 
@@ -43,9 +44,6 @@ const {
         <h1 class="font-serif text-title-lg sm:text-display max-w-2xl text-balance tracking-tight">
           研究所備考作戰中心
         </h1>
-        <p class="text-muted text-body mt-5 max-w-prose leading-relaxed">
-          從一題考古題開始練習，再查想報的系所、考試日期與研究方向。
-        </p>
         <AppButton to="/questions" class="mt-7 min-h-touch" :trailing-icon="icons.next">
           開始刷題
         </AppButton>
@@ -53,25 +51,25 @@ const {
       <HomeQuestionPreview />
     </div>
 
-    <nav aria-labelledby="home-explore" class="mt-14">
-      <h2 id="home-explore" class="font-serif text-title-md mb-4">規劃你的報考路線</h2>
+    <AppCard as="nav" aria-labelledby="home-explore" class="mt-section">
+      <h2 id="home-explore" class="font-serif text-title-md mb-3">報考指南</h2>
       <ul
-        class="border-default divide-default grid divide-y border-y md:grid-cols-3 md:divide-x md:divide-y-0"
+        class="border-default divide-default grid divide-y border-t sm:grid-cols-3 sm:divide-x sm:divide-y-0"
       >
-        <li v-for="section in sections" :key="section.to" class="min-w-0">
-          <NuxtLink
+        <li v-for="section in sections" :key="section.to" class="min-w-0 py-1 sm:px-2">
+          <AppButton
             :to="section.to"
-            class="focus-ring hover:bg-elevated/50 block px-3 py-5 transition-colors sm:px-5"
+            intent="ghost"
+            :leading-icon="section.icon"
+            :trailing-icon="icons.next"
+            class="font-serif text-title-sm text-default min-h-touch w-full justify-start gap-3"
+            :ui="{ leadingIcon: 'size-5 text-primary', trailingIcon: 'ml-auto size-4' }"
           >
-            <h3 class="font-serif text-title-sm flex items-center gap-2">
-              {{ section.label }}
-              <UIcon :name="icons.next" aria-hidden="true" class="text-muted size-4" />
-            </h3>
-            <p class="text-muted text-small mt-2">{{ section.description }}</p>
-          </NuxtLink>
+            {{ section.label }}
+          </AppButton>
         </li>
       </ul>
-    </nav>
+    </AppCard>
 
     <section v-if="!upcomingError" aria-label="近期招生日程" class="mt-section">
       <div class="mb-4 flex items-baseline justify-between">
@@ -98,8 +96,8 @@ const {
           <span class="text-muted text-small w-44 shrink-0 tabular-nums">{{
             formatDateRange(item.at, item.endAt)
           }}</span>
-          <AppBadge intent="meta" size="sm">{{ ADMISSION_EVENT_LABELS[item.event] }}</AppBadge>
           <span class="font-medium">{{ item.school.name }}</span>
+          <AppBadge intent="meta" size="sm">{{ ADMISSION_EVENT_LABELS[item.event] }}</AppBadge>
         </AppListRow>
       </AppList>
 

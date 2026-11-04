@@ -41,11 +41,11 @@ registerEndpoint("/questions/papers", () => ({
 describe("schedules page", () => {
   it("offers a different year when there are no events", async () => {
     const wrapper = await mountSuspended(SchedulesPage);
-    await vi.waitFor(() => expect(wrapper.text()).toContain("2025 學年尚無招生事件"));
-    const otherYear = wrapper.findAll("button").find((button) => button.text() === "2026 學年");
+    await vi.waitFor(() => expect(wrapper.text()).toContain("2026 學年尚無招生事件"));
+    const otherYear = wrapper.findAll("button").find((button) => button.text() === "2025 學年");
     expect(otherYear).toBeDefined();
     await otherYear?.trigger("click");
-    await vi.waitFor(() => expect(wrapper.text()).toContain("2026 學年尚無招生事件"));
+    await vi.waitFor(() => expect(wrapper.text()).toContain("2025 學年尚無招生事件"));
   });
 });
 
@@ -69,6 +69,11 @@ describe("index page", () => {
     expect(board.text()).toContain("練習黑板");
     expect(board.text()).toContain("二分搜尋為什麼需要排序？");
     expect(board.get("details summary").text()).toBe("展開示範解法");
-    expect(wrapper.text()).toContain("師資陣容");
+    const guide = wrapper.get('nav[aria-labelledby="home-explore"]');
+    expect(guide.findAll("a").map((link) => [link.text(), link.attributes("href")])).toEqual([
+      ["報名資訊", "/admissions"],
+      ["招生日程", "/schedules"],
+      ["師資陣容", "/faculty"],
+    ]);
   });
 });

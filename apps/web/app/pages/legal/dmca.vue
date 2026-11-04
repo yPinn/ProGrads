@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { icons } from "~/utils/icons";
 
-useSeoMeta({ title: "DMCA / 內容通知 — ProGrads" });
+useSeoMeta({
+  title: "DMCA / 內容通知",
+  description: "查看 ProGrads 的著作權與內容通知方式。",
+});
 </script>
 
 <template>

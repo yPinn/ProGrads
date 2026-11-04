@@ -27,6 +27,8 @@ export const icons = {
   // external content
   externalLink: "i-lucide-external-link",
   document: "i-lucide-file-text",
+  calendar: "i-lucide-calendar-days",
+  faculty: "i-lucide-graduation-cap",
   trend: "i-lucide-trending-up",
   // trust loop
   report: "i-lucide-flag",

@@ -6,8 +6,8 @@ import { useQuestionFacets } from "~/composables/useQuestionFacets";
 import { icons } from "~/utils/icons";
 
 useSeoMeta({
-  title: "考古題",
-  description: "跨校練單科:依考科、學校、年度、題型檢索研究所歷屆考題。",
+  title: "研究所歷屆考古題",
+  description: "依考科、學校與年度查找台灣各校研究所歷屆考古題，逐題練習或進行整卷測驗。",
 });
 
 // "all" sentinel: reka-ui forbids an empty-string option value, so a filter's

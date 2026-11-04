@@ -114,6 +114,7 @@ export default defineNuxtConfig({
         "lucide:arrow-left",
         "lucide:arrow-right",
         "lucide:arrow-up-right",
+        "lucide:calendar-days",
         "lucide:check",
         "lucide:chevron-down",
         "lucide:chevron-left",
@@ -130,7 +131,9 @@ export default defineNuxtConfig({
         "lucide:eye",
         "lucide:eye-off",
         "lucide:file",
+        "lucide:file-text",
         "lucide:folder",
+        "lucide:graduation-cap",
         "lucide:info",
         "lucide:lightbulb",
         "lucide:loader-circle",
@@ -153,10 +156,14 @@ export default defineNuxtConfig({
   },
   // Formatting is handled by Prettier.
   eslint: { config: { stylistic: false } },
-  // url is env-driven (NUXT_PUBLIC_SITE_URL) so prod/staging/preview each set their own; no real domain yet.
-  site: { name: "ProGrads", url: process.env.NUXT_PUBLIC_SITE_URL || "https://app.example.com" },
-  // OG image generation needs a native renderer; enable later when needed.
+  site: {
+    name: "ProGrads",
+    url: process.env.NUXT_PUBLIC_SITE_URL || "https://prograds.pages.dev",
+  },
+  sitemap: { exclude: ["/styleguide", "/coverage"] },
+  // Share a static PNG so Cloudflare Pages needs no image renderer.
   ogImage: { enabled: false },
+  colorMode: { preference: "light", fallback: "light" },
   i18n: {
     defaultLocale: "zh-TW",
     strategy: "no_prefix",

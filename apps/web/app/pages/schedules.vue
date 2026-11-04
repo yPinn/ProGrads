@@ -11,12 +11,13 @@ import {
 import { formatDateRange } from "~/utils/format";
 
 useSeoMeta({
-  title: "招生日程",
-  description: "各校研究所招生事件時程:報名起訖、筆試、面試、放榜。",
+  title: "研究所招生日程",
+  description: "用清單與月曆查詢各校研究所報名起訖、筆試、面試及放榜日期，並切換學年瀏覽。",
 });
 
-const year = ref(2025);
-const yearOptions = [2024, 2025, 2026].map((y) => ({ label: `${y} 學年`, value: y }));
+const academicYears = [2026, 2025, 2024] as const;
+const year = ref<(typeof academicYears)[number]>(academicYears[0]);
+const yearOptions = academicYears.map((y) => ({ label: `${y} 學年`, value: y }));
 
 const { data, isPending, isError, error, refetch } = useSchedules(
   computed(() => ({ year: year.value })),
