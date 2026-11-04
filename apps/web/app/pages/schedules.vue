@@ -63,7 +63,20 @@ const prefersReducedMotion = useReducedMotion();
         </AppList>
       </template>
 
-      <template #empty>此學年尚無招生事件。</template>
+      <template #empty>
+        <p>{{ year }} 學年尚無招生事件。可以切換其他學年查看。</p>
+        <div class="mt-3 flex flex-wrap justify-center gap-2">
+          <AppButton
+            v-for="option in yearOptions.filter((item) => item.value !== year)"
+            :key="option.value"
+            intent="secondary"
+            class="min-h-touch"
+            @click="year = option.value"
+          >
+            {{ option.label }}
+          </AppButton>
+        </div>
+      </template>
 
       <!-- Side-by-side: phase-grouped list (exact times) on the left, month overview on the
            right. Stacks to a single column below lg; the calendar sticks while the list scrolls. -->

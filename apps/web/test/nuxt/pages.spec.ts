@@ -28,15 +28,24 @@ const paperSummary = {
 };
 
 registerEndpoint("/schedules", () => ({ data: [] }));
+registerEndpoint("/schedules/upcoming", () => ({ data: [] }));
+registerEndpoint("/questions", () => ({
+  data: [],
+  meta: { page: 1, pageSize: 12, total: 0 },
+}));
 registerEndpoint("/questions/papers", () => ({
   data: [paperSummary],
   meta: { page: 1, pageSize: 20, total: 1 },
 }));
 
 describe("schedules page", () => {
-  it("shows the empty state when there are no events", async () => {
+  it("offers a different year when there are no events", async () => {
     const wrapper = await mountSuspended(SchedulesPage);
-    await vi.waitFor(() => expect(wrapper.text()).toContain("此學年尚無招生事件"));
+    await vi.waitFor(() => expect(wrapper.text()).toContain("2025 學年尚無招生事件"));
+    const otherYear = wrapper.findAll("button").find((button) => button.text() === "2026 學年");
+    expect(otherYear).toBeDefined();
+    await otherYear?.trigger("click");
+    await vi.waitFor(() => expect(wrapper.text()).toContain("2026 學年尚無招生事件"));
   });
 });
 
@@ -52,11 +61,12 @@ describe("questions page", () => {
 });
 
 describe("index page", () => {
-  it("renders the landing heading and tagline", async () => {
+  it("renders the landing heading and the fallback practice exercise", async () => {
     const wrapper = await mountSuspended(IndexPage);
     expect(wrapper.text()).toContain("研究所備考作戰中心");
-    expect(wrapper.text()).toContain("把散落各校的備考資訊收攏於一處");
-    // All four section cards render, 師資陣容 included.
+    expect(wrapper.text()).toContain("練習黑板");
+    expect(wrapper.text()).toContain("二分搜尋為什麼需要排序？");
+    expect(wrapper.get("details summary").text()).toBe("展開示範解法");
     expect(wrapper.text()).toContain("師資陣容");
   });
 });
