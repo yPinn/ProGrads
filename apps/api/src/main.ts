@@ -21,10 +21,12 @@ async function bootstrap(): Promise<void> {
   app.useGlobalPipes(new ZodValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // CORS for the cross-origin web app. Its origin is WEB_BASE_URL (dev :3000; prod app.<domain>).
+  // Allow the primary web origin and, during a site migration, one additional exact origin.
   // credentials:true so the httpOnly auth cookie can flow once auth lands.
+  const webOrigin = configService.getOrThrow<string>("WEB_BASE_URL");
+  const additionalWebOrigin = configService.get<string>("WEB_ADDITIONAL_ORIGIN");
   app.enableCors({
-    origin: configService.getOrThrow<string>("WEB_BASE_URL"),
+    origin: additionalWebOrigin ? [webOrigin, additionalWebOrigin] : webOrigin,
     credentials: true,
   });
 

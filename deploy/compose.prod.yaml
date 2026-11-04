@@ -30,6 +30,7 @@ services:
       HOST: 0.0.0.0
       PORT: 8088
       WEB_BASE_URL: ${PROGRADS_WEB_ORIGIN:-https://prograds.pages.dev}
+      WEB_ADDITIONAL_ORIGIN: ${PROGRADS_ADDITIONAL_WEB_ORIGIN:-}
       DATABASE_URL: postgresql://prograds:${PROGRADS_DB_PASSWORD:?Set PROGRADS_DB_PASSWORD to a URL-safe value}@postgres:5432/prograds
     ports:
       - "127.0.0.1:${PROGRADS_API_PORT:-18088}:8088"

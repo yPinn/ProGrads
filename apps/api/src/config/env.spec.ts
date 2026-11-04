@@ -27,6 +27,16 @@ describe("validateEnv", () => {
     expect(env.PORT).toBe(3000);
   });
 
+  it("accepts an additional web origin for a parallel deployment", () => {
+    const config = {
+      DATABASE_URL: "postgres://x",
+      WEB_BASE_URL: "https://prograds.pages.dev",
+      WEB_ADDITIONAL_ORIGIN: "https://prograds-git.pages.dev",
+    };
+    expect(validateEnv(config).WEB_ADDITIONAL_ORIGIN).toBe(config.WEB_ADDITIONAL_ORIGIN);
+    expect(() => validateEnv({ ...config, WEB_ADDITIONAL_ORIGIN: "*" })).toThrow();
+  });
+
   it("throws when DATABASE_URL is missing", () => {
     expect(() => validateEnv({})).toThrow();
   });
