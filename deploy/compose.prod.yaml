@@ -1,0 +1,50 @@
+name: prograds-prod
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    mem_limit: 512m
+    environment:
+      POSTGRES_DB: prograds
+      POSTGRES_USER: prograds
+      POSTGRES_PASSWORD: ${PROGRADS_DB_PASSWORD:?Set PROGRADS_DB_PASSWORD to a URL-safe value}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "prograds", "-d", "prograds"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  api:
+    image: ${PROGRADS_API_IMAGE:-prograds-api:local}
+    build:
+      context: ..
+      dockerfile: deploy/prograds-api.Dockerfile
+    restart: unless-stopped
+    init: true
+    mem_limit: 512m
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 8088
+      WEB_BASE_URL: ${PROGRADS_WEB_ORIGIN:-https://prograds.pages.dev}
+      DATABASE_URL: postgresql://prograds:${PROGRADS_DB_PASSWORD:?Set PROGRADS_DB_PASSWORD to a URL-safe value}@postgres:5432/prograds
+    ports:
+      - "127.0.0.1:${PROGRADS_API_PORT:-18088}:8088"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:8088/api/v1/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))
+      interval: 15s
+      timeout: 5s
+      retries: 6
+
+volumes:
+  postgres-data:

@@ -1,0 +1,12 @@
+.git
+**/node_modules
+**/dist
+**/generated
+**/coverage
+**/.turbo
+**/.env
+**/.env.*
+**/.npmrc
+**/.dev.vars*
+**/*.pem
+**/*.key
