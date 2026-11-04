@@ -42,6 +42,18 @@ const yearOptions = computed(() => [
   { label: "全部年度", value: "all" as const },
   ...(facets.value?.years ?? []).map((y) => ({ label: `${y}`, value: y })),
 ]);
+const quickSubjects = computed(() =>
+  [...(facets.value?.subjects ?? [])].sort((a, b) => b.paperCount - a.paperCount).slice(0, 4),
+);
+const hasFilters = computed(
+  () => subject.value !== "all" || school.value !== "all" || year.value !== "all",
+);
+
+function clearFilters() {
+  subject.value = "all";
+  school.value = "all";
+  year.value = "all";
+}
 
 // Any filter change resets to the first page.
 watch([subject, school, year], () => {
@@ -115,6 +127,20 @@ const prefersReducedMotion = useReducedMotion();
       >
     </AppCard>
 
+    <div v-if="!hasFilters && quickSubjects.length" class="mb-6 flex flex-wrap items-center gap-2">
+      <span class="text-muted text-small mr-2">從有較多考卷的考科開始</span>
+      <AppButton
+        v-for="item in quickSubjects"
+        :key="item.slug"
+        intent="secondary"
+        size="sm"
+        class="min-h-touch"
+        @click="subject = item.slug"
+      >
+        {{ item.name }}
+      </AppButton>
+    </div>
+
     <QueryState
       :pending="isPending"
       :error="isError ? error : null"
@@ -127,7 +153,12 @@ const prefersReducedMotion = useReducedMotion();
         </div>
       </template>
 
-      <template #empty>查無符合條件的考卷。試試放寬考科、學校或年度。</template>
+      <template #empty>
+        <p>{{ hasFilters ? "查無符合條件的考卷。" : "目前沒有可瀏覽的考卷。" }}</p>
+        <AppButton v-if="hasFilters" intent="secondary" class="mt-3" @click="clearFilters">
+          清除篩選
+        </AppButton>
+      </template>
 
       <div v-if="data">
         <!-- 每張考卷一張 <PaperCard>(票券版面);列表頁只管排列與進場交錯動畫。 -->

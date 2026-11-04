@@ -25,9 +25,19 @@ const school = ref<string | undefined>();
 const dept = ref<string | undefined>();
 const track = ref<string | undefined>();
 
-const { data: schools, isLoading: schoolsLoading } = useSchools();
+const {
+  data: schools,
+  isLoading: schoolsLoading,
+  isError: schoolsFailed,
+  refetch: reloadSchools,
+} = useSchools();
 const { data: depts, isLoading: deptsLoading } = useDepartments(school);
-const { data: tracks, isLoading: tracksLoading } = useTracks();
+const {
+  data: tracks,
+  isLoading: tracksLoading,
+  isError: tracksFailed,
+  refetch: reloadTracks,
+} = useTracks();
 const schoolItems = computed(() => toSelectItems(schools.value));
 const deptItems = computed(() => toSelectItems(depts.value));
 const trackItems = computed(() => toSelectItems(tracks.value));
@@ -142,7 +152,17 @@ const prefersReducedMotion = useReducedMotion();
     <!-- By school: school → dept → roster. -->
     <template v-if="mode === 'school'">
       <!-- State A: no school chosen yet. -->
-      <EmptyState v-if="!school">選擇學校開始瀏覽各系所師資。</EmptyState>
+      <BrowseStart
+        v-if="!school"
+        title="從一所學校認識系所師資"
+        description="先選學校再選系所，查看老師的研究方向與實驗室。想跨校比較時，可以切換成依所別瀏覽。"
+        :items="schoolItems"
+        :pending="schoolsLoading"
+        :failed="schoolsFailed"
+        empty-text="目前沒有可瀏覽的學校資料。"
+        @select="school = $event"
+        @retry="reloadSchools()"
+      />
 
       <!-- State B: school chosen, browsing its departments. -->
       <section v-else-if="!dept">
@@ -213,7 +233,17 @@ const prefersReducedMotion = useReducedMotion();
     <!-- By track: 所別 → 各校 rosters grouped by school/dept. -->
     <template v-else>
       <!-- State A: no track chosen yet. -->
-      <EmptyState v-if="!track">選擇所別,瀏覽各校該領域師資。</EmptyState>
+      <BrowseStart
+        v-if="!track"
+        title="比較同一領域的各校師資"
+        description="選一個感興趣的所別，集中瀏覽不同學校的老師與研究方向。"
+        :items="trackItems"
+        :pending="tracksLoading"
+        :failed="tracksFailed"
+        empty-text="目前沒有可瀏覽的所別資料。"
+        @select="track = $event"
+        @retry="reloadTracks()"
+      />
 
       <template v-else>
         <header class="mb-section">

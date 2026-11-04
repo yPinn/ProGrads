@@ -28,7 +28,12 @@ const selectedAdmissionType = ref<AdmissionType | "all">("all");
 
 // School list (near-static) + departments of the selected school (cascading).
 // isLoading (not isPending): a disabled query is "pending" but idle — selects shouldn't spin.
-const { data: schools, isLoading: schoolsLoading } = useSchools();
+const {
+  data: schools,
+  isLoading: schoolsLoading,
+  isError: schoolsFailed,
+  refetch: reloadSchools,
+} = useSchools();
 const { data: depts, isLoading: deptsLoading } = useDepartments(school);
 const schoolItems = computed(() => toSelectItems(schools.value));
 const deptItems = computed(() => toSelectItems(depts.value));
@@ -182,7 +187,17 @@ const prefersReducedMotion = useReducedMotion();
     </AppCard>
 
     <!-- State A: no school chosen yet. -->
-    <EmptyState v-if="!school">選擇學校開始瀏覽各系所招生組別。</EmptyState>
+    <BrowseStart
+      v-if="!school"
+      title="先選一間想報考的學校"
+      description="接著選系所，就能查看各組的名額、採計方式與簡章。也可以用上方選單搜尋其他學校。"
+      :items="schoolItems"
+      :pending="schoolsLoading"
+      :failed="schoolsFailed"
+      empty-text="目前沒有可瀏覽的學校資料。"
+      @select="school = $event"
+      @retry="reloadSchools()"
+    />
 
     <!-- State B: school chosen, browsing its departments. -->
     <section v-else-if="!dept">
