@@ -64,9 +64,11 @@ describe("index page", () => {
   it("renders the landing heading and the fallback practice exercise", async () => {
     const wrapper = await mountSuspended(IndexPage);
     expect(wrapper.text()).toContain("研究所備考作戰中心");
-    expect(wrapper.text()).toContain("練習黑板");
-    expect(wrapper.text()).toContain("二分搜尋為什麼需要排序？");
-    expect(wrapper.get("details summary").text()).toBe("展開示範解法");
+    const board = wrapper.get('section[aria-labelledby="home-question-title"]').get(".board");
+    expect(board.classes()).toContain("board");
+    expect(board.text()).toContain("練習黑板");
+    expect(board.text()).toContain("二分搜尋為什麼需要排序？");
+    expect(board.get("details summary").text()).toBe("展開示範解法");
     expect(wrapper.text()).toContain("師資陣容");
   });
 });
